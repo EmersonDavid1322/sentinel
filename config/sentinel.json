@@ -1,0 +1,23 @@
+{
+    "backup": {
+        "carpetas": [],
+        "destino": "",
+        "intervalo_horas": 24,
+        "activo": false
+    },
+    "monitor": {
+        "limite_cpu": 70,
+        "limite_ram": 80,
+        "limite_disco": 90,
+        "activo": false
+    },
+    "organizador": {
+        "carpeta_vigilar": "",
+        "activo": false,
+        "reglas": {
+            ".pdf": "",
+            ".jpg": "",
+            ".zip": ""
+        }
+    }
+}
