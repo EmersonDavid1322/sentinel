@@ -2,7 +2,7 @@
     "backup": {
         "carpetas": [],
         "destino": "Disco Duro",
-        "intervalo_horas": 24,
+        "hora": "1:00",
         "activo": false
     },
     "monitor": {

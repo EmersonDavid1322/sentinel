@@ -18,13 +18,13 @@ ConfigBackup cargarBackup(const json& datos){
 
     std::vector<std::string> carpetas = datos["backup"]["carpetas"];
     std::string destino = datos["backup"]["destino"];
-    int intervalo_horas = datos["backup"]["intervalo_horas"];
+    std::string hora = datos["backup"]["hora"];
     bool activo = datos["backup"]["activo"];
 
     ConfigBackup backup;
     backup.carpetas = carpetas;
     backup.destino = destino;
-    backup.intervalo_horas = intervalo_horas;
+    backup.hora = hora;
     backup.activo = activo;
 
     return backup;

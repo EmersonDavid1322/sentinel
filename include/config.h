@@ -7,7 +7,7 @@
 struct ConfigBackup {
         std::vector<std::string> carpetas;
         std::string destino;
-        int intervalo_horas;
+        std::string hora;
         bool activo;
     };
 
