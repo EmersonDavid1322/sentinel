@@ -8,4 +8,5 @@ include_directories(include)
 
 add_executable(sentinel
     src/main.cpp
+    src/config_loader.cpp
 )

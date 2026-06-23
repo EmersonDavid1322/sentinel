@@ -1,7 +1,7 @@
 {
     "backup": {
         "carpetas": [],
-        "destino": "",
+        "destino": "Disco Duro",
         "intervalo_horas": 24,
         "activo": false
     },
@@ -12,7 +12,7 @@
         "activo": false
     },
     "organizador": {
-        "carpeta_vigilar": "",
+        "carpeta_vigilar": "Prueba vigilar",
         "activo": false,
         "reglas": {
             ".pdf": "",
