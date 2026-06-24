@@ -1,8 +1,8 @@
 {
     "backup": {
         "carpetas": [],
-        "destino": "Disco Duro",
-        "hora": "1:00",
+        "destino": "",
+        "hora": "10:00",
         "activo": false
     },
     "monitor": {
@@ -12,7 +12,7 @@
         "activo": false
     },
     "organizador": {
-        "carpeta_vigilar": "Prueba vigilar",
+        "carpeta_vigilar": "Vigilar",
         "activo": false,
         "reglas": {
             ".pdf": "",
