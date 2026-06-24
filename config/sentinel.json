@@ -1,9 +1,10 @@
 {
     "backup": {
-        "carpetas": [],
+        "_nota_carpetas": "Sin / al final para copiar la carpeta completa, Con / para copiar el interior de una carpeta",
+        "carpetas": [""],
         "destino": "",
-        "hora": "10:00",
-        "activo": false
+        "hora": "00:00",
+        "activo": true
     },
     "monitor": {
         "limite_cpu": 70,
