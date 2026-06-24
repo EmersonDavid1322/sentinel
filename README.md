@@ -7,7 +7,7 @@ Corre en segundo plano con systemd y automatiza tareas de mantenimiento del sist
 
 ### Backup
 - Respalda carpetas configurables automáticamente
-- Programable por intervalo de horas
+- Programable por hora fija
 - Registro de cada backup realizado
 - Notificación al completar o si falla
 
@@ -23,7 +23,7 @@ Corre en segundo plano con systemd y automatiza tareas de mantenimiento del sist
 
 ## Configuración
 
-Todo se configura `config/sentinel.json` necesidad de recompilar.
+Todo se configura `config/sentinel.json` sin necesidad de recompilar.
 
 ## Requisitos
 
