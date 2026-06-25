@@ -11,4 +11,5 @@ add_executable(sentinel
     src/config_loader.cpp
     src/rutas.cpp
     src/backup/backup.cpp
+    src/monitor/monitor.cpp
 )

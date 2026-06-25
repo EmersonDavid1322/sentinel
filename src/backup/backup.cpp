@@ -22,7 +22,7 @@ void registroResultado(const std::string& resultado){
 std::string verificarCarpetas(const std::vector<std::string>& carpetas, const std::string& destino){
     std::string msg_carpetas;
 
-    for (const std::string carpeta : carpetas){
+    for (const std::string& carpeta : carpetas){
         if (!fs::exists(carpeta)){
             throw ErrorBackup("La carpeta no existe: " + carpeta);
         }

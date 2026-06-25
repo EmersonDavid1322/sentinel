@@ -8,9 +8,9 @@
     },
     "monitor": {
         "limite_cpu": 70,
-        "limite_ram": 80,
-        "limite_disco": 90,
-        "activo": false
+        "limite_ram": 70,
+        "limite_disco": 80,
+        "activo": true
     },
     "organizador": {
         "carpeta_vigilar": "Vigilar",

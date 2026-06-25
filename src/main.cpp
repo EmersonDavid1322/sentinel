@@ -7,16 +7,16 @@
 #include "json.hpp"
 #include "rutas.h"
 #include "backup.h"
+#include "monitor.h"
 namespace fs = std::filesystem;
 fs::path ruta_base = obtenerRutaBase();
 
 int main(){
-
 try {
     ConfigSentinel config = cargarConfig(ruta_base / "config" / "sentinel.json");
     
-    if (config.backup.activo) {
-        hacerBackup(config.backup.carpetas, config.backup.destino, config.backup.hora);
+    if (config.monitor.activo) {
+        ejecutarMonitoreo(config.monitor.ram, config.monitor.cpu, config.monitor.disco);
     }
 } catch (const DaemonError& e) {
     std::cout << "Error critico: " << e.what() << std::endl;
