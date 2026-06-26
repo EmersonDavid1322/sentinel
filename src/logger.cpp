@@ -1,0 +1,26 @@
+#include <string>
+#include <filesystem>
+#include <fstream>
+#include <ctime>
+#include "rutas.h"
+namespace fs = std::filesystem;
+
+static void escribirLog(const std::string& nivel, const std::string& mensaje) {
+    fs::path ruta_log = obtenerRutaBase() / "logs" / "sentinel.log";
+    time_t ahora = time(0);
+    std::string fecha = ctime(&ahora);
+    std::ofstream log(ruta_log, std::ios::app);
+    log << "[" << fecha.substr(0, fecha.size()-1) << "] [" << nivel << "] " << mensaje << std::endl;
+}
+
+void logInfo(const std::string& mensaje) {
+    escribirLog("INFO", mensaje);
+}
+
+void logWarning(const std::string& mensaje) {
+    escribirLog("WARNING", mensaje);
+}
+
+void logError(const std::string& mensaje) {
+    escribirLog("ERROR", mensaje);
+}

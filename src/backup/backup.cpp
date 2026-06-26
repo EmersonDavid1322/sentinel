@@ -2,22 +2,11 @@
 #include <vector>
 #include <filesystem>
 #include <string>
-#include <ctime>
 #include <fstream>
 #include "errores.h"
 #include "rutas.h"
+#include "logger.h"
 namespace fs = std::filesystem;
-
-void registroResultado(const std::string& resultado){
-    fs::path ruta_base = obtenerRutaBase();
-    fs::path ruta_log = ruta_base / "logs" / "sentinel.log";
-
-    time_t ahora = time(0);
-    std::string fecha = ctime(&ahora);
-
-    std::ofstream log(ruta_log, std::ios::app);
-    log << "[" << fecha.substr(0, fecha.size()-1) << "] " << resultado << std::endl;
-}
 
 std::string verificarCarpetas(const std::vector<std::string>& carpetas, const std::string& destino){
     std::string msg_carpetas;
@@ -32,7 +21,7 @@ std::string verificarCarpetas(const std::vector<std::string>& carpetas, const st
     }
     if (!fs::exists(destino)){
         fs::create_directories(destino);
-        registroResultado("Se creo la carpeta destinataria del backup: " + destino);
+        logWarning("La carpeta destinataria no existe, se creo la carpeta destinataria del backup: " + destino);
     }
     return msg_carpetas;
 }
@@ -61,16 +50,16 @@ void hacerBackup(const std::vector<std::string>& carpetas, const std::string& de
 
         std::string carpetas_msg = verificarCarpetas(carpetas, destino);
         ejecutarBackup(carpetas, destino);
-        registroResultado("Se realizo un bakup de forma correcta de las carpetas: " + carpetas_msg + " Destino: " + destino);
+        logInfo("Se realizo un bakup de forma correcta de las carpetas: " + carpetas_msg + " Destino: " + destino);
 
     }
     catch(const ErrorBackup& e){
         std::cout << "Error Backup: " << e.what() << std::endl;
-        registroResultado("Error en backup - " + std::string(e.what()));
+        logError("Error en backup - " + std::string(e.what()));
     }
 
     catch(const DaemonError& e){
         std::cout << "DeamonError: " << e.what() << std::endl;
-        registroResultado("Error en backup - " + std::string(e.what()));
+        logError("Error en backup - " + std::string(e.what()));
     }
 }

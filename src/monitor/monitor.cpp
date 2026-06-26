@@ -8,7 +8,7 @@
 #include "errores.h"
 #include "monitor.h"
 #include "config.h"
-#include "backup.h"
+#include "logger.h"
 
 double uso_ram() {
     std::ifstream archivo("/proc/meminfo");
@@ -96,7 +96,7 @@ double uso_disco() {
     struct statvfs datos;
 
     if (statvfs("/", &datos) != 0) {
-        ErrorMonitor("No se podido analizar el uso del disco error al usar la estrcutura 'statvfs'");
+        throw ErrorMonitor("No se podido analizar el uso del disco error al usar la estrcutura 'statvfs'");
     }
     
     unsigned long long bloquesTotales = datos.f_blocks; 
@@ -112,21 +112,21 @@ double uso_disco() {
 }
 
 
-void revisarLimites(std::unordered_map<std::string, int> limites, double& ram, double& cpu, double& disco){
+void revisarLimites(std::unordered_map<std::string, int>& limites, double& ram, double& cpu, double& disco){
     int ram_entero = static_cast<int>(ram);
     int cpu_entero = static_cast<int>(cpu);
     int disco_entero = static_cast<int>(disco);
 
     if (ram >= limites["ram"]){
-        registroResultado("Monitor: se sobrepaso el limite de uso en la memoria ram: " + std::to_string(ram_entero) + "%");
+        logWarning("Monitor: se sobrepaso el limite de uso en la memoria ram: " + std::to_string(ram_entero) + "%");
     }
 
     if (cpu >= limites["cpu"]){
-        registroResultado("Monitor: se sobrepaso el limite de uso del cpu: " + std::to_string(cpu_entero) + "%");
+        logWarning("Monitor: se sobrepaso el limite de uso del cpu: " + std::to_string(cpu_entero) + "%");
     }
 
     if (disco >= limites["disco"]){
-        registroResultado("Monitor: se sobrepaso el limite de espacio en el disco: " + std::to_string(disco_entero) + "%");
+        logWarning("Monitor: se sobrepaso el limite de espacio en el disco: " + std::to_string(disco_entero) + "%");
     }
 }
 
@@ -146,10 +146,10 @@ void ejecutarMonitoreo(const int& limite_ram, const int& limite_cpu, const int& 
     }
     catch(const ErrorMonitor& e){
         std::cout << "ErrorMonitor: " << e.what() << std::endl;
-        registroResultado("Error en monitor - " + std::string(e.what()));
+        logError("Error en monitor - " + std::string(e.what()));
     }
     catch(const DaemonError& e){
         std::cout << "DaemonError: " << e.what() << std::endl;
-        registroResultado("Error en monitor - " + std::string(e.what()));
+        logError("Error en monitor - " + std::string(e.what()));
     }
 }

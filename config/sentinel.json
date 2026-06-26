@@ -7,9 +7,9 @@
         "activo": true
     },
     "monitor": {
-        "limite_cpu": 70,
-        "limite_ram": 70,
-        "limite_disco": 80,
+        "limite_cpu": 1,
+        "limite_ram": 1,
+        "limite_disco": 1,
         "activo": true
     },
     "organizador": {
