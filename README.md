@@ -32,6 +32,9 @@ Todo se configura `config/sentinel.json` sin necesidad de recompilar.
 - CMake 3.10+
 - systemd
 
+## Instalación
+bash scripts/install.sh
+
 ## Estado
 
 🚧 En desarrollo activo
