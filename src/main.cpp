@@ -1,26 +1,26 @@
 #include <iostream>
-#include <vector>
 #include <filesystem>
-#include <map>
 #include "config_loader.h"
-#include "errores.h"
-#include "json.hpp"
-#include "rutas.h"
 #include "backup.h"
 #include "monitor.h"
-namespace fs = std::filesystem;
-fs::path ruta_base = obtenerRutaBase();
+#include "organizer.h"
+#include "logger.h"
+#include "rutas.h"
+#include "errores.h"
 
-int main(){
-try {
-    ConfigSentinel config = cargarConfig(ruta_base / "config" / "sentinel.json");
+namespace fs = std::filesystem;
+
+int main() {
+    fs::create_directories(obtenerRutaBase() / "logs");
     
-    if (config.monitor.activo) {
-        ejecutarMonitoreo(config.monitor.ram, config.monitor.cpu, config.monitor.disco);
+    try {
+        ConfigSentinel config = cargarConfig("config/sentinel.json");
+        logInfo("Sentinel iniciado correctamente");
+        
+    } catch (const DaemonError& e) {
+        logError("Error critico al iniciar: " + std::string(e.what()));
+        return 1;
     }
-} catch (const DaemonError& e) {
-    std::cout << "Error critico: " << e.what() << std::endl;
-    return 1;
-}
-return 0;
+    
+    return 0;
 }
