@@ -1,24 +1,23 @@
 {
     "backup": {
         "_nota_carpetas": "Sin / al final para copiar la carpeta completa, Con / para copiar el interior de una carpeta",
-        "carpetas": [""],
-        "destino": "",
-        "hora": "00:00",
+        "carpetas": ["/home/emersondavid/Documentos/"],
+        "destino": "/home/emersondavid/Descargas/sentinel_backup",
+        "hora": "19:35",
         "activo": true
     },
     "monitor": {
-        "limite_cpu": 1,
-        "limite_ram": 1,
-        "limite_disco": 1,
+        "limite_cpu": 70,
+        "limite_ram": 70,
+        "limite_disco":70,
         "activo": true
     },
     "organizador": {
-        "carpeta_vigilar": "Vigilar",
-        "activo": false,
+        "carpeta_vigilar": "/home/emersondavid/Descargas/",
+        "activo": true,
         "reglas": {
-            ".pdf": "",
-            ".jpg": "",
-            ".zip": ""
+            ".pdf": "/home/emersondavid/Documentos/PDFs",
+            ".jpg": "/home/emersondavid/Imágenes"
         }
     }
 }

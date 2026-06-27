@@ -13,4 +13,9 @@ add_executable(sentinel
     src/logger.cpp
     src/backup/backup.cpp
     src/monitor/monitor.cpp
+    src/organizer/organizer.cpp
 )
+
+
+find_package(Threads REQUIRED)
+target_link_libraries(sentinel Threads::Threads)

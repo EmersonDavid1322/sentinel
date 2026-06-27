@@ -3,9 +3,12 @@
 #include <filesystem>
 #include <string>
 #include <fstream>
+#include <chrono>
+#include <thread>
 #include "errores.h"
 #include "rutas.h"
 #include "logger.h"
+#include "config.h"
 namespace fs = std::filesystem;
 
 std::string verificarCarpetas(const std::vector<std::string>& carpetas, const std::string& destino){
@@ -61,5 +64,12 @@ void hacerBackup(const std::vector<std::string>& carpetas, const std::string& de
     catch(const DaemonError& e){
         std::cout << "DeamonError: " << e.what() << std::endl;
         logError("Error en backup - " + std::string(e.what()));
+    }
+}
+
+void loopBackup(const ConfigBackup& config){
+    while (true) {
+        hacerBackup(config.carpetas, config.destino, config.hora);
+        std::this_thread::sleep_for(std::chrono::seconds(60));
     }
 }

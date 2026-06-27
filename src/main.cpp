@@ -1,5 +1,6 @@
 #include <iostream>
 #include <filesystem>
+#include <thread>
 #include "config_loader.h"
 #include "backup.h"
 #include "monitor.h"
@@ -17,10 +18,31 @@ int main() {
         ConfigSentinel config = cargarConfig("config/sentinel.json");
         logInfo("Sentinel iniciado correctamente");
         
+        if (config.backup.activo) {
+            std::thread hilo_backup(loopBackup, config.backup);
+            hilo_backup.detach();
+        }
+
+        if (config.monitor.activo) {
+            std::thread hilo_monitor(loopMonitor, config.monitor);
+            hilo_monitor.detach();
+        }
+
+        if (config.organizador.activo) {
+            std::thread hilo_organizador(ejecutarOrganizador,
+                                        config.organizador.reglas,
+                                        config.organizador.carpeta_vigilar);
+            hilo_organizador.detach();
+        }
+
+        while (true) {
+            std::this_thread::sleep_for(std::chrono::seconds(60));
+        }
+
     } catch (const DaemonError& e) {
         logError("Error critico al iniciar: " + std::string(e.what()));
         return 1;
     }
-    
+
     return 0;
 }

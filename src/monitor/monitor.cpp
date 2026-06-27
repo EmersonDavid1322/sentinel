@@ -153,3 +153,10 @@ void ejecutarMonitoreo(const int& limite_ram, const int& limite_cpu, const int& 
         logError("Error en monitor - " + std::string(e.what()));
     }
 }
+
+void loopMonitor(const ConfigMonitor& config) {
+    while (true) {
+        ejecutarMonitoreo(config.cpu, config.ram, config.disco);
+        std::this_thread::sleep_for(std::chrono::seconds(60));
+    }
+}
