@@ -1,6 +1,7 @@
 #include <iostream>
 #include <filesystem>
 #include <thread>
+#include <mutex>
 #include "config_loader.h"
 #include "backup.h"
 #include "monitor.h"
@@ -8,7 +9,7 @@
 #include "logger.h"
 #include "rutas.h"
 #include "errores.h"
-
+#include "sentinel_config.h"
 namespace fs = std::filesystem;
 
 int main() {
@@ -16,8 +17,11 @@ int main() {
     
     try {
         ConfigSentinel config = cargarConfig("config/sentinel.json");
-        logInfo("Sentinel iniciado correctamente");
+        logInfo("Sentinel iniciado correctamente 1.0");
         
+        std::thread hilo_json(actualizarJSON);
+        hilo_json.detach();
+
         if (config.backup.activo) {
             std::thread hilo_backup(loopBackup, config.backup);
             hilo_backup.detach();

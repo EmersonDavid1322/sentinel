@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 BASE_DIR=$(dirname "$(readlink -f "$0")")
-CURRENT_USER=$(whoami)
+PROYECTO_DIR=$(dirname "$BASE_DIR")
 DESTINO_DEAMON="$HOME/apps/deamon"
 
 mkdir -p "$DESTINO_DEAMON"
@@ -28,24 +28,35 @@ if ! command -v cmake &> /dev/null; then
 fi
 
 echo "Compilado Sentinel..."
-mkdir -p "$BASE_DIR/build"
-cd "$BASE_DIR/build"
-cmake .. -DCMAKE_BUILD_TYPE=Release
+mkdir -p "$PROYECTO_DIR/build"
+cd "$PROYECTO_DIR/build"
+cmake "$PROYECTO_DIR" -DCMAKE_BUILD_TYPE=Release
 make
 
 mkdir -p "$DESTINO_DEAMON/config"
-cp "$BASE_DIR/build/sentinel" "$DESTINO_DEAMON/"
+
+if [ -f "$DESTINO_DEAMON/sentinel" ]; then
+    echo "Elimando version anterior..."
+    rm "$DESTINO_DEAMON/sentinel"
+fi
+
+cp "$PROYECTO_DIR/build/sentinel" "$DESTINO_DEAMON/"
 if [ ! -f "$DESTINO_DEAMON/config/sentinel.json" ]; then
-    cp "$BASE_DIR/config/sentinel.json" "$DESTINO_DEAMON/config/"
+    cp "$PROYECTO_DIR/config/sentinel.json" "$DESTINO_DEAMON/config/"
 fi
 
 chmod +x "$DESTINO_DEAMON/sentinel"
 
 rm -rf "$BASE_DIR/build"
 
+if [ -f "$HOME/.config/systemd/user/sentinel.service" ]; then
+    systemctl --user disable sentinel.service
+    rm -f "$HOME/.config/systemd/user/sentinel.service"
+fi
+
 echo "Configurando service..."
-DIR_SERVICIOS_USER="$HOME/.config/systemd/user/"
-mkdir -p "$DIR_SERVICIOS"
+DIR_SERVICIOS_USER="$HOME/.config/systemd/user"
+mkdir -p "$DIR_SERVICIOS_USER"
 
 cat > "$DIR_SERVICIOS_USER/sentinel.service" <<EOF
 [Unit]
@@ -72,3 +83,6 @@ systemctl --user daemon-reload
 
 systemctl --user enable sentinel.service
 systemctl --user start sentinel.service
+systemctl --user status sentinel.service
+
+echo "Instalación completa"
