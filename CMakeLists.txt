@@ -20,6 +20,7 @@ add_executable(sentinel
     src/monitor/monitor.cpp
     src/organizer/organizer.cpp
     src/notificador.cpp
+    src/sentinel_estado.cpp
 )
 
 target_include_directories(sentinel PRIVATE ${LIBNOTIFY_INCLUDE_DIRS})

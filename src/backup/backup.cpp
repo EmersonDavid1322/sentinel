@@ -10,6 +10,7 @@
 #include "logger.h"
 #include "config.h"
 #include "notificador.h"
+#include "sentinel_estado.h"
 namespace fs = std::filesystem;
 
 std::string verificarCarpetas(const std::vector<std::string>& carpetas, const std::string& destino){
@@ -78,7 +79,7 @@ void hacerBackup(const std::vector<std::string>& carpetas, const std::string& de
 }
 
 void loopBackup(const ConfigBackup& config){
-    while (true) {
+    while (corriendo) {
         hacerBackup(config.carpetas, config.destino, config.hora);
         std::this_thread::sleep_for(std::chrono::seconds(60));
     }

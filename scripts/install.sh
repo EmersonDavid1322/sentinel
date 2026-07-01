@@ -52,6 +52,7 @@ rm -rf "$BASE_DIR/build"
 if [ -f "$HOME/.config/systemd/user/sentinel.service" ]; then
     systemctl --user disable sentinel.service
     rm -f "$HOME/.config/systemd/user/sentinel.service"
+    systemctl --user reset-failed sentinel.service
     systemctl --user daemon-reload
     echo "Se limpio el servicio anteriro"
 fi

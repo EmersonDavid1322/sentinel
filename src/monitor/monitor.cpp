@@ -10,6 +10,7 @@
 #include "config.h"
 #include "logger.h"
 #include "notificador.h"
+#include "sentinel_estado.h"
 
 double uso_ram() {
     std::ifstream archivo("/proc/meminfo");
@@ -161,7 +162,7 @@ void ejecutarMonitoreo(const int& limite_ram, const int& limite_cpu, const int& 
 }
 
 void loopMonitor(const ConfigMonitor& config) {
-    while (true) {
+    while (corriendo) {
         ejecutarMonitoreo(config.cpu, config.ram, config.disco);
         std::this_thread::sleep_for(std::chrono::seconds(60));
     }

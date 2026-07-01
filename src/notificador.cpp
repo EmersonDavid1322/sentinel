@@ -5,9 +5,6 @@
 #include "logger.h"
 
 void enviarNotificación(std::string titulo, std::string mensaje, std::string nivel){
-    if (!notify_init("Sentinel")){
-        logError("Error al intentar inicializar el envio de una notificación");
-    }
     
     NotifyUrgency urgencia;
     std::string icon;
@@ -41,6 +38,4 @@ void enviarNotificación(std::string titulo, std::string mensaje, std::string ni
     }
 
     g_object_unref(G_OBJECT(notif));
-    notify_uninit();
-
 }
