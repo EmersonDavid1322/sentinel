@@ -17,7 +17,7 @@ int main() {
     
     try {
         ConfigSentinel config = cargarConfig("config/sentinel.json");
-        logInfo("Sentinel iniciado correctamente 1.0");
+        logInfo("Sentinel iniciado correctamente 1.1");
         
         std::thread hilo_json(actualizarJSON);
         hilo_json.detach();
@@ -33,9 +33,7 @@ int main() {
         }
 
         if (config.organizador.activo) {
-            std::thread hilo_organizador(ejecutarOrganizador,
-                                        config.organizador.reglas,
-                                        config.organizador.carpeta_vigilar);
+            std::thread hilo_organizador(ejecutarOrganizador, config.organizador.reglas, config.organizador.carpeta_vigilar);
             hilo_organizador.detach();
         }
 

@@ -9,6 +9,7 @@
 #include "rutas.h"
 #include "logger.h"
 #include "config.h"
+#include "notificador.h"
 namespace fs = std::filesystem;
 
 std::string verificarCarpetas(const std::vector<std::string>& carpetas, const std::string& destino){
@@ -31,12 +32,18 @@ std::string verificarCarpetas(const std::vector<std::string>& carpetas, const st
 
 void ejecutarBackup(const std::vector<std::string>& carpetas, const std::string& destino){
     for (const std::string& carpeta : carpetas){
-        fs::path origen(carpeta);
-        fs::path destino_final = fs::path(destino) / origen.filename();
+        try{
+            fs::path origen(carpeta);
+            fs::path destino_final = fs::path(destino) / origen.filename();
 
-        fs::copy(origen, destino_final, 
-                fs::copy_options::recursive | 
-                fs::copy_options::overwrite_existing);
+            fs::copy(origen, destino_final, 
+                    fs::copy_options::recursive | 
+                    fs::copy_options::overwrite_existing);
+        }
+        catch(const fs::filesystem_error& e){
+            logError("Error Backup: -" + std::string(e.what()));
+            continue;
+            }
     }
 }
 
@@ -54,16 +61,19 @@ void hacerBackup(const std::vector<std::string>& carpetas, const std::string& de
         std::string carpetas_msg = verificarCarpetas(carpetas, destino);
         ejecutarBackup(carpetas, destino);
         logInfo("Se realizo un bakup de forma correcta de las carpetas: " + carpetas_msg + " Destino: " + destino);
+        enviarNotificación("Backup", "Se completo el bakup correctamente al la carpeta: " + destino, "INFO");
 
     }
     catch(const ErrorBackup& e){
         std::cout << "Error Backup: " << e.what() << std::endl;
         logError("Error en backup - " + std::string(e.what()));
+        enviarNotificación("Error backup", "Ocurrio un error en el intento de bakup: " + std::string(e.what()), "ERROR");
     }
 
     catch(const DaemonError& e){
         std::cout << "DeamonError: " << e.what() << std::endl;
         logError("Error en backup - " + std::string(e.what()));
+        enviarNotificación("Error Deamon-backup", "Ocurrio un error en el intento de bakup: " + std::string(e.what()), "ERROR");
     }
 }
 

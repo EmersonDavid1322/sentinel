@@ -9,6 +9,7 @@
 #include "monitor.h"
 #include "config.h"
 #include "logger.h"
+#include "notificador.h"
 
 double uso_ram() {
     std::ifstream archivo("/proc/meminfo");
@@ -119,14 +120,17 @@ void revisarLimites(std::unordered_map<std::string, int>& limites, double& ram, 
 
     if (ram >= limites["ram"]){
         logWarning("Monitor: se sobrepaso el limite de uso en la memoria ram: " + std::to_string(ram_entero) + "%");
+        enviarNotificación("Monitor", "Se sobrepaso el limite de la ram: " + std::to_string(ram_entero) + "%", "WARNING");
     }
 
     if (cpu >= limites["cpu"]){
         logWarning("Monitor: se sobrepaso el limite de uso del cpu: " + std::to_string(cpu_entero) + "%");
+        enviarNotificación("Monitor", "Se sobrepaso el limite del CPU: " + std::to_string(cpu_entero) + "%", "WARNING");
     }
 
     if (disco >= limites["disco"]){
         logWarning("Monitor: se sobrepaso el limite de espacio en el disco: " + std::to_string(disco_entero) + "%");
+        enviarNotificación("Monitor", "Se sobrepaso el limite de espacio disco: " + std::to_string(disco_entero) + "%", "WARNING");
     }
 }
 
@@ -147,10 +151,12 @@ void ejecutarMonitoreo(const int& limite_ram, const int& limite_cpu, const int& 
     catch(const ErrorMonitor& e){
         std::cout << "ErrorMonitor: " << e.what() << std::endl;
         logError("Error en monitor - " + std::string(e.what()));
+        enviarNotificación("Error Monitor", "Ocurrio un error en el intento de telemetrica: " + std::string(e.what()), "ERROR");
     }
     catch(const DaemonError& e){
         std::cout << "DaemonError: " << e.what() << std::endl;
         logError("Error en monitor - " + std::string(e.what()));
+        enviarNotificación("Error Deamon-Monitor", "Ocurrio un error en el intento de telemetrica: " + std::string(e.what()), "ERROR");
     }
 }
 

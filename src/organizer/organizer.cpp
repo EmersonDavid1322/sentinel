@@ -8,6 +8,7 @@
 #include "organizer.h"
 #include "logger.h"
 #include "errores.h"
+#include "notificador.h"
 namespace fs = std::filesystem;
 
 std::vector<std::string> verificarCarpetas(const std::map<std::string, std::string>& carpetasRegla, const std::string& carpetaVigilar){
@@ -73,10 +74,11 @@ void ejecutarOrganizador(const std::map<std::string, std::string>& carpetasRegla
     catch(const ErrorOrganizador& e){
         std::cout << "OrganizadorError: " << e.what() << std::endl;
         logError("Error en Organizador - " + std::string(e.what()));
+        enviarNotificación("Error Organizador", "Ocurrio un error en el organizador: " + std::string(e.what()), "ERROR");
     }
     catch(const DaemonError& e){
         std::cout << "DaemonError: " << e.what() << std::endl;
         logError("Error en Deamon - " + std::string(e.what()));
+        enviarNotificación("Error Deamon-Organizador", "Ocurrio un error en el organizador: " + std::string(e.what()), "ERROR");
     }
-    
 }

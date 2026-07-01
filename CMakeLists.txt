@@ -6,6 +6,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 include_directories(include)
 
+find_package(PkgConfig REQUIRED)
+find_package(Threads REQUIRED)
+pkg_check_modules(LIBNOTIFY REQUIRED libnotify)
+
 add_executable(sentinel
     src/main.cpp
     src/config_loader.cpp
@@ -15,8 +19,8 @@ add_executable(sentinel
     src/backup/backup.cpp
     src/monitor/monitor.cpp
     src/organizer/organizer.cpp
+    src/notificador.cpp
 )
 
-
-find_package(Threads REQUIRED)
-target_link_libraries(sentinel Threads::Threads)
+target_include_directories(sentinel PRIVATE ${LIBNOTIFY_INCLUDE_DIRS})
+target_link_libraries(sentinel Threads::Threads ${LIBNOTIFY_LIBRARIES})
