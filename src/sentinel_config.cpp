@@ -43,5 +43,4 @@ void actualizarJSON(){
     } 
     inotify_rm_watch(fd, wd);
     close(fd);
-    std::cout << "Vigilante json detenido correctamente" << std::endl;
 }

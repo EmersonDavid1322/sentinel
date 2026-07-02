@@ -22,25 +22,31 @@ int main() {
     
     try {
         ConfigSentinel config = cargarConfig("config/sentinel.json");
-        logInfo("Sentinel iniciado correctamente 1.1");
+        logInfo("Sentinel iniciado correctamente 1.2");
         
         std::thread hilo_json(actualizarJSON);
-        hilo_json.join();
 
+        std::thread hilo_backup;
         if (config.backup.activo) {
-            std::thread hilo_backup(loopBackup, config.backup);
-            hilo_backup.join();
+            hilo_backup = std::thread(loopBackup, config.backup);
         }
 
+        std::thread hilo_monitor;
         if (config.monitor.activo) {
-            std::thread hilo_monitor(loopMonitor, config.monitor);
-            hilo_monitor.join();
+            hilo_monitor = std::thread(loopMonitor, config.monitor);
         }
 
+        std::thread hilo_organizador;
         if (config.organizador.activo) {
-            std::thread hilo_organizador(ejecutarOrganizador, config.organizador.reglas, config.organizador.carpeta_vigilar);
-            hilo_organizador.join();
+            hilo_organizador = std::thread(ejecutarOrganizador, 
+                                        config.organizador.reglas, 
+                                        config.organizador.carpeta_vigilar);
         }
+
+        hilo_json.join();
+        if (hilo_backup.joinable()) hilo_backup.join();
+        if (hilo_monitor.joinable()) hilo_monitor.join();
+        if (hilo_organizador.joinable()) hilo_organizador.join();
 
     } catch (const DaemonError& e) {
         logError("Error critico al iniciar: " + std::string(e.what()));

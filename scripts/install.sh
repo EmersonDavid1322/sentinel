@@ -54,7 +54,7 @@ if [ -f "$HOME/.config/systemd/user/sentinel.service" ]; then
     rm -f "$HOME/.config/systemd/user/sentinel.service"
     systemctl --user reset-failed sentinel.service
     systemctl --user daemon-reload
-    echo "Se limpio el servicio anteriro"
+    echo "Se limpio el servicio anterior"
 fi
 
 echo "Configurando service..."

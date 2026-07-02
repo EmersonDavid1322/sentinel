@@ -13,43 +13,49 @@
 #include "sentinel_estado.h"
 
 double uso_ram() {
-    std::ifstream archivo("/proc/meminfo");
+    int intentos = 3;
+    while (intentos > 0) {
+        std::ifstream archivo("/proc/meminfo");
     
-    if (!archivo.is_open()) {
-        throw ErrorMonitor("No se pudo obtener los datos de la memoria ram en la carpeta: '/proc/meminfo'"); 
-    }
-
-    std::string etiqueta;
-    long long valor = 0;
-    std::string unidad;
-
-    long long memTotal = 0;
-    long long memAvailable = 0;
-
-    while (archivo >> etiqueta >> valor >> unidad) {
-        if (etiqueta == "MemTotal:") {
-            memTotal = valor;
-        } 
-        else if (etiqueta == "MemAvailable:") {
-            memAvailable = valor;
+        if (!archivo.is_open()) {
+            throw ErrorMonitor("No se pudo obtener los datos de la memoria ram en la carpeta: '/proc/meminfo'"); 
         }
 
-        if (memTotal > 0 && memAvailable > 0) {
-            break;
+        std::string etiqueta;
+        long long valor = 0;
+        std::string unidad;
+
+        long long memTotal = 0;
+        long long memAvailable = 0;
+
+        while (archivo >> etiqueta >> valor >> unidad) {
+            if (etiqueta == "MemTotal:") {
+                memTotal = valor;
+            } 
+            else if (etiqueta == "MemAvailable:") {
+                memAvailable = valor;
+            }
+            if (memTotal > 0 && memAvailable > 0) {
+                break;
+            }
+        }
+        
+        archivo.close();
+
+        if (memTotal > 0 && memAvailable > 0){
+            long long memUsada = memTotal - memAvailable;
+
+            double porcentajeUso = (memUsada * 100.0) / memTotal;
+
+            return porcentajeUso;
+        }
+        intentos --;
+
+        if (intentos == 0) {
+            throw ErrorMonitor("El resultado del uso de momeoria ram fue 0"); 
         }
     }
     
-    archivo.close();
-
-    if (memTotal == 0) {
-        throw ErrorMonitor("El resultado del uso de momeoria ram fue 0"); 
-    }
-
-    long long memUsada = memTotal - memAvailable;
-
-    double porcentajeUso = (memUsada * 100.0) / memTotal;
-
-    return porcentajeUso;
 }
 
 bool obtener_tics_cpu(long long& trabajo, long long& descanso) {
