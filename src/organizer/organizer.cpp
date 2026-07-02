@@ -50,6 +50,7 @@ void moverArchivo(const std::string& archivo, const std::map<std::string, std::s
 }
 
 void ejecutarOrganizador(const std::map<std::string, std::string>& carpetasRegla, const std::string& carpetaVigilar){
+    std::vector<std::string> carpetas_fallidas = verificarCarpetas(carpetasRegla, carpetaVigilar);
     try{
         int fd = inotify_init();
         int wd = inotify_add_watch(fd, carpetaVigilar.c_str(), IN_CREATE | IN_MOVED_TO);
@@ -59,7 +60,6 @@ void ejecutarOrganizador(const std::map<std::string, std::string>& carpetasRegla
         pfd.events = POLLIN;
         
         while (corriendo) { 
-            std::vector<std::string> carpetas_fallidas = verificarCarpetas(carpetasRegla, carpetaVigilar);
             int resultado = poll(&pfd, 1, 1000);
             
             if (resultado < 0) break;
@@ -75,9 +75,9 @@ void ejecutarOrganizador(const std::map<std::string, std::string>& carpetasRegla
                     moverArchivo(rutaCompleta, carpetasRegla, carpetas_fallidas);
                 }
             }
-        inotify_rm_watch(fd, wd);
-        close(fd);
     }
+    inotify_rm_watch(fd, wd);
+    close(fd);
     }
     catch(const ErrorOrganizador& e){
         std::cout << "OrganizadorError: " << e.what() << std::endl;

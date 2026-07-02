@@ -35,7 +35,10 @@ void actualizarJSON(){
             if (evento->mask & IN_MODIFY){
                 logInfo("JSON modificado, reiniciando Sentinel...");
                 int resultado = system("systemctl --user restart sentinel.service");
-                if (resultado != 0) {
+                if (resultado == 15 || resultado == 0){
+                    logInfo("Señal de reinicio recibida correctamente.");
+                }
+                else if (resultado != 0) {
                     logError("Error al reiniciar Sentinel: código " + std::to_string(resultado));
                 }
             }
