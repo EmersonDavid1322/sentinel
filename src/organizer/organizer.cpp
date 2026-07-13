@@ -11,6 +11,7 @@
 #include "errores.h"
 #include "notificador.h"
 #include "sentinel_estado.h"
+#include "descriptor_inotify.h"
 namespace fs = std::filesystem;
 
 std::vector<std::string> verificarCarpetas(const std::map<std::string, std::string>& carpetasRegla, const std::string& carpetaVigilar){
@@ -50,13 +51,12 @@ void moverArchivo(const std::string& archivo, const std::map<std::string, std::s
 }
 
 void ejecutarOrganizador(const std::map<std::string, std::string>& carpetasRegla, const std::string& carpetaVigilar){
-    std::vector<std::string> carpetas_fallidas = verificarCarpetas(carpetasRegla, carpetaVigilar);
     try{
-        int fd = inotify_init();
-        int wd = inotify_add_watch(fd, carpetaVigilar.c_str(), IN_CREATE | IN_MOVED_TO);
+        std::vector<std::string> carpetas_fallidas = verificarCarpetas(carpetasRegla, carpetaVigilar);
+        VigilanteInotify vigilante(carpetaVigilar, IN_CREATE | IN_MOVED_TO);
         
         struct pollfd pfd;
-        pfd.fd = fd;
+        pfd.fd = vigilante.fd;
         pfd.events = POLLIN;
         
         while (corriendo) { 
@@ -66,7 +66,7 @@ void ejecutarOrganizador(const std::map<std::string, std::string>& carpetasRegla
             
             if (pfd.revents & POLLIN) { 
                 char buffer[4096];
-                int bytes = read(fd, buffer, sizeof(buffer));
+                int bytes = read(vigilante.fd, buffer, sizeof(buffer));
                 if (bytes < 0) break;
                 
                 struct inotify_event* evento = (struct inotify_event*) buffer;
@@ -76,8 +76,11 @@ void ejecutarOrganizador(const std::map<std::string, std::string>& carpetasRegla
                 }
             }
     }
-    inotify_rm_watch(fd, wd);
-    close(fd);
+    }
+    catch(const ErrorInotify& e){
+        std::cout << "ErrorInotify: " << e.what() << std::endl;
+        logError("Error en Inotify organizador - " + std::string(e.what()));
+        enviarNotificación("Error en Inotify organizador", "Ocurrio un error en el Inotify organizador: " + std::string(e.what()), "ERROR");
     }
     catch(const ErrorOrganizador& e){
         std::cout << "OrganizadorError: " << e.what() << std::endl;

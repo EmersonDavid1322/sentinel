@@ -55,7 +55,6 @@ double uso_ram() {
             throw ErrorMonitor("El resultado del uso de momeoria ram fue 0"); 
         }
     }
-    
 }
 
 bool obtener_tics_cpu(long long& trabajo, long long& descanso) {
@@ -120,40 +119,39 @@ double uso_disco() {
 }
 
 
-void revisarLimites(std::unordered_map<std::string, int>& limites, double& ram, double& cpu, double& disco){
-    int ram_entero = static_cast<int>(ram);
-    int cpu_entero = static_cast<int>(cpu);
-    int disco_entero = static_cast<int>(disco);
+void revisarLimites(const ConfigMonitor& config ,  const MetricasSistema& metricas){
+    std::string mensaje;
 
-    if (ram >= limites["ram"]){
+    if (metricas.ram >= config.ram){
+        int ram_entero = static_cast<int>(metricas.ram);
         logWarning("Monitor: se sobrepaso el limite de uso en la memoria ram: " + std::to_string(ram_entero) + "%");
-        enviarNotificación("Monitor", "Se sobrepaso el limite de la ram: " + std::to_string(ram_entero) + "%", "WARNING");
+        mensaje +=  "\nSe sobrepaso el limite de la ram: " + std::to_string(ram_entero) + "%";
     }
 
-    if (cpu >= limites["cpu"]){
+    if (metricas.cpu >= config.cpu){
+        int cpu_entero = static_cast<int>(metricas.cpu);
         logWarning("Monitor: se sobrepaso el limite de uso del cpu: " + std::to_string(cpu_entero) + "%");
-        enviarNotificación("Monitor", "Se sobrepaso el limite del CPU: " + std::to_string(cpu_entero) + "%", "WARNING");
+        mensaje += "\nSe sobrepaso el limite del CPU: " + std::to_string(cpu_entero) + "%";
     }
 
-    if (disco >= limites["disco"]){
+    if (metricas.disco >= config.disco){
+        int disco_entero = static_cast<int>(metricas.disco);
         logWarning("Monitor: se sobrepaso el limite de espacio en el disco: " + std::to_string(disco_entero) + "%");
-        enviarNotificación("Monitor", "Se sobrepaso el limite de espacio disco: " + std::to_string(disco_entero) + "%", "WARNING");
+        mensaje += "\nSe sobrepaso el limite de espacio disco: " + std::to_string(disco_entero) + "%";
+    }
+    if (!mensaje.empty()){
+        enviarNotificación("Monitor", mensaje, "WARNING");
     }
 }
 
-void ejecutarMonitoreo(const int& limite_ram, const int& limite_cpu, const int& limite_disco){
+void ejecutarMonitoreo(const ConfigMonitor& config){
     try{
-        std::unordered_map<std::string, int> limites;
-        limites["ram"] = limite_ram;
-        limites["cpu"] = limite_cpu;
-        limites["disco"] = limite_disco;
+        MetricasSistema metricas;
+        metricas.ram = uso_ram();
+        metricas.cpu = uso_cpu();
+        metricas.disco = uso_disco();
 
-        double ram = uso_ram();
-        double cpu = uso_cpu();
-        double disco = uso_disco();
-
-        revisarLimites(limites, ram, cpu, disco);
-
+        revisarLimites(config, metricas);
     }
     catch(const ErrorMonitor& e){
         std::cout << "ErrorMonitor: " << e.what() << std::endl;
@@ -167,9 +165,9 @@ void ejecutarMonitoreo(const int& limite_ram, const int& limite_cpu, const int& 
     }
 }
 
-void loopMonitor(const ConfigMonitor& config) {
+void loopMonitor(const ConfigMonitor& configuraciones) {
     while (corriendo) {
-        ejecutarMonitoreo(config.cpu, config.ram, config.disco);
+        ejecutarMonitoreo(configuraciones);
         std::this_thread::sleep_for(std::chrono::seconds(60));
     }
 }

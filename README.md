@@ -33,7 +33,11 @@ Todo se configura `config/sentinel.json` sin necesidad de recompilar.
 - systemd
 
 ## Instalación
+```bash
+git clone https://github.com/EmersonDavid1322/sentinel
+cd sentinel
 bash scripts/install.sh
+```
 
 ## Estado
 

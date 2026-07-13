@@ -4,7 +4,7 @@
 #include <fstream>
 #include "config.h"
 
-std::ifstream comprobar_json(const nlohmann::json& datos);
+std::ifstream comprobar_json(const std::filesystem::path& ruta);
 
 ConfigBackup cargarBackup(const nlohmann::json& datos);
 
@@ -12,4 +12,4 @@ ConfigMonitor cargarMonitor(const nlohmann::json& datos);
 
 ConfigOrganizador cargarOrganizador(const nlohmann::json& datos);
 
-ConfigSentinel cargarConfig(const std::string& rutaJSON);
+ConfigSentinel cargarConfig(const std::filesystem::path& rutaJSON);

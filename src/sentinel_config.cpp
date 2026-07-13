@@ -10,15 +10,17 @@
 #include "logger.h"
 #include "rutas.h"
 #include "sentinel_estado.h"
+#include "descriptor_inotify.h"
+#include "notificador.h"
 namespace fs = std::filesystem;
 fs::path ruta = (obtenerRutaBase() / "config" / "sentinel.json");
 
 void actualizarJSON(){
-    int fd = inotify_init();
-    int wd = inotify_add_watch(fd, ruta.c_str(), IN_MODIFY);
+    try{
+    VigilanteInotify vigilante(ruta.c_str(), IN_MODIFY);
 
     struct pollfd pfd;
-    pfd.fd = fd;
+    pfd.fd = vigilante.fd;
     pfd.events = POLLIN;
 
     while (corriendo){
@@ -28,7 +30,7 @@ void actualizarJSON(){
 
         if (pfd.revents & POLLIN) {
             char buffer[4096];
-            int bytes = read(fd, buffer, sizeof(buffer));
+            int bytes = read(vigilante.fd, buffer, sizeof(buffer));
             struct inotify_event* evento = (struct inotify_event*) buffer;
             if (bytes < 0) break;
 
@@ -43,7 +45,16 @@ void actualizarJSON(){
                 }
             }
         }
-    } 
-    inotify_rm_watch(fd, wd);
-    close(fd);
+    }
+    }
+    catch(const ErrorInotify& e){
+        std::cout << "DaemonError: " << e.what() << std::endl;
+        logError("Error en Deamon - " + std::string(e.what()));
+        enviarNotificación("Error Error intify-JSON", "Ocurrio un error en el vigilante del JSON: " + std::string(e.what()), "ERROR");
+    }
+    catch(const DaemonError& e){
+        std::cout << "DaemonError: " << e.what() << std::endl;
+        logError("Error en Deamon - " + std::string(e.what()));
+        enviarNotificación("Error Deamon-JSON", "Ocurrio un error en el vigilante del JSON: " + std::string(e.what()), "ERROR");
+    }
 }

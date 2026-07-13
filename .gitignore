@@ -5,4 +5,5 @@ sentinel
 *.json
 logs/
 .vscode/
+config/
 

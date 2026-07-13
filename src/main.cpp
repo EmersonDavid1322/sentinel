@@ -21,7 +21,7 @@ int main() {
     fs::create_directories(obtenerRutaBase() / "logs");
     
     try {
-        ConfigSentinel config = cargarConfig("config/sentinel.json");
+        ConfigSentinel config = cargarConfig(obtenerRutaBase() / "config" / "sentinel.json");
         logInfo("Sentinel iniciado correctamente 1.2");
         
         std::thread hilo_json(actualizarJSON);

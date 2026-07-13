@@ -9,7 +9,7 @@ double uso_cpu();
 
 double uso_disco();
 
-void revisarLimites(double& ram, double& cpu, double& disco);
-void ejecutarMonitoreo(const int& limite_ram, const int& limite_cpu, const int& limite_disco);
+void revisarLimites(const ConfigMonitor& config , const MetricasSistema& metricas);
+void ejecutarMonitoreo(const ConfigMonitor& config);
 
-void loopMonitor(const ConfigMonitor& config);
+void loopMonitor(const ConfigMonitor& configuraciones);

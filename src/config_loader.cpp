@@ -6,10 +6,10 @@
 #include "errores.h"
 using json = nlohmann::json;
 
-std::ifstream comprobar_json(const std::string& ruta){
+std::ifstream comprobar_json(const std::filesystem::path& ruta){
     std::ifstream archivo(ruta);
     if (!archivo.is_open()){
-        throw DaemonError("El archivo json no se a podido encontrar: " + ruta);
+        throw DaemonError("El archivo json no se a podido encontrar: " + ruta.string());
     }
     return archivo;
 }
@@ -60,7 +60,7 @@ ConfigOrganizador cargarOrganizador(const json& datos){
     return organizador;
 }
 
-ConfigSentinel cargarConfig(const std::string& rutaJSON){
+ConfigSentinel cargarConfig(const std::filesystem::path& rutaJSON){
     std::ifstream archivo = comprobar_json(rutaJSON);
     json datos = json::parse(archivo);
 

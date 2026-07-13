@@ -1,11 +1,13 @@
 #include <iostream>
 #include <libnotify/notify.h>
+#include <mutex>
 #include "notificador.h"
 #include "errores.h"
 #include "logger.h"
+std::mutex mutex_notificador;
 
 void enviarNotificación(std::string titulo, std::string mensaje, std::string nivel){
-    
+    std::lock_guard<std::mutex> lock(mutex_notificador);
     NotifyUrgency urgencia;
     std::string icon;
 

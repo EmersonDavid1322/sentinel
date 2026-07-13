@@ -25,3 +25,8 @@ public:
     ErrorOrganizador(const std::string& mensaje)
         : DaemonError(mensaje) {}
 };
+class ErrorInotify : public DaemonError {
+public:
+    ErrorInotify(const std::string& mensaje) 
+        : DaemonError(mensaje) {}
+};
