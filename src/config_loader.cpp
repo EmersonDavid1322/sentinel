@@ -61,17 +61,22 @@ ConfigOrganizador cargarOrganizador(const json& datos){
 }
 
 ConfigSentinel cargarConfig(const std::filesystem::path& rutaJSON){
-    std::ifstream archivo = comprobar_json(rutaJSON);
-    json datos = json::parse(archivo);
+    try{
+        std::ifstream archivo = comprobar_json(rutaJSON);
+        json datos = json::parse(archivo);
 
-    ConfigBackup struct_backup = cargarBackup(datos);
-    ConfigMonitor struct_monitor = cargarMonitor(datos);
-    ConfigOrganizador struct_organizador = cargarOrganizador(datos);
+        ConfigBackup struct_backup = cargarBackup(datos);
+        ConfigMonitor struct_monitor = cargarMonitor(datos);
+        ConfigOrganizador struct_organizador = cargarOrganizador(datos);
 
-    ConfigSentinel config;
-    config.backup = struct_backup;
-    config.monitor = struct_monitor;
-    config.organizador = struct_organizador;
+        ConfigSentinel config;
+        config.backup = struct_backup;
+        config.monitor = struct_monitor;
+        config.organizador = struct_organizador;
 
-    return config;
+        return config;
+    }
+    catch (const nlohmann::json::exception& e) {
+        throw ErrorConfig("El archivo de configuración tiene un error: " + std::string(e.what()));
+    }
 }

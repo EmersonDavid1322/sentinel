@@ -30,3 +30,7 @@ public:
     ErrorInotify(const std::string& mensaje) 
         : DaemonError(mensaje) {}
 };
+class ErrorConfig : public DaemonError {
+public:
+    ErrorConfig(const std::string& mensaje) : DaemonError(mensaje) {}
+};
