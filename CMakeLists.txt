@@ -12,15 +12,17 @@ pkg_check_modules(LIBNOTIFY REQUIRED libnotify)
 
 add_executable(sentinel
     src/main.cpp
-    src/config_loader.cpp
+    src/config_json/config_loader.cpp
     src/rutas.cpp
     src/logger.cpp
-    src/sentinel_config.cpp
+    src/config_json/sentinel_config.cpp
     src/backup/backup.cpp
     src/monitor/monitor.cpp
     src/organizer/organizer.cpp
     src/notificador.cpp
     src/sentinel_estado.cpp
+    src/comandos/comandos.cpp
+    src/comandos/comandos_deamon.cpp
 )
 
 target_include_directories(sentinel PRIVATE ${LIBNOTIFY_INCLUDE_DIRS})

@@ -1,23 +1,26 @@
 {
     "backup": {
         "_nota_carpetas": "Sin / al final para copiar la carpeta completa, Con / para copiar el interior de una carpeta",
-        "carpetas": ["/home/emersondavid/Documentos/"],
-        "destino": "/home/emersondavid/Descargas/sentinel_backup",
-        "hora": "14:40",
-        "activo": true
+        "activo": true,
+        "carpetas": [
+            "/home/Emerson/Documentos",
+            "/home/Emerson/proyectos_personales"
+        ],
+        "destino": "/run/media/Emerson/Ventoy/Personal/sentinel_backup",
+        "hora": "20:00"
     },
     "monitor": {
-        "limite_cpu": 1,
-        "limite_ram": 1,
-        "limite_disco":1,
-        "activo": true
+        "activo": true,
+        "limite_cpu": 80,
+        "limite_disco": 85,
+        "limite_ram": 90
     },
     "organizador": {
-        "carpeta_vigilar": "/home/emersondavid/Descargas/",
         "activo": true,
+        "carpeta_vigilar": "/home/Emerson/SENTINEL/",
         "reglas": {
-            ".pdf": "/home/emersondavid/Documentos/PDFs",
-            ".jpg": "/home/emersondavid/Imágenes"
+            ".jpg": "/home/Emerson/Imágenes",
+            ".pdf": "/home/Emerson/Documentos"
         }
     }
 }

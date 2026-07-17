@@ -12,6 +12,7 @@
 #include "errores.h"
 #include "sentinel_config.h"
 #include "sentinel_estado.h"
+#include "comandos.h"
 namespace fs = std::filesystem;
 
 
@@ -20,11 +21,16 @@ int main() {
     capturarSenal();
     fs::create_directories(obtenerRutaBase() / "logs");
     
+    std::filesystem::path rutaConfig = obtenerRutaBase() / "config" / "sentinel.json";
+
     try {
-        ConfigSentinel config = cargarConfig(obtenerRutaBase() / "config" / "sentinel.json");
-        logInfo("Sentinel iniciado correctamente 1.2");
+        asegurarConfigExiste(rutaConfig);
+        ConfigSentinel config = cargarConfig(rutaConfig);
+        logInfo("Sentinel iniciado correctamente 1.3");
         
         std::thread hilo_json(actualizarJSON);
+
+        std::thread hilo_comandos(loopComandos);
 
         std::thread hilo_backup;
         if (config.backup.activo) {
@@ -44,6 +50,7 @@ int main() {
         }
 
         hilo_json.join();
+        hilo_comandos.join();
         if (hilo_backup.joinable()) hilo_backup.join();
         if (hilo_monitor.joinable()) hilo_monitor.join();
         if (hilo_organizador.joinable()) hilo_organizador.join();

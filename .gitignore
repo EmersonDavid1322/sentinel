@@ -6,4 +6,5 @@ sentinel
 logs/
 .vscode/
 config/
-
+*.fifo
+sentinel_estado.txt

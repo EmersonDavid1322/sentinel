@@ -4,15 +4,9 @@
 #include "config_loader.h"
 #include "json.hpp"
 #include "errores.h"
+#include "sentinel_config.h"
+#include "notificador.h"
 using json = nlohmann::json;
-
-std::ifstream comprobar_json(const std::filesystem::path& ruta){
-    std::ifstream archivo(ruta);
-    if (!archivo.is_open()){
-        throw DaemonError("El archivo json no se a podido encontrar: " + ruta.string());
-    }
-    return archivo;
-}
 
 ConfigBackup cargarBackup(const json& datos){
 
@@ -78,5 +72,6 @@ ConfigSentinel cargarConfig(const std::filesystem::path& rutaJSON){
     }
     catch (const nlohmann::json::exception& e) {
         throw ErrorConfig("El archivo de configuración tiene un error: " + std::string(e.what()));
+        enviarNotificación("Error config", "Archivo configuraciones corrupto" + std::string(e.what()), "ERROR");
     }
 }
