@@ -29,3 +29,11 @@ void cambiarEstadoSeccion(const std::string& seccion, bool activo){
     datos [seccion]["activo"] = activo;
     guardarJSON(datos, ruta);
 }
+
+void cambiarValorMonitor(const std::string& parametro, double valor){
+    std::filesystem::path ruta = obtenerRutaBase() / "config" / "sentinel.json";
+
+    json datos = leerJSONActual(ruta);
+    datos ["monitor"][parametro] = valor;
+    guardarJSON(datos, ruta);
+}

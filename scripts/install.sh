@@ -117,3 +117,12 @@ systemctl --user start sentinel.service
 systemctl --user status sentinel.service
 
 echo "Instalación completa de manera exitosa"
+
+
+if [ -f "$PROYECTO_DIR/scripts/sentinel-cli.sh" ]; then
+    cp "$PROYECTO_DIR/scripts/sentinel-cli.sh" "$DESTINO_DEAMON"
+    chmod +x "$DESTINO_DEAMON/sentinel-cli.sh"
+    echo "Se copie el scrips cliente correctamente"
+else
+    echo "No se encontro el cliente sentinel-cli.sh"
+fi
