@@ -33,36 +33,30 @@ void procesarEstado(std::string modulo, std::string& accion){
     enviarRespuesta("Se lanzo el comando: "+ accion + " al modulo: " + modulo);
 }
 
+//backup
 void procesarComandoBackup(std::string& accion, std::string& valor){
     if (accion == "activar" || accion == "desactivar"){
         procesarEstado("backup", accion);
     }
 }
 
+//monitor
 void procesarComandoMonitor(std::string& accion, std::string& valor){
     if (accion == "activar" || accion == "desactivar"){
         procesarEstado("monitor", accion);
     }
     else if (accion == "limite_cpu" || accion == "limite_ram" || accion == "limite_disco" ){
-        try{
-            double valor_double = std::stod(valor);
-            if (valor_double < 0 || valor_double > 100){
-                enviarRespuesta("El límite debe estar entre 0 y 100.");
-                return;
-            }
-            cambiarValorMonitor(accion, valor_double);
-            enviarRespuesta("Se cambio el valor del parametro " + accion + ":" + valor);
-        }catch (const std::invalid_argument&){
-            enviarRespuesta("El valor '" + valor + "' no es un numero valido");
-        }catch (const std::out_of_range&){
-            enviarRespuesta("El valor '" + valor + "' es demasiado grande.");
-        }
+        ejecutarCambioValorMonitor(accion, valor);
+    }
+    else if (accion == "consumo") {
+        ejecutarMonitoreoComando();
     }
     else{
         enviarRespuesta("Accion '" + accion + "' no disponible en el modulo de monitor");
     }
 }
 
+//organizador
 void procesarComandoOrganizador(std::string& accion, std::string& valor){
     if (accion == "activar" || accion == "desactivar"){
         procesarEstado("organizador", accion);
@@ -75,10 +69,10 @@ void procesarComando(const std::string& comando) {
     stream >> modulo >> accion;
     std::getline(stream, valor);
 
-    if (modulo == "monitor") {
-        procesarComandoMonitor(accion, valor);
-    } else if (modulo == "backup") {
+    if (modulo == "backup") {
         procesarComandoBackup(accion, valor);
+    } else if (modulo == "monitor") {
+        procesarComandoMonitor(accion, valor);
     } else if (modulo == "organizador") {
         procesarComandoOrganizador(accion, valor);
     } else if (modulo == "estado") {

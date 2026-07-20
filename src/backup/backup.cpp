@@ -6,7 +6,6 @@
 #include <chrono>
 #include <thread>
 #include "errores.h"
-#include "rutas.h"
 #include "logger.h"
 #include "config.h"
 #include "notificador.h"
