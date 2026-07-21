@@ -26,11 +26,11 @@ int main() {
     try {
         asegurarConfigExiste(rutaConfig);
         ConfigSentinel config = cargarConfig(rutaConfig);
-        logInfo("Sentinel iniciado correctamente 1.3");
+        logInfo("Sentinel iniciado correctamente 1.5");
         
         std::thread hilo_json(actualizarJSON);
 
-        std::thread hilo_comandos(loopComandos);
+        std::thread hilo_comandos(loopComandos, config);
 
         std::thread hilo_backup;
         if (config.backup.activo) {

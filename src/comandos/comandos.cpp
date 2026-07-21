@@ -34,9 +34,21 @@ void procesarEstado(std::string modulo, std::string& accion){
 }
 
 //backup
-void procesarComandoBackup(std::string& accion, std::string& valor){
+void procesarComandoBackup(std::string& accion, std::string& valor, const ConfigBackup& configBackup){
     if (accion == "activar" || accion == "desactivar"){
         procesarEstado("backup", accion);
+    }
+    else if (accion == "añadir_carpeta") {
+        agregarCarpetaBackup(valor);
+    }
+    else if (accion == "destino") {
+        cambiarDestinoBackup(valor);
+    }
+    else if (accion == "ahora") {
+        ejecutarBackupComando(configBackup);
+    }
+    else {
+        enviarRespuesta("Accion '" + accion + "' no disponible en el modulo de backup");
     }
 }
 
@@ -63,14 +75,14 @@ void procesarComandoOrganizador(std::string& accion, std::string& valor){
     }
 }
 
-void procesarComando(const std::string& comando) {
+void procesarComando(const std::string& comando, const ConfigSentinel& config) {
     std::istringstream stream(comando);
     std::string modulo, accion, valor;
     stream >> modulo >> accion;
     std::getline(stream, valor);
 
     if (modulo == "backup") {
-        procesarComandoBackup(accion, valor);
+        procesarComandoBackup(accion, valor, config.backup);
     } else if (modulo == "monitor") {
         procesarComandoMonitor(accion, valor);
     } else if (modulo == "organizador") {
@@ -82,7 +94,7 @@ void procesarComando(const std::string& comando) {
     }
 }
 
-void loopComandos() {
+void loopComandos(const ConfigSentinel& config) {
     std::string ruta_fifo = (obtenerRutaBase() / "config" / "sentinel.fifo").string();
     std::string ruta_estado = obtenerRutaBase() / "config" / "sentinel_estado.txt";
 
@@ -112,7 +124,7 @@ void loopComandos() {
                 if (!comando.empty() && comando.back() == '\n'){
                     comando.pop_back();
                 }
-                procesarComando(comando);
+                procesarComando(comando, config);
             }
         }
     }

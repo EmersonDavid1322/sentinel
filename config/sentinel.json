@@ -3,10 +3,9 @@
         "_nota_carpetas": "Sin / al final para copiar la carpeta completa, Con / para copiar el interior de una carpeta",
         "activo": true,
         "carpetas": [
-            "/home/Emerson/Documentos",
             "/home/Emerson/proyectos_personales"
         ],
-        "destino": "/run/media/Emerson/Ventoy/Personal/sentinel_backup",
+        "destino": "/home/Emerson/Documentos/prueba_backup",
         "hora": "20:00"
     },
     "monitor": {
