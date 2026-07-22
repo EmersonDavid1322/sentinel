@@ -35,7 +35,7 @@ void moverArchivo(const std::string& archivo, const std::map<std::string, std::s
 
     for (const auto& [extension_regla, destino] : reglas) {
     if (extension_regla != extension) continue;
-    
+
     for (const std::string& carpeta : carpetas_fallidas) {
         if (carpeta == destino) {
             logWarning("Organizador: saltando archivo, carpeta destino no existe: " + destino);

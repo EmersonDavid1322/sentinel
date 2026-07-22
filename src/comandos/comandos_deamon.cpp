@@ -10,6 +10,7 @@
 #include "monitor.h"
 #include "backup.h"
 using json = nlohmann::json;
+namespace fs = std::filesystem;
 
 //json carga y guarda
 json leerJSONActual(const std::filesystem::path& ruta){
@@ -40,6 +41,36 @@ std::string limpiarEspacios(const std::string& texto) {
     return texto.substr(inicio, final - inicio + 1);
 }
 
+void cambiarDireccion(const std::string& parametro,const std::string& llave ,const std::string& dirrecion) {
+    std::string destino_limpio = limpiarEspacios(dirrecion);
+    if (destino_limpio.empty()) {
+        enviarRespuesta("No se permiten valores vacios en destino");
+        return;
+    }
+
+
+    std::filesystem::path direccion_path(destino_limpio);
+    if (!fs::exists(direccion_path)) {
+        enviarRespuesta("La dirrección " + destino_limpio + " no a sido encontrada o no existe");
+        return;
+    }
+
+
+
+    std::filesystem::path ruta = obtenerRutaBase() / "config" / "sentinel.json";
+
+    json datos = leerJSONActual(ruta);
+
+    if (datos[parametro][llave] == destino_limpio) {
+        enviarRespuesta("Esta dirección " + destino_limpio + " ya esta asignada a " + parametro + "-" + llave);
+        return;
+    }
+
+    datos [parametro][llave] = destino_limpio;
+    guardarJSON(datos, ruta);
+    enviarRespuesta("Se a cambiado el destino del backup a: " + destino_limpio);
+}
+
 //cambiar estado acitvo modulo
 void cambiarEstadoSeccion(const std::string& seccion, bool activo){
     std::filesystem::path ruta = obtenerRutaBase() / "config" / "sentinel.json";
@@ -68,21 +99,6 @@ void agregarCarpetaBackup(const std::string& carpeta) {
 
     guardarJSON(datos, ruta);
     enviarRespuesta("Se a añadido la carpeta: " + carpeta_limpia);
-}
-
-void cambiarDestinoBackup(const std::string& destino) {
-    std::string destino_limpio = limpiarEspacios(destino);
-    if (destino_limpio.empty()) {
-        enviarRespuesta("No se permiten valores vacios en destino");
-        return;
-    }
-
-    std::filesystem::path ruta = obtenerRutaBase() / "config" / "sentinel.json";
-
-    json datos = leerJSONActual(ruta);
-    datos ["backup"]["destino"] = destino_limpio;
-    guardarJSON(datos, ruta);
-    enviarRespuesta("Se a cambiado el destino del backup a: " + destino_limpio);
 }
 
 void ejecutarBackupComando(const ConfigBackup& configBackup) {
@@ -140,4 +156,94 @@ void ejecutarMonitoreoComando() {
     catch(const DaemonError& e){
         enviarRespuesta("Error Deamon-Monitor Ocurrio un error en el intento de telemetrica: " + std::string(e.what()));
     }
+}
+
+//organizador
+void agregarReglaOrganizador(const std::string& extension, const std::string& carpetaDestino) {
+
+    std::filesystem::path ruta_destino(carpetaDestino);
+    if (!fs::exists(ruta_destino)) {
+        enviarRespuesta("La carpeta destino " + carpetaDestino + " no existe");
+        return;
+    }
+
+    std::filesystem::path ruta = obtenerRutaBase() / "config" / "sentinel.json";
+    json datos = leerJSONActual(ruta);
+
+    std::map<std::string, std::string> reglas = datos["organizador"]["reglas"];
+    reglas[extension] = carpetaDestino;
+    datos["organizador"]["reglas"] = reglas;
+
+    guardarJSON(datos, ruta);
+    enviarRespuesta("Regla agregada: " + extension + " -> " + carpetaDestino);
+}
+
+void procesarComandoOrganizadorAgregarRegla(const std::string& valor) {
+    std::istringstream stream(valor);
+    std::string extension, direccion;
+
+    std::getline(stream, extension, '|');
+    std::getline(stream, direccion, '|');
+
+    extension = limpiarEspacios(extension);
+    direccion = limpiarEspacios(direccion);
+
+    if (extension.empty() || direccion.empty()) {
+        enviarRespuesta("Formato incorrecto. Usa: extension|direccion (ej: .pdf|/home/usuario/PDFs)");
+        return;
+    }
+
+    if (extension.front() != '.') {
+        enviarRespuesta("La extension debe comenzar con un punto, ej: .pdf");
+        return;
+    }
+
+    agregarReglaOrganizador(extension, direccion);
+}
+
+//estado
+std::string  estadoBackup(const ConfigBackup& config) {
+    std::string carpetas_str;
+    for (const auto& carpeta : config.carpetas) {
+        carpetas_str += carpeta + "\n";
+    }
+
+    std::string mensaje = "=== Estado Backup ===\n";
+    mensaje += "Activo: " + std::string(config.activo ? "si" : "no") + "\n";
+    mensaje += "Hora: " + config.hora + "\n";
+    mensaje += "Destino: " + config.destino + "\n";
+    mensaje += "Carpetas:\n" + carpetas_str;
+
+    return mensaje;
+}
+
+std::string  estadoMonitor(const ConfigMonitor& config) {
+    int cpu_entero = static_cast<int>(config.cpu);
+    int ram_entero = static_cast<int>(config.ram);
+    int disco_entero = static_cast<int>(config.disco);
+    std::string mensaje = "=== Estado Monitor ===\n";
+    mensaje += "Activo: " + std::string(config.activo ? "si" : "no") + "\n";
+    mensaje += "Limite CPU: " + std::to_string(cpu_entero) + "%\n";
+    mensaje += "Limite RAM: " + std::to_string(ram_entero) + "%\n";
+    mensaje += "Limite Disco: " + std::to_string(disco_entero) + "%\n";
+
+    return mensaje;
+}
+
+std::string  estadoOrganizador(const ConfigOrganizador& config) {
+    std::string reglas_str;
+    for (const auto& [extension, carpeta] : config.reglas) {
+        reglas_str += extension + " -> " + carpeta + "\n";
+    }
+
+    std::string mensaje = "=== Estado Organizador ===\n";
+    mensaje += "Activo: " + std::string(config.activo ? "si" : "no") + "\n";
+    mensaje += "Carpeta vigilada: " + config.carpeta_vigilar + "\n";
+    mensaje += "Reglas:\n" + reglas_str;
+
+    return mensaje;
+}
+
+std::string generarDiagnostico(const ConfigSentinel& config) {
+    return estadoBackup(config.backup) + "\n" + estadoMonitor(config.monitor) + "\n" + estadoOrganizador(config.organizador);
 }

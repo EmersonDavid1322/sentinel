@@ -11,7 +11,6 @@
 #include "sentinel_estado.h"
 #include "rutas.h"
 #include "comandos_deamon.h"
-namespace fs = std::filesystem;
 
 void enviarRespuesta(const std::string& mensaje) {
     std::filesystem::path ruta_estado = obtenerRutaBase() / "config" / "sentinel_estado.txt";
@@ -42,7 +41,7 @@ void procesarComandoBackup(std::string& accion, std::string& valor, const Config
         agregarCarpetaBackup(valor);
     }
     else if (accion == "destino") {
-        cambiarDestinoBackup(valor);
+        cambiarDireccion("backup",accion ,valor);
     }
     else if (accion == "ahora") {
         ejecutarBackupComando(configBackup);
@@ -73,6 +72,28 @@ void procesarComandoOrganizador(std::string& accion, std::string& valor){
     if (accion == "activar" || accion == "desactivar"){
         procesarEstado("organizador", accion);
     }
+    else if (accion == "carpeta_vigilar") {
+        cambiarDireccion("organizador",accion, valor);
+    }
+    else if (accion == "agregar_regla") {
+        procesarComandoOrganizadorAgregarRegla(valor);
+    }
+}
+
+//estado
+void procesarComandoEstado(std::string& accion, std::string& valor, const ConfigSentinel& config) {
+    if (accion.empty()) {
+        enviarRespuesta(generarDiagnostico(config));
+    }
+    else if (accion == "backup") {
+        enviarRespuesta(estadoBackup(config.backup));
+    }
+    else if (accion == "monitor") {
+        enviarRespuesta(estadoMonitor(config.monitor));
+    }
+    else if (accion == "organizador") {
+        enviarRespuesta(estadoOrganizador(config.organizador));
+    }
 }
 
 void procesarComando(const std::string& comando, const ConfigSentinel& config) {
@@ -88,7 +109,7 @@ void procesarComando(const std::string& comando, const ConfigSentinel& config) {
     } else if (modulo == "organizador") {
         procesarComandoOrganizador(accion, valor);
     } else if (modulo == "estado") {
-        enviarRespuesta("Sentinel ejecutandose correctamente");
+        procesarComandoEstado(accion, valor, config);
     } else {
         enviarRespuesta("Módulo no reconocido: " + modulo);
     }
