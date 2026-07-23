@@ -3,6 +3,7 @@ project(sentinel)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+add_compile_options(-Wall -Wextra -Wpedantic)
 
 include_directories(include)
 

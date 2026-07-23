@@ -14,7 +14,7 @@
 #include "descriptor_inotify.h"
 namespace fs = std::filesystem;
 
-std::vector<std::string> verificarCarpetas(const std::map<std::string, std::string>& carpetasRegla, const std::string& carpetaVigilar){
+std::vector<std::string> verificarCarpetasOrganizado(const std::map<std::string, std::string>& carpetasRegla, const std::string& carpetaVigilar){
     std::vector<std::string> carpetas_fallidas;
     if (!fs::exists(carpetaVigilar)){
         throw ErrorOrganizador("Organizador: Carpeta a vigilar no existente: " + carpetaVigilar);
@@ -52,7 +52,7 @@ void moverArchivo(const std::string& archivo, const std::map<std::string, std::s
 
 void ejecutarOrganizador(const std::map<std::string, std::string>& carpetasRegla, const std::string& carpetaVigilar){
     try{
-        std::vector<std::string> carpetas_fallidas = verificarCarpetas(carpetasRegla, carpetaVigilar);
+        std::vector<std::string> carpetas_fallidas = verificarCarpetasOrganizado(carpetasRegla, carpetaVigilar);
         VigilanteInotify vigilante(carpetaVigilar, IN_CREATE | IN_MOVED_TO);
         
         struct pollfd pfd;
@@ -64,31 +64,31 @@ void ejecutarOrganizador(const std::map<std::string, std::string>& carpetasRegla
             
             if (resultado < 0) break;
             
-            if (pfd.revents & POLLIN) { 
+            if (pfd.revents & POLLIN) {
                 char buffer[4096];
                 int bytes = read(vigilante.fd, buffer, sizeof(buffer));
                 if (bytes < 0) break;
-                
-                struct inotify_event* evento = (struct inotify_event*) buffer;
-                if (evento->len > 0) {
-                    std::string rutaCompleta = carpetaVigilar + "/" + evento->name;
-                    moverArchivo(rutaCompleta, carpetasRegla, carpetas_fallidas);
+
+                for (int i = 0; i < bytes; ) {
+                    struct inotify_event* evento = (struct inotify_event*)&buffer[i];
+                    if (evento->len > 0) {
+                        std::string rutaCompleta = carpetaVigilar + "/" + evento->name;
+                        moverArchivo(rutaCompleta, carpetasRegla, carpetas_fallidas);
+                    }
+                    i += sizeof(struct inotify_event) + evento->len;
                 }
             }
-    }
+        }
     }
     catch(const ErrorInotify& e){
-        std::cout << "ErrorInotify: " << e.what() << std::endl;
         logError("Error en Inotify organizador - " + std::string(e.what()));
         enviarNotificación("Error en Inotify organizador", "Ocurrio un error en el Inotify organizador: " + std::string(e.what()), "ERROR");
     }
     catch(const ErrorOrganizador& e){
-        std::cout << "OrganizadorError: " << e.what() << std::endl;
         logError("Error en Organizador - " + std::string(e.what()));
         enviarNotificación("Error Organizador", "Ocurrio un error en el organizador: " + std::string(e.what()), "ERROR");
     }
     catch(const DaemonError& e){
-        std::cout << "DaemonError: " << e.what() << std::endl;
         logError("Error en Deamon - " + std::string(e.what()));
         enviarNotificación("Error Deamon-Organizador", "Ocurrio un error en el organizador: " + std::string(e.what()), "ERROR");
     }

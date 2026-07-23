@@ -12,7 +12,7 @@ void procesarComandoBackup(std::string& accion, std::string& valor, const Config
 
 void procesarComandoOrganizador(std::string& accion, std::string& valor);
 
-void procesarComandoEstado(std::string& accion, std::string& valor, const ConfigSentinel& config);
+void procesarComandoEstado(std::string& accion, const ConfigSentinel& config);
 
 void procesarComando(const std::string& comando, const ConfigSentinel& config);
 

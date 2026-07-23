@@ -1,14 +1,14 @@
+#include "comandos_deamon.h"
+#include <filesystem>
 #include <fstream>
 #include <string>
-#include <filesystem>
-#include "json.hpp"
-#include "comandos_deamon.h"
-#include "errores.h"
-#include "logger.h"
-#include "rutas.h"
-#include "comandos.h"
-#include "monitor.h"
 #include "backup.h"
+#include "comandos.h"
+#include "errores.h"
+#include "json.hpp"
+#include "logger.h"
+#include "monitor.h"
+#include "rutas.h"
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 
@@ -54,8 +54,6 @@ void cambiarDireccion(const std::string& parametro,const std::string& llave ,con
         enviarRespuesta("La dirrección " + destino_limpio + " no a sido encontrada o no existe");
         return;
     }
-
-
 
     std::filesystem::path ruta = obtenerRutaBase() / "config" / "sentinel.json";
 
@@ -106,7 +104,7 @@ void ejecutarBackupComando(const ConfigBackup& configBackup) {
         std::filesystem::path ruta = obtenerRutaBase() / "config" / "sentinel.json";
         json datos = leerJSONActual(ruta);
 
-        std::string carpetas_msg = verificarCarpetas(configBackup.carpetas, configBackup.destino);
+        std::string carpetas_msg = verificarCarpetasBackup(configBackup.carpetas, configBackup.destino);
         ejecutarBackup(configBackup.carpetas, configBackup.destino);
 
         logInfo("Se realizo un backup manual de las carpetas: " + carpetas_msg + " Destino: " + configBackup.destino);

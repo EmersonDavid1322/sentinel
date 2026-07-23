@@ -5,6 +5,7 @@
 std::atomic<bool> corriendo{true};
 
 void manejoSenal(int senal){
+    (void)senal;
     corriendo = false;
 }
 void capturarSenal(){

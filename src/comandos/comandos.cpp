@@ -1,4 +1,3 @@
-#include <iostream>
 #include <string>
 #include <fcntl.h>
 #include <unistd.h>
@@ -81,7 +80,7 @@ void procesarComandoOrganizador(std::string& accion, std::string& valor){
 }
 
 //estado
-void procesarComandoEstado(std::string& accion, std::string& valor, const ConfigSentinel& config) {
+void procesarComandoEstado(std::string& accion, const ConfigSentinel& config) {
     if (accion.empty()) {
         enviarRespuesta(generarDiagnostico(config));
     }
@@ -109,7 +108,7 @@ void procesarComando(const std::string& comando, const ConfigSentinel& config) {
     } else if (modulo == "organizador") {
         procesarComandoOrganizador(accion, valor);
     } else if (modulo == "estado") {
-        procesarComandoEstado(accion, valor, config);
+        procesarComandoEstado(accion, config);
     } else {
         enviarRespuesta("Módulo no reconocido: " + modulo);
     }
@@ -137,7 +136,6 @@ void loopComandos(const ConfigSentinel& config) {
         if (resultado > 0 && (pfd.revents & POLLIN)) {
             char buffer[256]; 
             int bytes = read(fd, buffer, sizeof(buffer) - 1);
-            std::cout << "poll detecto actividad, bytes leidos: " << bytes << std::endl;
             if (bytes > 0) {
                 buffer[bytes] = '\0';
                 std::string comando(buffer);

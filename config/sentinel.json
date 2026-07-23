@@ -16,7 +16,7 @@
     },
     "organizador": {
         "activo": true,
-        "carpeta_vigilar": "/home/Emerson/SENTINEL/",
+        "carpeta_vigilar": "/home/Emerson/prueba/",
         "reglas": {
             ".jpg": "/home/Emerson/Imágenes",
             ".pdf": "/home/Emerson/Documentos"

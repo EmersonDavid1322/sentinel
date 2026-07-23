@@ -1,8 +1,6 @@
 #include <string>
 #include <filesystem>
 #include <sys/inotify.h>
-#include <sys/wait.h>
-#include <iostream>
 #include <unistd.h>
 #include <poll.h>
 #include "sentinel_config.h"
@@ -40,34 +38,35 @@ void actualizarJSON(){
         if (pfd.revents & POLLIN) {
             char buffer[4096];
             int bytes = read(vigilante.fd, buffer, sizeof(buffer));
-            struct inotify_event* evento = (struct inotify_event*) buffer;
             if (bytes < 0) break;
 
-            if (evento->mask & IN_MODIFY){
-                logInfo("JSON modificado, reiniciando Sentinel...");
-                int resultado = system("systemctl --user restart sentinel.service");
-                if (WIFEXITED(resultado)){
-                    int codigo_salida = WEXITSTATUS(resultado);
-                    if (codigo_salida == 0){
-                        logInfo("Señal de reinicio recibida correctamente");
-                    } else{
-                        logError("Error al reinicar el Sentinel: código " + std::to_string(codigo_salida));
+            for (int i = 0; i < bytes; ) {
+                struct inotify_event* evento = (struct inotify_event*)&buffer[i];
+                if (evento->mask & IN_MODIFY){
+                    logInfo("JSON modificado, reiniciando Sentinel...");
+                    int resultado = system("systemctl --user restart sentinel.service");
+                    if (WIFEXITED(resultado)){
+                        int codigo_salida = WEXITSTATUS(resultado);
+                        if (codigo_salida == 0){
+                            logInfo("Señal de reinicio recibida correctamente");
+                        } else{
+                            logError("Error al reinicar el Sentinel: código " + std::to_string(codigo_salida));
+                        }
+                    } else if (WIFSIGNALED(resultado)){
+                        int señal = WTERMSIG(resultado);
+                        logError("El comando de reinicio fue terminado por la señal: " + std::to_string(señal));
                     }
-                } else if (WIFSIGNALED(resultado)){
-                    int señal = WTERMSIG(resultado);
-                    logError("El comando de reinicio fue terminado por la señal: " + std::to_string(señal));
                 }
+                i += sizeof(struct inotify_event) + evento->len;
             }
         }
     }
     }
     catch(const ErrorInotify& e){
-        std::cout << "DaemonError: " << e.what() << std::endl;
         logError("Error en Deamon - " + std::string(e.what()));
         enviarNotificación("Error Error intify-JSON", "Ocurrio un error en el vigilante del JSON: " + std::string(e.what()), "ERROR");
     }
     catch(const DaemonError& e){
-        std::cout << "DaemonError: " << e.what() << std::endl;
         logError("Error en Deamon - " + std::string(e.what()));
         enviarNotificación("Error Deamon-JSON", "Ocurrio un error en el vigilante del JSON: " + std::string(e.what()), "ERROR");
     }

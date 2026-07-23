@@ -4,7 +4,7 @@
 #include <vector>
 #include "config.h"
 
-std::string verificarCarpetas(const std::vector<std::string>& carpetas, const std::string& destino);
+std::string verificarCarpetasBackup(const std::vector<std::string>& carpetas, const std::string& destino);
 
 void ejecutarBackup(const std::vector<std::string>& carpetas, const std::string& destino);
 

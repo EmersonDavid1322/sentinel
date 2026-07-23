@@ -1,5 +1,4 @@
 #include <string>
-#include <iostream>
 #include <fstream>
 #include <chrono>
 #include <thread>
@@ -55,6 +54,7 @@ double uso_ram() {
             throw ErrorMonitor("El resultado del uso de momeoria ram fue 0"); 
         }
     }
+    throw ErrorMonitor("Error inesperado en uso_ram");
 }
 
 bool obtener_tics_cpu(long long& trabajo, long long& descanso) {
@@ -154,12 +154,10 @@ void ejecutarMonitoreo(const ConfigMonitor& config){
         revisarLimites(config, metricas);
     }
     catch(const ErrorMonitor& e){
-        std::cout << "ErrorMonitor: " << e.what() << std::endl;
         logError("Error en monitor - " + std::string(e.what()));
         enviarNotificación("Error Monitor", "Ocurrio un error en el intento de telemetrica: " + std::string(e.what()), "ERROR");
     }
     catch(const DaemonError& e){
-        std::cout << "DaemonError: " << e.what() << std::endl;
         logError("Error en monitor - " + std::string(e.what()));
         enviarNotificación("Error Deamon-Monitor", "Ocurrio un error en el intento de telemetrica: " + std::string(e.what()), "ERROR");
     }
