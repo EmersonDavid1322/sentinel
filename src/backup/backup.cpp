@@ -8,6 +8,7 @@
 #include "config.h"
 #include "notificador.h"
 #include "sentinel_estado.h"
+#include "config_compartida.h"
 namespace fs = std::filesystem;
 
 std::string verificarCarpetasBackup(const std::vector<std::string>& carpetas, const std::string& destino){
@@ -22,8 +23,14 @@ std::string verificarCarpetasBackup(const std::vector<std::string>& carpetas, co
         }
     }
     if (!fs::exists(destino)){
-        fs::create_directories(destino);
-        logWarning("La carpeta destinataria no existe, se creo la carpeta destinataria del backup: " + destino);
+        try {
+            fs::create_directories(destino);
+            logWarning("La carpeta destinataria no existe, se creo la carpeta destinataria del backup: " + destino);
+        }
+        catch (const std::filesystem::filesystem_error& e) {
+            throw ErrorBackup("No se pudo crear la carpeta destino '" + destino + "' "
+                                "posible ubicacion erronea: " + std::string(e.what()));
+        }
     }
     return msg_carpetas;
 }
@@ -73,9 +80,15 @@ void hacerBackup(const std::vector<std::string>& carpetas, const std::string& de
     }
 }
 
-void loopBackup(const ConfigBackup& config){
+void loopBackup(ConfigCompartida& config_compartida){
     while (corriendo) {
-        hacerBackup(config.carpetas, config.destino, config.hora);
-        std::this_thread::sleep_for(std::chrono::seconds(60));
+        ConfigSentinel config = config_compartida.obtener();
+
+        if (config.backup.activo) {
+            hacerBackup(config.backup.carpetas, config.backup.destino, config.backup.hora);
+        }
+
+        std::unique_lock<std::mutex> lock(mtx_apagado);
+        cv_apagado.wait_for(lock, std::chrono::seconds(60), [] { return !corriendo.load(); });
     }
 }

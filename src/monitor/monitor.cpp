@@ -163,9 +163,15 @@ void ejecutarMonitoreo(const ConfigMonitor& config){
     }
 }
 
-void loopMonitor(const ConfigMonitor& configuraciones) {
+void loopMonitor(ConfigCompartida& config_compartida) {
     while (corriendo) {
-        ejecutarMonitoreo(configuraciones);
-        std::this_thread::sleep_for(std::chrono::seconds(60));
+        ConfigSentinel config = config_compartida.obtener();
+
+        if (config.monitor.activo) {
+            ejecutarMonitoreo(config.monitor);
+        }
+
+        std::unique_lock<std::mutex> lock(mtx_apagado);
+        cv_apagado.wait_for(lock, std::chrono::seconds(60), [] { return !corriendo.load(); });
     }
 }

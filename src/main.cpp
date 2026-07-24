@@ -12,7 +12,8 @@
 #include "errores.h"
 #include "sentinel_config.h"
 #include "sentinel_estado.h"
-#include "comandos.h"
+#include "procesar_comandos.h"
+#include "config_compartida.h"
 namespace fs = std::filesystem;
 
 
@@ -25,35 +26,28 @@ int main() {
 
     try {
         asegurarConfigExiste(rutaConfig);
-        ConfigSentinel config = cargarConfig(rutaConfig);
+        ConfigCompartida config_compartida;
+        config_compartida.actualizar(cargarConfig(rutaConfig));
         logInfo("Sentinel iniciado correctamente 1.5");
-        
-        std::thread hilo_json(actualizarJSON);
 
-        std::thread hilo_comandos(loopComandos, config);
+        //auxiliares
+        std::thread hilo_json(actualizarJSON, std::ref(config_compartida));
 
-        std::thread hilo_backup;
-        if (config.backup.activo) {
-            hilo_backup = std::thread(loopBackup, config.backup);
-        }
+        std::thread hilo_comandos(loopComandos, std::ref(config_compartida));
 
-        std::thread hilo_monitor;
-        if (config.monitor.activo) {
-            hilo_monitor = std::thread(loopMonitor, config.monitor);
-        }
+        //sentienl
+        std::thread  hilo_backup(loopBackup, std::ref(config_compartida));
 
-        std::thread hilo_organizador;
-        if (config.organizador.activo) {
-            hilo_organizador = std::thread(ejecutarOrganizador, 
-                                        config.organizador.reglas, 
-                                        config.organizador.carpeta_vigilar);
-        }
+        std::thread hilo_monitor(loopMonitor, std::ref(config_compartida));
+
+        std::thread hilo_organizador(ejecutarOrganizador,std::ref(config_compartida));
+
 
         hilo_json.join();
         hilo_comandos.join();
-        if (hilo_backup.joinable()) hilo_backup.join();
-        if (hilo_monitor.joinable()) hilo_monitor.join();
-        if (hilo_organizador.joinable()) hilo_organizador.join();
+        hilo_backup.join();
+        hilo_monitor.join();
+        hilo_organizador.join();
 
     } catch (const DaemonError& e) {
         logError("Error critico al iniciar: " + std::string(e.what()));

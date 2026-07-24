@@ -3,13 +3,17 @@
 #include <unistd.h>
 #include <poll.h>
 #include <sys/stat.h>
-#include "comandos.h"
 #include <fstream>
 #include "errores.h"
 #include "logger.h"
 #include "sentinel_estado.h"
 #include "rutas.h"
-#include "comandos_deamon.h"
+#include "comandos_auxiliar.h"
+#include "config_compartida.h"
+#include "comandos_backup.h"
+#include "comandos_monitor.h"
+#include "comandos_organizador.h"
+#include "comandos_estado.h"
 
 void enviarRespuesta(const std::string& mensaje) {
     std::filesystem::path ruta_estado = obtenerRutaBase() / "config" / "sentinel_estado.txt";
@@ -114,7 +118,7 @@ void procesarComando(const std::string& comando, const ConfigSentinel& config) {
     }
 }
 
-void loopComandos(const ConfigSentinel& config) {
+void loopComandos(ConfigCompartida& config_compartida) {
     std::string ruta_fifo = (obtenerRutaBase() / "config" / "sentinel.fifo").string();
     std::string ruta_estado = obtenerRutaBase() / "config" / "sentinel_estado.txt";
 
@@ -131,6 +135,7 @@ void loopComandos(const ConfigSentinel& config) {
     pfd.events = POLLIN;
 
     while (corriendo) {
+        ConfigSentinel config = config_compartida.obtener();
         int resultado = poll(&pfd, 1, 1000);
 
         if (resultado > 0 && (pfd.revents & POLLIN)) {

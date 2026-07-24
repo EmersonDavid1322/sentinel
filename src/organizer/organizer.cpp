@@ -50,16 +50,17 @@ void moverArchivo(const std::string& archivo, const std::map<std::string, std::s
     }
 }
 
-void ejecutarOrganizador(const std::map<std::string, std::string>& carpetasRegla, const std::string& carpetaVigilar){
+void ejecutarOrganizador(ConfigCompartida& config_compartida){
     try{
-        std::vector<std::string> carpetas_fallidas = verificarCarpetasOrganizado(carpetasRegla, carpetaVigilar);
-        VigilanteInotify vigilante(carpetaVigilar, IN_CREATE | IN_MOVED_TO);
-        
-        struct pollfd pfd;
-        pfd.fd = vigilante.fd;
-        pfd.events = POLLIN;
-        
-        while (corriendo) { 
+        while (corriendo) {
+            ConfigSentinel config = config_compartida.obtener();
+            std::vector<std::string> carpetas_fallidas = verificarCarpetasOrganizado(config.organizador.reglas, config.organizador.carpeta_vigilar);
+            VigilanteInotify vigilante(config.organizador.carpeta_vigilar, IN_CREATE | IN_MOVED_TO);
+
+            struct pollfd pfd;
+            pfd.fd = vigilante.fd;
+            pfd.events = POLLIN;
+
             int resultado = poll(&pfd, 1, 1000);
             
             if (resultado < 0) break;
@@ -72,8 +73,8 @@ void ejecutarOrganizador(const std::map<std::string, std::string>& carpetasRegla
                 for (int i = 0; i < bytes; ) {
                     struct inotify_event* evento = (struct inotify_event*)&buffer[i];
                     if (evento->len > 0) {
-                        std::string rutaCompleta = carpetaVigilar + "/" + evento->name;
-                        moverArchivo(rutaCompleta, carpetasRegla, carpetas_fallidas);
+                        std::string rutaCompleta = config.organizador.carpeta_vigilar + "/" + evento->name;
+                        moverArchivo(rutaCompleta, config.organizador.reglas, carpetas_fallidas);
                     }
                     i += sizeof(struct inotify_event) + evento->len;
                 }
