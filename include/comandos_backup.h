@@ -4,4 +4,4 @@
 
 void agregarCarpetaBackup(const std::string& carpeta);
 
-void ejecutarBackupComando(const ConfigBackup& configBackup);
+void ejecutarBackupComando(const ConfigBackup& configBackup, const ConfigMonitor& configMonitor);

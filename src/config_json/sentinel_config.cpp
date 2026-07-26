@@ -73,6 +73,7 @@ void crearConfigPorDefecto(const std::filesystem::path& rutaJSON){
     config["backup"]["destino"] = "";
     config["backup"]["hora"] = "00:00";
     config["backup"]["activo"] = false;
+    config["backup"]["forzar_backup"] = false;
 
     config["monitor"] = {};
     config["monitor"]["limite_cpu"] = 70;

@@ -9,7 +9,7 @@ void procesarEstado(std::string modulo, std::string& accion);
 
 void procesarComandoMonitor(std::string& accion, std::string& valor);
 
-void procesarComandoBackup(std::string& accion, std::string& valor, const ConfigBackup& configBackup);
+void procesarComandoBackup(std::string& accion, std::string& valor, const ConfigBackup& configBackup, const ConfigMonitor& configMonitor);
 
 void procesarComandoOrganizador(std::string& accion, std::string& valor);
 

@@ -40,7 +40,7 @@ std::string  estadoOrganizador(const ConfigOrganizador& config) {
     mensaje += "Activo: " + std::string(config.activo ? "si" : "no") + "\n";
     mensaje += "Carpeta vigilada: " + config.carpeta_vigilar + "\n";
     mensaje += "Reglas:\n" + reglas_str;
-
+ 
     return mensaje;
 }
 

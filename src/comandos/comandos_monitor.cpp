@@ -34,8 +34,12 @@ void ejecutarCambioValorMonitor(const std::string& parametro, std::string& valor
 
 void ejecutarMonitoreoComando() {
     try{
-        enviarRespuesta("Resultado del consumo actual\nCPU: " + std::to_string(uso_cpu()) + "%"
-                        + "\nRAM: " + std::to_string(uso_ram())+ "%" + "\nDisco: " + std::to_string(uso_disco()) + "%");
+        int cpu = static_cast<int>(uso_cpu());
+        int ram = static_cast<int>(uso_ram());
+        int disco = static_cast<int>(uso_disco());
+
+        enviarRespuesta("Resultado del consumo actual\nCPU: " + std::to_string(cpu) + "%"
+                        + "\nRAM: " + std::to_string(ram)+ "%" + "\nDisco: " + std::to_string(disco) + "%");
     }
     catch(const ErrorMonitor& e){
         enviarRespuesta("Error Monitor Ocurrio un error en el intento de telemetrica: " + std::string(e.what()));

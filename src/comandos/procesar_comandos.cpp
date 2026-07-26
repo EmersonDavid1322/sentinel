@@ -32,11 +32,11 @@ void procesarEstado(std::string modulo, std::string& accion){
     else if (accion == "desactivar"){
         cambiarEstadoSeccion(modulo, false);
     }
-    enviarRespuesta("Se lanzo el comando: "+ accion + " al modulo: " + modulo);
+    enviarRespuesta("Se cambio el estado del modulo "+ modulo + " a: " + accion);
 }
 
 //backup
-void procesarComandoBackup(std::string& accion, std::string& valor, const ConfigBackup& configBackup){
+void procesarComandoBackup(std::string& accion, std::string& valor, const ConfigBackup& configBackup, const ConfigMonitor& configMonitor){
     if (accion == "activar" || accion == "desactivar"){
         procesarEstado("backup", accion);
     }
@@ -47,7 +47,7 @@ void procesarComandoBackup(std::string& accion, std::string& valor, const Config
         cambiarDireccion("backup",accion ,valor);
     }
     else if (accion == "ahora") {
-        ejecutarBackupComando(configBackup);
+        ejecutarBackupComando(configBackup, configMonitor);
     }
     else {
         enviarRespuesta("Accion '" + accion + "' no disponible en el modulo de backup");
@@ -81,6 +81,9 @@ void procesarComandoOrganizador(std::string& accion, std::string& valor){
     else if (accion == "agregar_regla") {
         procesarComandoOrganizadorAgregarRegla(valor);
     }
+    else {
+        enviarRespuesta("Accion '" + accion + "' no disponible en el modulo de organizador");
+    }
 }
 
 //estado
@@ -106,7 +109,7 @@ void procesarComando(const std::string& comando, const ConfigSentinel& config) {
     std::getline(stream, valor);
 
     if (modulo == "backup") {
-        procesarComandoBackup(accion, valor, config.backup);
+        procesarComandoBackup(accion, valor, config.backup, config.monitor);
     } else if (modulo == "monitor") {
         procesarComandoMonitor(accion, valor);
     } else if (modulo == "organizador") {

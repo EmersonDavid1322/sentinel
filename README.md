@@ -23,7 +23,82 @@ Corre en segundo plano con systemd y automatiza tareas de mantenimiento del sist
 
 ## Configuración
 
-Todo se configura `config/sentinel.json` sin necesidad de recompilar.
+- Posibilidad de configurar por `config/sentinel.json`
+- Se puede reconfigurar mientras se ejecuta.
+- Opción de forzar backup si no hay suficiente espacio o el consumo de cpu actual supera 
+los limites impuestos.
+
+## Comandos Via FIFO
+**Se recomienda el uso del script 'sentinel-cli.sh'**
+
+Utilizar comandos para controlar el Sentinel:
+
+**Comando activar/desactivar módulos**
+```bash
+bash sentinel-cli.sh backup activar 
+```
+```bash
+bash sentinel-cli.sh organizador desactivar
+```
+
+**Comandos Backup**
+
+- Añadir alguna carpeta a la lista de carpetas del backup
+```bash
+bash sentinel-cli.sh backup añadir_carpeta dirección
+```
+
+- Modificar el destino del backup
+```bash
+bash sentinel-cli.sh backup destino dirección
+```
+
+- Ejecutar un backup
+```bash
+bash sentinel-cli.sh backup ahora
+```
+
+**Comandos Monitor**
+
+- Cambiar el valor limite del monitor: limite_cpu, limite_ram, limite_disco
+```bash
+bash sentinel-cli.sh monitor limite_cpu 90
+```
+
+- Ejecutar un monitoreo con el uso CPU, RAM y disco actual
+```bash
+bash sentinel-cli.sh monitor consumo
+```
+
+**Comandos Organizador**
+
+- Cambiar dirrción de la carpeta vigilada
+```bash
+bash sentinel-cli.sh organizador carpeta_vigilar dirección
+```
+
+- Agregar una regla al organizador
+```bash
+bash sentinel-cli.sh organizador agregar_regla 'extension|dirección_destino'
+```
+
+**Comandos Estado**
+
+- Ver la configuración actual de todos los modulos
+```bash
+bash sentinel-cli.sh estado
+```
+
+- Ver la configuración actual de algun modulo
+```bash
+bash sentinel-cli.sh estado backup
+```
+```bash
+bash sentinel-cli.sh estado monitor
+```
+```bash
+bash sentinel-cli.sh estado organizador
+```
 
 ## Requisitos
 

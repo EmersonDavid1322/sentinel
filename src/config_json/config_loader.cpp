@@ -14,12 +14,14 @@ ConfigBackup cargarBackup(const json& datos){
     std::string destino = datos["backup"]["destino"];
     std::string hora = datos["backup"]["hora"];
     bool activo = datos["backup"]["activo"];
+    bool forzar_backup = datos["backup"]["forzar_backup"];
 
     ConfigBackup backup;
     backup.carpetas = carpetas;
     backup.destino = destino;
     backup.hora = hora;
     backup.activo = activo;
+    backup.forzar_backup = forzar_backup;
 
     return backup;
 }

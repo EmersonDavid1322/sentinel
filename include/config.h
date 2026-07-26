@@ -9,6 +9,7 @@ struct ConfigBackup {
     std::string destino;
     std::string hora;
     bool activo;
+    bool forzar_backup;
 };
 
 struct ConfigMonitor {

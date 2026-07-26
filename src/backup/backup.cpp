@@ -4,12 +4,32 @@
 #include <chrono>
 #include <thread>
 #include "errores.h"
+#include "backup.h"
 #include "logger.h"
 #include "config.h"
 #include "notificador.h"
 #include "sentinel_estado.h"
 #include "config_compartida.h"
+#include "monitor.h"
 namespace fs = std::filesystem;
+
+ResultadoVerificacionRecursos verificarRecursosBackup(const ConfigBackup& configBackup, const ConfigMonitor& configMonitor) {
+    bool disco_superado = uso_disco() >= configMonitor.disco;
+    bool cpu_superado = uso_cpu() >= configMonitor.cpu;
+
+    if ((disco_superado || cpu_superado) && configBackup.forzar_backup) {
+        return ResultadoVerificacionRecursos::FORZADO;
+    }
+
+    if (disco_superado) {
+        return ResultadoVerificacionRecursos::CANCELADO_DISCO;
+    }
+
+    if (cpu_superado) {
+        return ResultadoVerificacionRecursos::CANCELADO_CPU;
+    }
+    return ResultadoVerificacionRecursos::OK;
+}
 
 std::string verificarCarpetasBackup(const std::vector<std::string>& carpetas, const std::string& destino){
     std::string msg_carpetas;
@@ -52,21 +72,40 @@ void ejecutarBackup(const std::vector<std::string>& carpetas, const std::string&
     }
 }
 
-void hacerBackup(const std::vector<std::string>& carpetas, const std::string& destino, const std::string hora){
+void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_monitor){
     try{
         time_t ahora = time(0);
         tm* tiempo = localtime(&ahora);
         char buffer[6];
         strftime(buffer, sizeof(buffer), "%H:%M", tiempo);
         std::string hora_actual = buffer;
-        if (hora_actual != hora){
+        if (hora_actual != config_backup.hora){
             return;
         }
 
-        std::string carpetas_msg = verificarCarpetasBackup(carpetas, destino);
-        ejecutarBackup(carpetas, destino);
-        logInfo("Se realizo un bakup de forma correcta de las carpetas: " + carpetas_msg + " Destino: " + destino);
-        enviarNotificación("Backup", "Se completo el bakup correctamente al la carpeta: " + destino, "INFO");
+        ResultadoVerificacionRecursos resultado = verificarRecursosBackup(config_backup, config_monitor);
+
+        if (resultado == ResultadoVerificacionRecursos::FORZADO) {
+            logInfo("Continuando con el backup a pesar de recursos elevados (forzar_backup activo)");
+            enviarNotificación("Backup", "Continuando con el backup a pesar de recursos elevados (forzar_backup activo)", "WARNING");
+        }
+        else if (resultado == ResultadoVerificacionRecursos::CANCELADO_DISCO) {
+            logInfo("Se cancelo el backup 'Se regitro un uso elevado del cpu'");
+            enviarNotificación("Backup","Se cancelo el backup luego de varios intentos  'Se regitro un uso elevado del cpu'", "WARNING");
+            return;
+        }else if (resultado == ResultadoVerificacionRecursos::CANCELADO_DISCO) {
+            logInfo("Se cancelo el backup 'Se regitro espacio elevado en el disco'");
+            enviarNotificación("Backup","Se cancelo el backup 'Se regitro espacio elevado en el disco'", "WARNING");
+            return;
+        }
+        else {
+            logInfo("Se inicio correctamente el backup a las: " + hora_actual);
+        }
+
+        std::string carpetas_msg = verificarCarpetasBackup(config_backup.carpetas, config_backup.destino);
+        ejecutarBackup(config_backup.carpetas, config_backup.destino);
+        logInfo("Se realizo un bakup de forma correcta de las carpetas: " + carpetas_msg + " Destino: " + config_backup.destino);
+        enviarNotificación("Backup", "Se completo el bakup correctamente a la carpeta: " + config_backup.destino, "INFO");
 
     }
     catch(const ErrorBackup& e){
@@ -85,7 +124,7 @@ void loopBackup(ConfigCompartida& config_compartida){
         ConfigSentinel config = config_compartida.obtener();
 
         if (config.backup.activo) {
-            hacerBackup(config.backup.carpetas, config.backup.destino, config.backup.hora);
+            hacerBackup(config.backup, config.monitor);
         }
 
         std::unique_lock<std::mutex> lock(mtx_apagado);

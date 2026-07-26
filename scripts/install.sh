@@ -50,11 +50,9 @@ fi
 if pgrep -x "sentinel" > /dev/null; then
     echo "Detectado proceso huérfano en ejecución. Enviando SIGTERM..."
     pkill -15 -x "sentinel" || true
-    
-    # Damos 3 segundos a tus hilos de C++ para que terminen sus .join() limpiamente
+
     sleep 3 
-    
-    # Si sigue vivo de forma terca, lo forzamos a cerrar
+
     if pgrep -x "sentinel" > /dev/null; then
         echo "El proceso no respondió al cierre limpio. Forzando SIGKILL..."
         pkill -9 -x "sentinel" || true
