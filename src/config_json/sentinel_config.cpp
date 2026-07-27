@@ -86,6 +86,9 @@ void crearConfigPorDefecto(const std::filesystem::path& rutaJSON){
     config["organizador"]["activo"] = false;
     config["organizador"]["reglas"] = json::object();
 
+    config["usuaior"] = {};
+    config["usuaior"]["nivel_noti"] = "NORMAL";
+
     std::ofstream archivo(rutaJSON);
     if (!archivo.is_open()){
         throw ErrorConfig("No se pudo crear el archivo de configuración en: " + rutaJSON.string());
