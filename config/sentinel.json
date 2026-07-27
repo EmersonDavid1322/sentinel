@@ -3,23 +3,34 @@
         "_nota_carpetas": "Sin / al final para copiar la carpeta completa, Con / para copiar el interior de una carpeta",
         "activo": true,
         "carpetas": [
-            "/home/Emerson/proyectos_personales"
+            "/home/Emerson/Documentos",
+            "/home/Emerson/proyectos_personales",
+            "/home/Emerson/SENTINEL"
         ],
-        "destino": "/home/Emerson/SENTINEL/",
-        "hora": "20:00"
+        "destino": "/run/media/Emerson/Ventoy/Personal/SENTINEL-BACKUP",
+        "hora": "20:00",
+        "forzar_backup": false
     },
     "monitor": {
         "activo": true,
-        "limite_cpu": 80.0,
-        "limite_disco": 85,
-        "limite_ram": 90
+        "limite_cpu": 1,
+        "limite_disco": 1,
+        "limite_ram": 1
     },
     "organizador": {
         "activo": true,
-        "carpeta_vigilar": "/home/Emerson/prueba/",
+        "carpeta_vigilar": "/home/Emerson/SENTINEL/",
         "reglas": {
-            ".jpg": "/home/Emerson/Imágenes",
-            ".pdf": "/home/Emerson/Documentos"
+            ".deb": "/home/Emerson/SENTINEL/deb/",
+            ".iso": "/home/Emerson/SENTINEL/ISOs/",
+            ".jpg": "/home/Emerson/Imágenes/",
+            ".mp4": "/home/Emerson/Vídeos/",
+            ".pdf": "/home/Emerson/Documentos",
+            ".rar": "/home/Emerson/SENTINEL/RAR/",
+            ".appimage": "/home/Emerson/SENTINEL/appimage/"
         }
+    },
+    "usuaior": {
+        "nivel_noti": "ERRORES"
     }
 }

@@ -59,13 +59,25 @@ void ejecutarBackup(const std::vector<std::string>& carpetas, const std::string&
     for (const std::string& carpeta : carpetas){
         try{
             fs::path origen(carpeta);
-            fs::path destino_final = fs::path(destino) / origen.filename();
+            fs::path carpeta_backup = destino / origen.filename();
+            fs::create_directories(carpeta_backup);
+            for (const auto& entrada : fs::recursive_directory_iterator(origen)) {
+                if (!fs::is_regular_file(entrada) && !fs::is_directory(entrada)) {
+                    logWarning("Backup: se omitió un archivo de tipo especial (no regular ni carpeta): " + entrada.path().string());
+                    continue;
+                }
 
-            fs::copy(origen, destino_final, 
-                    fs::copy_options::recursive | 
-                    fs::copy_options::overwrite_existing);
+                fs::path destino_final = carpeta_backup / fs::relative(entrada.path(), origen);
+
+                if (fs::is_directory(entrada)) {
+                    fs::create_directories(destino_final);
+                } else {
+                    fs::copy_file(entrada.path(), destino_final, fs::copy_options::overwrite_existing);
+                }
+            }
         }
         catch(const fs::filesystem_error& e){
+            enviarNotificación("Backup", "Error Backup: -" + std::string(e.what()), "WARNING");
             logError("Error Backup: -" + std::string(e.what()));
             continue;
             }

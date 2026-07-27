@@ -5,9 +5,7 @@
 #include "procesar_comandos.h"
 #include "errores.h"
 #include "json.hpp"
-#include "monitor.h"
 #include "rutas.h"
-#include "notificador.h"
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 

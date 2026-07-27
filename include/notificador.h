@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
-#include <libnotify/notify.h>
+
+int verificarEnvio(std::string nivel);
 
 void enviarNotificación(std::string titulo, std::string mensaje, std::string nivel);

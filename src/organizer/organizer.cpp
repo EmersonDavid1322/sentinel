@@ -32,22 +32,28 @@ std::vector<std::string> verificarCarpetasOrganizado(const std::map<std::string,
 void moverArchivo(const std::string& archivo, const std::map<std::string, std::string>& reglas, const std::vector<std::string>& carpetas_fallidas){
     fs::path ruta(archivo);
     std::string extension = ruta.extension().string();
+    try {
+        for (const auto& [extension_regla, destino] : reglas) {
+            if (extension_regla != extension) continue;
 
-    for (const auto& [extension_regla, destino] : reglas) {
-    if (extension_regla != extension) continue;
+            for (const std::string& carpeta : carpetas_fallidas) {
+                if (carpeta == destino) {
+                    logWarning("Organizador: saltando archivo, carpeta destino no existe: " + destino);
+                    return;
+                }
+            }
 
-    for (const std::string& carpeta : carpetas_fallidas) {
-        if (carpeta == destino) {
-            logWarning("Organizador: saltando archivo, carpeta destino no existe: " + destino);
+            fs::path destino_final = fs::path(destino) / ruta.filename();
+            fs::rename(ruta, destino_final);
+            logInfo("Organizador: archivo movido: " + archivo + " -> " + destino);
             return;
         }
     }
-    
-    fs::path destino_final = fs::path(destino) / ruta.filename();
-    fs::rename(ruta, destino_final);
-    logInfo("Organizador: archivo movido: " + archivo + " -> " + destino);
-    return;
+    catch (const fs::filesystem_error& e) {
+        logError("Error organizador-" + std::string(e.what()));
+        enviarNotificación("Organizador", "Error organizador-" + std::string(e.what()), "ERROR");
     }
+
 }
 
 void ejecutarOrganizador(ConfigCompartida& config_compartida){
