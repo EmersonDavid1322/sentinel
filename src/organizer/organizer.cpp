@@ -18,12 +18,15 @@ std::vector<std::string> verificarCarpetasOrganizado(const std::map<std::string,
     std::vector<std::string> carpetas_fallidas;
     if (!fs::exists(carpetaVigilar)){
         throw ErrorOrganizador("Organizador: Carpeta a vigilar no existente: " + carpetaVigilar);
+        enviarNotificación("Organizador", "La carpeta '" + carpetaVigilar + "' no existe", "ERROR");
     }
 
     for (const auto& par : carpetasRegla){
         if (!fs::exists(par.second)){
             logWarning("Organizador: Carpeta no existende para archivo de extensión: " + par.first + " " + par.second + "\nSe cancelo la acción");
             carpetas_fallidas.push_back(par.second);
+            enviarNotificación("Organizador",
+                                "Organizador: Carpeta no existende para archivo de extensión: '" + par.first + "' '" + par.second + "'", "WARNING");
         }
     }
     return carpetas_fallidas;
@@ -58,13 +61,30 @@ void moverArchivo(const std::string& archivo, const std::map<std::string, std::s
 
 void ejecutarOrganizador(ConfigCompartida& config_compartida){
     try{
+        ConfigSentinel config = config_compartida.obtener();
+        std::vector<std::string> carpetas_fallidas = verificarCarpetasOrganizado(config.organizador.reglas, config.organizador.carpeta_vigilar);
+
+        auto vigilante = std::make_unique<VigilanteInotify>(config.organizador.carpeta_vigilar, IN_CREATE | IN_MOVED_TO);
+        std::string carpetaVigiladaActual = config.organizador.carpeta_vigilar;
+        std::map<std::string, std::string> reglas = config.organizador.reglas;
+
         while (corriendo) {
-            ConfigSentinel config = config_compartida.obtener();
-            std::vector<std::string> carpetas_fallidas = verificarCarpetasOrganizado(config.organizador.reglas, config.organizador.carpeta_vigilar);
-            VigilanteInotify vigilante(config.organizador.carpeta_vigilar, IN_CREATE | IN_MOVED_TO);
+            config = config_compartida.obtener();
+
+            if (config.organizador.carpeta_vigilar != carpetaVigiladaActual) {
+                logInfo("Cambio detectado en carpeta vigilada, recreando vigilante inotify");
+                carpetas_fallidas = verificarCarpetasOrganizado(config.organizador.reglas, config.organizador.carpeta_vigilar);
+                vigilante = std::make_unique<VigilanteInotify>(config.organizador.carpeta_vigilar, IN_CREATE | IN_MOVED_TO);
+                carpetaVigiladaActual = config.organizador.carpeta_vigilar;
+            }
+            if (config.organizador.reglas != reglas) {
+                logInfo("Cambio detectado en reglas del organizador, recalculando carpetas fallidas");
+                reglas = config.organizador.reglas;
+                carpetas_fallidas = verificarCarpetasOrganizado(reglas, carpetaVigiladaActual);
+            }
 
             struct pollfd pfd;
-            pfd.fd = vigilante.fd;
+            pfd.fd = vigilante->fd;
             pfd.events = POLLIN;
 
             int resultado = poll(&pfd, 1, 1000);
@@ -73,7 +93,7 @@ void ejecutarOrganizador(ConfigCompartida& config_compartida){
             
             if (pfd.revents & POLLIN) {
                 char buffer[4096];
-                int bytes = read(vigilante.fd, buffer, sizeof(buffer));
+                int bytes = read(vigilante->fd, buffer, sizeof(buffer));
                 if (bytes < 0) break;
 
                 for (int i = 0; i < bytes; ) {

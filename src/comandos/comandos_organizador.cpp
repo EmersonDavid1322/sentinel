@@ -4,6 +4,8 @@
 #include "rutas.h"
 #include <string>
 #include <filesystem>
+#include "errores.h"
+#include "logger.h"
 namespace fs = std::filesystem;
 
 void agregarReglaOrganizador(const std::string& extension, const std::string& carpetaDestino) {
@@ -26,24 +28,30 @@ void agregarReglaOrganizador(const std::string& extension, const std::string& ca
 }
 
 void procesarComandoOrganizadorAgregarRegla(const std::string& valor) {
-    std::istringstream stream(valor);
-    std::string extension, direccion;
+    try {
+        std::istringstream stream(valor);
+        std::string extension, direccion;
 
-    std::getline(stream, extension, '|');
-    std::getline(stream, direccion, '|');
+        std::getline(stream, extension, '|');
+        std::getline(stream, direccion, '|');
 
-    extension = limpiarEspacios(extension);
-    direccion = limpiarEspacios(direccion);
+        extension = limpiarEspacios(extension);
+        direccion = limpiarEspacios(direccion);
 
-    if (extension.empty() || direccion.empty()) {
-        enviarRespuesta("Formato incorrecto. Usa: extension|direccion (ej: .pdf|/home/usuario/PDFs)");
-        return;
+        if (extension.empty() || direccion.empty()) {
+            enviarRespuesta("Formato incorrecto. Usa: extension|direccion (ej: .pdf|/home/usuario/PDFs)");
+            return;
+        }
+
+        if (extension.front() != '.') {
+            enviarRespuesta("La extension debe comenzar con un punto, ej: .pdf");
+            return;
+        }
+
+        agregarReglaOrganizador(extension, direccion);
     }
-
-    if (extension.front() != '.') {
-        enviarRespuesta("La extension debe comenzar con un punto, ej: .pdf");
-        return;
+    catch (const ErrorConfig& e) {
+        logError("Ocurrio un error de configuración durante el proceso del comando 'agregar_regla': " + std::string(e.what()));
+        enviarRespuesta("Ocurrio un error de configuración durante el proceso del comando 'agregar_regla': " + std::string(e.what()));
     }
-
-    agregarReglaOrganizador(extension, direccion);
 }

@@ -12,7 +12,7 @@
         "forzar_backup": false
     },
     "monitor": {
-        "activo": true,
+        "activo": false,
         "limite_cpu": 1,
         "limite_disco": 1,
         "limite_ram": 1
@@ -29,8 +29,5 @@
             ".rar": "/home/Emerson/SENTINEL/RAR/",
             ".appimage": "/home/Emerson/SENTINEL/appimage/"
         }
-    },
-    "usuaior": {
-        "nivel_noti": "ERRORES"
     }
 }

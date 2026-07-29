@@ -6,6 +6,7 @@
 #include "errores.h"
 #include <string>
 #include <filesystem>
+#include "logger.h"
 
 //comandos monitor
 void cambiarValorMonitor(const std::string& parametro, double valor){
@@ -42,9 +43,15 @@ void ejecutarMonitoreoComando() {
                         + "\nRAM: " + std::to_string(ram)+ "%" + "\nDisco: " + std::to_string(disco) + "%");
     }
     catch(const ErrorMonitor& e){
+        logError("Error Monitor Ocurrio un error en el intento de telemetrica: " + std::string(e.what()));
         enviarRespuesta("Error Monitor Ocurrio un error en el intento de telemetrica: " + std::string(e.what()));
     }
+    catch (const ErrorConfig& e) {
+        logError("Error Configuraciones Ocurrio un error en el intento de telemetrica: " + std::string(e.what()));
+        enviarRespuesta("Error Configuraciones Ocurrio un error en el intento de telemetrica: " + std::string(e.what()));
+    }
     catch(const DaemonError& e){
+        logError("Error Deamon-Monitor Ocurrio un error en el intento de telemetrica: " + std::string(e.what()));
         enviarRespuesta("Error Deamon-Monitor Ocurrio un error en el intento de telemetrica: " + std::string(e.what()));
     }
 }

@@ -12,7 +12,7 @@
 void agregarCarpetaBackup(const std::string& carpeta) {
 
     std::string carpeta_limpia = limpiarEspacios(carpeta);
-    if (carpeta.empty()) {
+    if (carpeta_limpia.empty()) {
         enviarRespuesta("No se permiten valores vacios en agregar carpeta");
         return;
     }
@@ -39,7 +39,7 @@ void ejecutarBackupComando(const ConfigBackup& configBackup, const ConfigMonitor
         if (resultado == ResultadoVerificacionRecursos::FORZADO) {
             logInfo("Continuando con el backup manual a pesar de recursos elevados (forzar_backup activo)");
         }
-        else if (resultado == ResultadoVerificacionRecursos::CANCELADO_DISCO) {
+        else if (resultado == ResultadoVerificacionRecursos::CANCELADO_CPU) {
             logInfo("Se cancelo el backup 'Se regitro un uso elevado del cpu'");
             enviarRespuesta("Se cancelo el backup luego de varios intentos  'Se regitro un uso elevado del cpu'");
             return;
@@ -62,10 +62,10 @@ void ejecutarBackupComando(const ConfigBackup& configBackup, const ConfigMonitor
     }
     catch (const ErrorBackup& e) {
         enviarRespuesta("Error al ejecutar backup: " + std::string(e.what()));
-        enviarNotificación("Backup", "Hubo un error durante la ejecutcion del backup " + std::string(e.what()), "ERROR");
+        enviarNotificación("Backup", "Hubo un error durante la ejecutcion del backup: " + std::string(e.what()), "ERROR");
     }
     catch (const DaemonError& e) {
         enviarRespuesta("Error Deamon al ejecutar backup: " + std::string(e.what()));
-        enviarNotificación("Backup", "Hubo un error durante la ejecutcion del backup " + std::string(e.what()), "ERROR");
+        enviarNotificación("Backup", "Hubo un error durante la ejecutcion del backup: " + std::string(e.what()), "ERROR");
     }
 }

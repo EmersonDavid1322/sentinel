@@ -101,7 +101,7 @@ void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_
             logInfo("Continuando con el backup a pesar de recursos elevados (forzar_backup activo)");
             enviarNotificación("Backup", "Continuando con el backup a pesar de recursos elevados (forzar_backup activo)", "WARNING");
         }
-        else if (resultado == ResultadoVerificacionRecursos::CANCELADO_DISCO) {
+        else if (resultado == ResultadoVerificacionRecursos::CANCELADO_CPU) {
             logInfo("Se cancelo el backup 'Se regitro un uso elevado del cpu'");
             enviarNotificación("Backup","Se cancelo el backup luego de varios intentos  'Se regitro un uso elevado del cpu'", "WARNING");
             return;

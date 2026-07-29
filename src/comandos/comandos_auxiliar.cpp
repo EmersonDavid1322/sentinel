@@ -13,7 +13,6 @@ namespace fs = std::filesystem;
 json leerJSONActual(const std::filesystem::path& ruta){
     std::ifstream archivo(ruta);
     if (!archivo.is_open()){
-        enviarRespuesta("No se pudo abir el archivo configuraciones en la ruta: " + ruta.string());
         throw ErrorConfig("No se pudo abir el archivo configuraciones en la ruta: " + ruta.string());
     }
     return json::parse(archivo);
@@ -63,7 +62,7 @@ void cambiarDireccion(const std::string& parametro,const std::string& llave ,con
 
     datos [parametro][llave] = destino_limpio;
     guardarJSON(datos, ruta);
-    enviarRespuesta("Se a cambiado el destino del backup a: " + destino_limpio);
+    enviarRespuesta("Se a cambiado la dirrecion de: "+ parametro + " a " + destino_limpio);
 }
 
 //cambiar estado acitvo modulo

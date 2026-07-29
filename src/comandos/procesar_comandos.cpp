@@ -26,13 +26,19 @@ void enviarRespuesta(const std::string& mensaje) {
 }
 
 void procesarEstado(std::string modulo, std::string& accion){
-    if (accion == "activar") {
-        cambiarEstadoSeccion(modulo, true);
+    try {
+        if (accion == "activar") {
+            cambiarEstadoSeccion(modulo, true);
         }
-    else if (accion == "desactivar"){
-        cambiarEstadoSeccion(modulo, false);
+        else if (accion == "desactivar"){
+            cambiarEstadoSeccion(modulo, false);
+        }
+        enviarRespuesta("Se cambio el estado del modulo "+ modulo + " a: " + accion);
     }
-    enviarRespuesta("Se cambio el estado del modulo "+ modulo + " a: " + accion);
+   catch (const ErrorConfig& e) {
+       enviarRespuesta("Ocurrio un errer al intentar cambiar de estado el modulo: " + modulo + " Error: " + std::string(e.what()));
+       logError("Ocurrio un errer al intentar cambiar de estado el modulo: " + modulo + " Error: " + std::string(e.what()));
+   }
 }
 
 //backup
