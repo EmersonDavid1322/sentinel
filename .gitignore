@@ -8,3 +8,4 @@ logs/
 config/
 *.fifo
 sentinel_estado.txt
+.idea/

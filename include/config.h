@@ -19,6 +19,14 @@ struct ConfigMonitor {
     bool activo;
 };
 
+struct ConfigBackupNube {
+    bool activo;
+    std::string token;
+    std::string carpeta_remota;
+    std::vector<std::string> carpetas;
+    std::string hora;
+};
+
 struct ConfigOrganizador {
     std::string carpeta_vigilar;
     bool activo;

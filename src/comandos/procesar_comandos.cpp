@@ -36,8 +36,8 @@ void procesarEstado(std::string modulo, std::string& accion){
         enviarRespuesta("Se cambio el estado del modulo "+ modulo + " a: " + accion);
     }
    catch (const ErrorConfig& e) {
-       enviarRespuesta("Ocurrio un errer al intentar cambiar de estado el modulo: " + modulo + " Error: " + std::string(e.what()));
-       logError("Ocurrio un errer al intentar cambiar de estado el modulo: " + modulo + " Error: " + std::string(e.what()));
+       enviarRespuesta("Ocurrio un error al intentar cambiar de estado el modulo: " + modulo + " Error: " + std::string(e.what()));
+       logError("Ocurrio un error al intentar cambiar de estado el modulo: " + modulo + " Error: " + std::string(e.what()));
    }
 }
 
