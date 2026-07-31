@@ -7,6 +7,8 @@ std::ifstream comprobar_json(const std::filesystem::path& ruta);
 
 ConfigBackup cargarBackup(const nlohmann::json& datos);
 
+ConfigBackupNube cargarBackupNube(const nlohmann::json&datos);
+
 ConfigMonitor cargarMonitor(const nlohmann::json& datos);
 
 ConfigOrganizador cargarOrganizador(const nlohmann::json& datos);

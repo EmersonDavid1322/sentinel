@@ -51,7 +51,7 @@ void procesarComandoOrganizadorAgregarRegla(const std::string& valor) {
         agregarReglaOrganizador(extension, direccion);
     }
     catch (const ErrorConfig& e) {
-        logError("Ocurrio un error de configuración durante el proceso del comando 'agregar_regla': " + std::string(e.what()));
+        logError("Ocurrio un error de configuración durante el proceso del comando 'agregar_regla': " + std::string(e.what()), "sentinel.log");
         enviarRespuesta("Ocurrio un error de configuración durante el proceso del comando 'agregar_regla': " + std::string(e.what()));
     }
 }

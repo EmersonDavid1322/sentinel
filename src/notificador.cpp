@@ -37,7 +37,7 @@ void enviarNotificación(std::string titulo, std::string mensaje, std::string ni
 
     GError* error = nullptr;
     if (!notify_notification_show(notif, &error)){
-        logError("Error notificador: " + std::string(error->message));
+        logError("Error notificador: " + std::string(error->message), "sentinel.log");
         g_error_free(error);
     }
 

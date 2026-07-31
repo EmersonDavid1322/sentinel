@@ -43,15 +43,15 @@ void ejecutarMonitoreoComando() {
                         + "\nRAM: " + std::to_string(ram)+ "%" + "\nDisco: " + std::to_string(disco) + "%");
     }
     catch(const ErrorMonitor& e){
-        logError("Error Monitor Ocurrio un error en el intento de telemetrica: " + std::string(e.what()));
+        logError("Error Monitor Ocurrio un error en el intento de telemetrica: " + std::string(e.what()), "sentinel.log");
         enviarRespuesta("Error Monitor Ocurrio un error en el intento de telemetrica: " + std::string(e.what()));
     }
     catch (const ErrorConfig& e) {
-        logError("Error Configuraciones Ocurrio un error en el intento de telemetrica: " + std::string(e.what()));
+        logError("Error Configuraciones Ocurrio un error en el intento de telemetrica: " + std::string(e.what()), "sentinel.log");
         enviarRespuesta("Error Configuraciones Ocurrio un error en el intento de telemetrica: " + std::string(e.what()));
     }
     catch(const DaemonError& e){
-        logError("Error Deamon-Monitor Ocurrio un error en el intento de telemetrica: " + std::string(e.what()));
+        logError("Error Deamon-Monitor Ocurrio un error en el intento de telemetrica: " + std::string(e.what()), "sentinel.log");
         enviarRespuesta("Error Deamon-Monitor Ocurrio un error en el intento de telemetrica: " + std::string(e.what()));
     }
 }

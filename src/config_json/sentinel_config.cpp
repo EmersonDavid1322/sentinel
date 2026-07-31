@@ -43,10 +43,10 @@ void actualizarJSON(ConfigCompartida& configCompartida){
                 for (int i = 0; i < bytes; ) {
                     struct inotify_event* evento = (struct inotify_event*)&buffer[i];
                     if (evento->mask & IN_MODIFY){
-                        logInfo("JSON modificado, actualzando información");
+                        logInfo("JSON modificado, actualzando información", "sentinel.log");
 
                         configCompartida.actualizar(cargarConfig(ruta));
-                        logInfo("Sentinel actualizado correctamente");
+                        logInfo("Sentinel actualizado correctamente", "sentinel.log");
                     }
                     i += sizeof(struct inotify_event) + evento->len;
                 }
@@ -54,11 +54,11 @@ void actualizarJSON(ConfigCompartida& configCompartida){
         }
     }
     catch(const ErrorInotify& e){
-        logError("Error en Deamon - " + std::string(e.what()));
+        logError("Error en Deamon - " + std::string(e.what()), "sentinel.log");
         enviarNotificación("Error Error intify-JSON", "Ocurrio un error en el vigilante del JSON: " + std::string(e.what()), "ERROR");
     }
     catch(const DaemonError& e){
-        logError("Error en Deamon - " + std::string(e.what()));
+        logError("Error en Deamon - " + std::string(e.what()), "sentinel.log");
         enviarNotificación("Error Deamon-JSON", "Ocurrio un error en el vigilante del JSON: " + std::string(e.what()), "ERROR");
     }
 }
@@ -74,6 +74,14 @@ void crearConfigPorDefecto(const std::filesystem::path& rutaJSON){
     config["backup"]["hora"] = "00:00";
     config["backup"]["activo"] = false;
     config["backup"]["forzar_backup"] = false;
+
+    config["backup_nube"] = {};
+    config["backup_nube"]["carpetas"] = std::vector<std::string>{};
+    config["backup_nube"]["carpeta_remota"] = "/";
+    config["backup_nube"]["ignorar"] = std::vector<std::string>{};
+    config["backup_nube"]["token"] = "";
+    config["backup_nube"]["hora"] = "00:00";
+    config["backup_nube"]["activo"] = false;
 
     config["monitor"] = {};
     config["monitor"]["limite_cpu"] = 70;
@@ -98,11 +106,11 @@ void asegurarConfigExiste(const std::filesystem::path& rutaJSON){
 
     if (!fs::exists(carpeta_padre)){
         fs::create_directories(carpeta_padre);
-        logInfo("No se encontro la carpeta 'config' se creo una nueva: " + carpeta_padre.string());
+        logInfo("No se encontro la carpeta 'config' se creo una nueva: " + carpeta_padre.string(), "sentinel.log");
     }
 
     if (!fs::exists(rutaJSON)){
         crearConfigPorDefecto(rutaJSON);
-        logInfo("No se encontro el archivo 'sentinel.json' se creo uno nuevo: " + rutaJSON.string());
+        logInfo("No se encontro el archivo 'sentinel.json' se creo uno nuevo: " + rutaJSON.string(), "sentinel.log");
     }
 }

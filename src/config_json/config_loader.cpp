@@ -26,6 +26,26 @@ ConfigBackup cargarBackup(const json& datos){
     return backup;
 }
 
+ConfigBackupNube cargarBackupNube(const json& datos) {
+
+    std::vector<std::string> carpetas = datos["backup_nube"]["carpetas"];
+    std::string carpeta_remota = datos["backup_nube"]["carpeta_remota"];
+    std::vector<std::string> ignorar = datos["backup_nube"]["ignorar"];
+    std::string token = datos["backup_nube"]["token"];
+    std::string hora = datos["backup_nube"]["hora"];
+    bool activo = datos["backup_nube"]["activo"];
+
+    ConfigBackupNube nube;
+    nube.carpetas = carpetas;
+    nube.carpeta_remota = carpeta_remota;
+    nube.ignorar = ignorar;
+    nube.token = token;
+    nube.hora = hora;
+    nube.activo = activo;
+
+    return nube;
+}
+
 ConfigMonitor cargarMonitor(const json& datos){
 
     int cpu = datos["monitor"]["limite_cpu"];
@@ -62,11 +82,13 @@ ConfigSentinel cargarConfig(const std::filesystem::path& rutaJSON){
         json datos = json::parse(archivo);
 
         ConfigBackup struct_backup = cargarBackup(datos);
+        ConfigBackupNube struc_backup_nube = cargarBackupNube(datos);
         ConfigMonitor struct_monitor = cargarMonitor(datos);
         ConfigOrganizador struct_organizador = cargarOrganizador(datos);
 
         ConfigSentinel config;
         config.backup = struct_backup;
+        config.backup_nube = struc_backup_nube;
         config.monitor = struct_monitor;
         config.organizador = struct_organizador;
 

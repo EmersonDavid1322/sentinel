@@ -23,7 +23,7 @@ std::vector<std::string> verificarCarpetasOrganizado(const std::map<std::string,
 
     for (const auto& par : carpetasRegla){
         if (!fs::exists(par.second)){
-            logWarning("Organizador: Carpeta no existende para archivo de extensión: " + par.first + " " + par.second + "\nSe cancelo la acción");
+            logWarning("Organizador: Carpeta no existende para archivo de extensión: " + par.first + " " + par.second + "\nSe cancelo la acción", "sentinel.log");
             carpetas_fallidas.push_back(par.second);
             enviarNotificación("Organizador",
                                 "Organizador: Carpeta no existende para archivo de extensión: '" + par.first + "' '" + par.second + "'", "WARNING");
@@ -41,19 +41,19 @@ void moverArchivo(const std::string& archivo, const std::map<std::string, std::s
 
             for (const std::string& carpeta : carpetas_fallidas) {
                 if (carpeta == destino) {
-                    logWarning("Organizador: saltando archivo, carpeta destino no existe: " + destino);
+                    logWarning("Organizador: saltando archivo, carpeta destino no existe: " + destino, "sentinel.log");
                     return;
                 }
             }
 
             fs::path destino_final = fs::path(destino) / ruta.filename();
             fs::rename(ruta, destino_final);
-            logInfo("Organizador: archivo movido: " + archivo + " -> " + destino);
+            logInfo("Organizador: archivo movido: " + archivo + " -> " + destino, "sentinel.log");
             return;
         }
     }
     catch (const fs::filesystem_error& e) {
-        logError("Error organizador-" + std::string(e.what()));
+        logError("Error organizador-" + std::string(e.what()), "sentinel.log");
         enviarNotificación("Organizador", "Error organizador-" + std::string(e.what()), "ERROR");
     }
 
@@ -72,13 +72,13 @@ void ejecutarOrganizador(ConfigCompartida& config_compartida){
             config = config_compartida.obtener();
 
             if (config.organizador.carpeta_vigilar != carpetaVigiladaActual) {
-                logInfo("Cambio detectado en carpeta vigilada, recreando vigilante inotify");
+                logInfo("Cambio detectado en carpeta vigilada, recreando vigilante inotify", "sentinel.log");
                 carpetas_fallidas = verificarCarpetasOrganizado(config.organizador.reglas, config.organizador.carpeta_vigilar);
                 vigilante = std::make_unique<VigilanteInotify>(config.organizador.carpeta_vigilar, IN_CREATE | IN_MOVED_TO);
                 carpetaVigiladaActual = config.organizador.carpeta_vigilar;
             }
             if (config.organizador.reglas != reglas) {
-                logInfo("Cambio detectado en reglas del organizador, recalculando carpetas fallidas");
+                logInfo("Cambio detectado en reglas del organizador, recalculando carpetas fallidas", "sentinel.log");
                 reglas = config.organizador.reglas;
                 carpetas_fallidas = verificarCarpetasOrganizado(reglas, carpetaVigiladaActual);
             }
@@ -108,15 +108,15 @@ void ejecutarOrganizador(ConfigCompartida& config_compartida){
         }
     }
     catch(const ErrorInotify& e){
-        logError("Error en Inotify organizador - " + std::string(e.what()));
+        logError("Error en Inotify organizador - " + std::string(e.what()), "sentinel.log");
         enviarNotificación("Error en Inotify organizador", "Ocurrio un error en el Inotify organizador: " + std::string(e.what()), "ERROR");
     }
     catch(const ErrorOrganizador& e){
-        logError("Error en Organizador - " + std::string(e.what()));
+        logError("Error en Organizador - " + std::string(e.what()), "sentinel.log");
         enviarNotificación("Error Organizador", "Ocurrio un error en el organizador: " + std::string(e.what()), "ERROR");
     }
     catch(const DaemonError& e){
-        logError("Error en Deamon - " + std::string(e.what()));
+        logError("Error en Deamon - " + std::string(e.what()), "sentinel.log");
         enviarNotificación("Error Deamon-Organizador", "Ocurrio un error en el organizador: " + std::string(e.what()), "ERROR");
     }
 }

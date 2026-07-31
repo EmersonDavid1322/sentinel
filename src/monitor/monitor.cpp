@@ -124,19 +124,19 @@ void revisarLimites(const ConfigMonitor& config ,  const MetricasSistema& metric
 
     if (metricas.ram >= config.ram){
         int ram_entero = static_cast<int>(metricas.ram);
-        logWarning("Monitor: se sobrepaso el limite de uso en la memoria ram: " + std::to_string(ram_entero) + "%");
+        logWarning("Monitor: se sobrepaso el limite de uso en la memoria ram: " + std::to_string(ram_entero) + "%", "sentinel.log");
         mensaje +=  "\nSe sobrepaso el limite de la ram: " + std::to_string(ram_entero) + "%";
     }
 
     if (metricas.cpu >= config.cpu){
         int cpu_entero = static_cast<int>(metricas.cpu);
-        logWarning("Monitor: se sobrepaso el limite de uso del cpu: " + std::to_string(cpu_entero) + "%");
+        logWarning("Monitor: se sobrepaso el limite de uso del cpu: " + std::to_string(cpu_entero) + "%", "sentinel.log");
         mensaje += "\nSe sobrepaso el limite del CPU: " + std::to_string(cpu_entero) + "%";
     }
 
     if (metricas.disco >= config.disco){
         int disco_entero = static_cast<int>(metricas.disco);
-        logWarning("Monitor: se sobrepaso el limite de espacio en el disco: " + std::to_string(disco_entero) + "%");
+        logWarning("Monitor: se sobrepaso el limite de espacio en el disco: " + std::to_string(disco_entero) + "%", "sentinel.log");
         mensaje += "\nSe sobrepaso el limite de espacio disco: " + std::to_string(disco_entero) + "%";
     }
     if (!mensaje.empty()){
@@ -154,11 +154,11 @@ void ejecutarMonitoreo(const ConfigMonitor& config){
         revisarLimites(config, metricas);
     }
     catch(const ErrorMonitor& e){
-        logError("Error en monitor - " + std::string(e.what()));
+        logError("Error en monitor - " + std::string(e.what()), "sentinel.log");
         enviarNotificación("Error Monitor", "Ocurrio un error en el intento de telemetrica: " + std::string(e.what()), "ERROR");
     }
     catch(const DaemonError& e){
-        logError("Error en monitor - " + std::string(e.what()));
+        logError("Error en monitor - " + std::string(e.what()), "sentinel.log");
         enviarNotificación("Error Deamon-Monitor", "Ocurrio un error en el intento de telemetrica: " + std::string(e.what()), "ERROR");
     }
 }

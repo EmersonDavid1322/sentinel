@@ -6,10 +6,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_compile_options(-Wall -Wextra -Wpedantic)
 
 include_directories(include)
-
+find_package(CURL REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(Threads REQUIRED)
 pkg_check_modules(LIBNOTIFY REQUIRED libnotify)
+
 
 add_executable(sentinel
     src/main.cpp
@@ -28,7 +29,8 @@ add_executable(sentinel
     src/comandos/comandos_monitor.cpp
     src/comandos/comandos_organizador.cpp
     src/comandos/comandos_estado.cpp
+    src/backup/backup_nube.cpp
 )
 
 target_include_directories(sentinel PRIVATE ${LIBNOTIFY_INCLUDE_DIRS})
-target_link_libraries(sentinel Threads::Threads ${LIBNOTIFY_LIBRARIES})
+target_link_libraries(sentinel Threads::Threads ${LIBNOTIFY_LIBRARIES} CURL::libcurl)

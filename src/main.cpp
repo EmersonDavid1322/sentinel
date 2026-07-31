@@ -1,10 +1,10 @@
 #include <iostream>
 #include <filesystem>
 #include <thread>
-#include <mutex>
 #include <libnotify/notify.h>
 #include "config_loader.h"
 #include "backup.h"
+#include "backup_nube.h"
 #include "monitor.h"
 #include "organizer.h"
 #include "logger.h"
@@ -28,7 +28,7 @@ int main() {
         asegurarConfigExiste(rutaConfig);
         ConfigCompartida config_compartida;
         config_compartida.actualizar(cargarConfig(rutaConfig));
-        logInfo("Sentinel iniciado correctamente 1.5");
+        logInfo("Sentinel iniciado correctamente 1.5", "sentinel.log");
 
         //auxiliares
         std::thread hilo_json(actualizarJSON, std::ref(config_compartida));
@@ -37,6 +37,8 @@ int main() {
 
         //sentienl
         std::thread  hilo_backup(loopBackup, std::ref(config_compartida));
+
+        std::thread hilo_backupNube(loopBackupNube ,std::ref(config_compartida));
 
         std::thread hilo_monitor(loopMonitor, std::ref(config_compartida));
 
@@ -50,12 +52,12 @@ int main() {
         hilo_organizador.join();
 
     } catch (const DaemonError& e) {
-        logError("Error critico al iniciar: " + std::string(e.what()));
+        logError("Error critico al iniciar: " + std::string(e.what()), "sentinel.log");
         notify_uninit();
-        logInfo("Sentinel detenido correctamente");
+        logInfo("Sentinel detenido correctamente", "sentinel.log");
         return 1;
     }    
     notify_uninit();
-    logInfo("Sentinel detenido correctamente");
+    logInfo("Sentinel detenido correctamente", "sentinel.log");
     return 0;
 }

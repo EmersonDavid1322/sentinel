@@ -21,7 +21,7 @@ void enviarRespuesta(const std::string& mensaje) {
     if (salida.is_open()) {
         salida << mensaje << std::endl;
     }else{
-        logError("No se pudo abrir el archivo sentinel_estado.txt en: " + ruta_estado.string());
+        logError("No se pudo abrir el archivo sentinel_estado.txt en: " + ruta_estado.string(), "sentinel.log");
     }
 }
 
@@ -37,7 +37,7 @@ void procesarEstado(std::string modulo, std::string& accion){
     }
    catch (const ErrorConfig& e) {
        enviarRespuesta("Ocurrio un error al intentar cambiar de estado el modulo: " + modulo + " Error: " + std::string(e.what()));
-       logError("Ocurrio un error al intentar cambiar de estado el modulo: " + modulo + " Error: " + std::string(e.what()));
+       logError("Ocurrio un error al intentar cambiar de estado el modulo: " + modulo + " Error: " + std::string(e.what()), "sentinel.log");
    }
 }
 

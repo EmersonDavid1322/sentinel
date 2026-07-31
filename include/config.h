@@ -12,19 +12,20 @@ struct ConfigBackup {
     bool forzar_backup;
 };
 
+struct ConfigBackupNube {
+    std::vector<std::string> carpetas;
+    std::string carpeta_remota;
+    std::vector<std::string> ignorar;
+    std::string token;
+    std::string hora;
+    bool activo;
+};
+
 struct ConfigMonitor {
     double cpu;
     double ram;
     double disco;
     bool activo;
-};
-
-struct ConfigBackupNube {
-    bool activo;
-    std::string token;
-    std::string carpeta_remota;
-    std::vector<std::string> carpetas;
-    std::string hora;
 };
 
 struct ConfigOrganizador {
@@ -35,6 +36,7 @@ struct ConfigOrganizador {
 
 struct ConfigSentinel {
     ConfigBackup backup;
+    ConfigBackupNube backup_nube;
     ConfigMonitor monitor;
     ConfigOrganizador organizador;
 };

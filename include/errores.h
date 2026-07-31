@@ -14,6 +14,18 @@ public:
         : DaemonError(mensaje) {}
 };
 
+class ErrorBackupRED : public DaemonError {
+public:
+    ErrorBackupRED(const std::string& mensaje)
+        : DaemonError(mensaje) {}
+};
+
+class ErrorBackupAPI : public DaemonError {
+public:
+    ErrorBackupAPI(const std::string& mensaje)
+        : DaemonError(mensaje) {}
+};
+
 class ErrorMonitor : public DaemonError {
 public:
     ErrorMonitor(const std::string& mensaje)
