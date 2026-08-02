@@ -56,15 +56,28 @@ std::string verificarCarpetasBackup(const std::vector<std::string>& carpetas, co
     return msg_carpetas;
 }
 
-void ejecutarBackup(const std::vector<std::string>& carpetas, const std::string& destino){
+void ejecutarBackup(const std::vector<std::string>& carpetas, const std::string& destino, const std::vector<std::string>& ignorar){
     for (const std::string& carpeta : carpetas){
         try{
             fs::path origen(carpeta);
             fs::path carpeta_backup = destino / origen.filename();
             fs::create_directories(carpeta_backup);
-            for (const auto& entrada : fs::recursive_directory_iterator(origen)) {
+            for (auto it = fs::recursive_directory_iterator(origen); it != fs::recursive_directory_iterator(); ++it) {
+                const auto& entrada = *it;
+
+                if (fs::is_directory(entrada) && debeIgnorarce(entrada.path(), ignorar)) {
+                    logWarning("Se ignoro la carpeta completa: " + entrada.path().string(), "backups.log");
+                    it.disable_recursion_pending();
+                    continue;
+                }
+
+                if (debeIgnorarce(entrada.path(), ignorar)) {
+                    logWarning("Se ignoro un archivo :" + entrada.path().string(), "backups.log");
+                    continue;
+                }
+
                 if (!fs::is_regular_file(entrada) && !fs::is_directory(entrada)) {
-                    logWarning("Backup: se omitió un archivo de tipo especial (no regular ni carpeta): " + entrada.path().string(), "sentinel.log");
+                    logWarning("Backup: se omitió un archivo de tipo especial (no regular ni carpeta): " + entrada.path().string(), "backups.log");
                     continue;
                 }
 
@@ -72,8 +85,10 @@ void ejecutarBackup(const std::vector<std::string>& carpetas, const std::string&
 
                 if (fs::is_directory(entrada)) {
                     fs::create_directories(destino_final);
+                    logInfo("Se creo correctamente la carpeta " + entrada.path().string() , "backups.log");
                 } else {
                     fs::copy_file(entrada.path(), destino_final, fs::copy_options::overwrite_existing);
+                    logInfo("Se copio correctamente el archivo " + entrada.path().string() , "backups.log");
                 }
             }
         }
@@ -83,6 +98,7 @@ void ejecutarBackup(const std::vector<std::string>& carpetas, const std::string&
             continue;
             }
     }
+    logInfo("Se a completado el backup local de forma exitosa", "sentinel.log");
 }
 
 void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_monitor){
@@ -116,8 +132,9 @@ void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_
         }
 
         std::string carpetas_msg = verificarCarpetasBackup(config_backup.carpetas, config_backup.destino);
-        ejecutarBackup(config_backup.carpetas, config_backup.destino);
-            logInfo("Se realizo un bakup de forma correcta de las carpetas: " + carpetas_msg + " Destino: " + config_backup.destino, "sentinel.log");
+        ejecutarBackup(config_backup.carpetas, config_backup.destino, config_backup.ignorar);
+
+        logInfo("Se realizo un bakup de forma correcta de las carpetas: " + carpetas_msg + " Destino: " + config_backup.destino, "sentinel.log");
         enviarNotificación("Backup", "Se completo el bakup correctamente a la carpeta: " + config_backup.destino, "INFO");
 
     }

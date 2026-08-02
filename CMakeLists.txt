@@ -30,6 +30,8 @@ add_executable(sentinel
     src/comandos/comandos_organizador.cpp
     src/comandos/comandos_estado.cpp
     src/backup/backup_nube.cpp
+        "src/backup/backup_auxiliar.cpp"
+        include/backup_auxiliar.h
 )
 
 target_include_directories(sentinel PRIVATE ${LIBNOTIFY_INCLUDE_DIRS})

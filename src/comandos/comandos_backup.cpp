@@ -6,6 +6,7 @@
 #include "logger.h"
 #include "notificador.h"
 #include "errores.h"
+#include "backup_auxiliar.h"
 #include <filesystem>
 
 //comandos backup
@@ -54,7 +55,7 @@ void ejecutarBackupComando(const ConfigBackup& configBackup, const ConfigMonitor
 
 
         std::string carpetas_msg = verificarCarpetasBackup(configBackup.carpetas, configBackup.destino);
-        ejecutarBackup(configBackup.carpetas, configBackup.destino);
+        ejecutarBackup(configBackup.carpetas, configBackup.destino, configBackup.ignorar);
 
         logInfo("Se realizo un backup manual de las carpetas: " + carpetas_msg + " Destino: " + configBackup.destino, "sentinel.log");
         enviarRespuesta("Backup ejecutado correctamente. Carpetas: " + carpetas_msg + " Destino: " + configBackup.destino);

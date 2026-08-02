@@ -12,6 +12,7 @@ ConfigBackup cargarBackup(const json& datos){
 
     std::vector<std::string> carpetas = datos["backup"]["carpetas"];
     std::string destino = datos["backup"]["destino"];
+    std::vector<std::string> ignorar = datos["backup"]["ignorar"];
     std::string hora = datos["backup"]["hora"];
     bool activo = datos["backup"]["activo"];
     bool forzar_backup = datos["backup"]["forzar_backup"];
@@ -19,6 +20,7 @@ ConfigBackup cargarBackup(const json& datos){
     ConfigBackup backup;
     backup.carpetas = carpetas;
     backup.destino = destino;
+    backup.ignorar = ignorar;
     backup.hora = hora;
     backup.activo = activo;
     backup.forzar_backup = forzar_backup;

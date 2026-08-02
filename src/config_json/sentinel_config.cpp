@@ -71,6 +71,7 @@ void crearConfigPorDefecto(const std::filesystem::path& rutaJSON){
     config["backup"]["_notas_carpetas"] = "Sin / al final para copiar la carpeta completa, Con / para copiar el interior de una carpeta";
     config["backup"]["carpetas"] = std::vector<std::string>{};
     config["backup"]["destino"] = "";
+    config["backup_nube"]["ignorar"] = std::vector<std::string>{};
     config["backup"]["hora"] = "00:00";
     config["backup"]["activo"] = false;
     config["backup"]["forzar_backup"] = false;

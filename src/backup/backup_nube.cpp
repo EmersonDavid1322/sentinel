@@ -2,6 +2,7 @@
 #include "errores.h"
 #include "sentinel_estado.h"
 #include "logger.h"
+#include "backup_auxiliar.h"
 #include  <string>
 #include <curl/curl.h>
 #include <filesystem>
@@ -12,17 +13,6 @@ size_t escribirRespuesta(void* datos, size_t tamano, size_t cantidad, std::strin
     size_t bytesTotales = tamano * cantidad;
     salida->append((char*)datos, bytesTotales);
     return bytesTotales;
-}
-
-bool debeIgnorarce(const fs::path& ruta, const std::vector<std::string>& lista_ignorar) {
-    for (const auto& parte : ruta) {
-        for (const auto& regla : lista_ignorar) {
-            if (parte == regla) {
-                return true;
-            }
-        }
-    }
-    return false;
 }
 
 void subirArchivo(std::string ruta, std::string& ruta_remota, std::string token) {
@@ -80,7 +70,7 @@ void subirArchivo(std::string ruta, std::string& ruta_remota, std::string token)
 
     curl_slist_free_all(headers);
     curl_easy_cleanup(curl);
-    logInfo("Se subio el archvio\n" + respuesta, "backups.log");
+    logInfo("Se subio el archvio\n" + ruta, "backups.log");
 }
 
 void ejecutarBackupNube(const ConfigBackupNube& config) {
@@ -92,16 +82,20 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
     if (hora_actual != config.hora){
         return;
     }
+    logInfo("Se incio el backup a la nube " + hora_actual, "sentinel.log");
 
     namespace fs = std::filesystem;
     try {
         for (std::string carpeta : config.carpetas) {
             fs::path origen(carpeta);
-            for (const auto& entrada : fs::recursive_directory_iterator(origen)) {
+            for (auto it = fs::recursive_directory_iterator(origen); it != fs::recursive_directory_iterator(); ++it) {
+                const auto& entrada = *it;
+
                 fs::path archivo = origen / entrada;
 
-                if (!fs::is_regular_file(entrada)) {
-                    logWarning("Se ignoro un archivo de tipo no regular: " + archivo.string(), "backups.log");
+                if (fs::is_directory(entrada) && debeIgnorarce(entrada.path(), config.ignorar)) {
+                    logWarning("Se ignoro la carpeta completa: " + entrada.path().string(), "backups.log");
+                    it.disable_recursion_pending();
                     continue;
                 }
 
@@ -110,12 +104,17 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
                     continue;
                 }
 
+                if (!fs::is_regular_file(entrada)) {
+                    logWarning("Se ignoro un archivo de tipo no regular: " + archivo.string(), "backups.log");
+                    continue;
+                }
+
                 fs::path ruta_relativa = fs::relative(entrada.path(), origen);
                 std::string ruta_remota = config.carpeta_remota + "/" + ruta_relativa.string();
 
                 subirArchivo(archivo.string(),ruta_remota, config.token);
             }
-            logInfo("Se a completado el backup de forma exitosa", "backups.log");
+            logInfo("Se a completado el backup a la nube de forma exitosa", "sentinel.log");
         }
     }
     catch (const std::filesystem::filesystem_error& e) {

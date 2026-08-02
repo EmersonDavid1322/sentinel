@@ -14,7 +14,7 @@ ResultadoVerificacionRecursos verificarRecursosBackup(const ConfigBackup& config
 
 std::string verificarCarpetasBackup(const std::vector<std::string>& carpetas, const std::string& destino);
 
-void ejecutarBackup(const std::vector<std::string>& carpetas, const std::string& destino);
+void ejecutarBackup(const std::vector<std::string>& carpetas, const std::string& destino, const std::vector<std::string>& ignorar);
 
 void registroResultado(const std::string& resultado);
 
