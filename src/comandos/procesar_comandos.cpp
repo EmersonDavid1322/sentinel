@@ -41,22 +41,22 @@ void procesarEstado(std::string modulo, std::string& accion){
    }
 }
 
-//backup
+//backup_local
 void procesarComandoBackup(std::string& accion, std::string& valor, const ConfigBackup& configBackup, const ConfigMonitor& configMonitor){
     if (accion == "activar" || accion == "desactivar"){
-        procesarEstado("backup", accion);
+        procesarEstado("backup_local", accion);
     }
     else if (accion == "añadir_carpeta") {
         agregarCarpetaBackup(valor);
     }
     else if (accion == "destino") {
-        cambiarDireccion("backup",accion ,valor);
+        cambiarDireccion("backup_local",accion ,valor);
     }
     else if (accion == "ahora") {
         ejecutarBackupComando(configBackup, configMonitor);
     }
     else {
-        enviarRespuesta("Accion '" + accion + "' no disponible en el modulo de backup");
+        enviarRespuesta("Accion '" + accion + "' no disponible en el modulo de backup_local");
     }
 }
 
@@ -97,7 +97,7 @@ void procesarComandoEstado(std::string& accion, const ConfigSentinel& config) {
     if (accion.empty()) {
         enviarRespuesta(generarDiagnostico(config));
     }
-    else if (accion == "backup") {
+    else if (accion == "backup_local") {
         enviarRespuesta(estadoBackup(config.backup));
     }
     else if (accion == "monitor") {
@@ -114,7 +114,7 @@ void procesarComando(const std::string& comando, const ConfigSentinel& config) {
     stream >> modulo >> accion;
     std::getline(stream, valor);
 
-    if (modulo == "backup") {
+    if (modulo == "backup_local") {
         procesarComandoBackup(accion, valor, config.backup, config.monitor);
     } else if (modulo == "monitor") {
         procesarComandoMonitor(accion, valor);

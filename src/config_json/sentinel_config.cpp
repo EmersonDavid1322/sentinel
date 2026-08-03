@@ -67,14 +67,14 @@ void crearConfigPorDefecto(const std::filesystem::path& rutaJSON){
     using json = nlohmann::json;
 
     json config;
-    config["backup"] = {};
-    config["backup"]["_notas_carpetas"] = "Sin / al final para copiar la carpeta completa, Con / para copiar el interior de una carpeta";
-    config["backup"]["carpetas"] = std::vector<std::string>{};
-    config["backup"]["destino"] = "";
+    config["backup_local"] = {};
+    config["backup_local"]["_notas_carpetas"] = "Sin / al final para copiar la carpeta completa, Con / para copiar el interior de una carpeta";
+    config["backup_local"]["carpetas"] = std::vector<std::string>{};
+    config["backup_local"]["destino"] = "";
     config["backup_nube"]["ignorar"] = std::vector<std::string>{};
-    config["backup"]["hora"] = "00:00";
-    config["backup"]["activo"] = false;
-    config["backup"]["forzar_backup"] = false;
+    config["backup_local"]["hora"] = "00:00";
+    config["backup_local"]["activo"] = false;
+    config["backup_local"]["forzar_backup"] = false;
 
     config["backup_nube"] = {};
     config["backup_nube"]["carpetas"] = std::vector<std::string>{};

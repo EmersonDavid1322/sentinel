@@ -18,7 +18,7 @@ add_executable(sentinel
     src/rutas.cpp
     src/logger.cpp
     src/config_json/sentinel_config.cpp
-    src/backup/backup.cpp
+    src/backup_local/backup.cpp
     src/monitor/monitor.cpp
     src/organizer/organizer.cpp
     src/notificador.cpp
@@ -29,9 +29,9 @@ add_executable(sentinel
     src/comandos/comandos_monitor.cpp
     src/comandos/comandos_organizador.cpp
     src/comandos/comandos_estado.cpp
-    src/backup/backup_nube.cpp
-        "src/backup/backup_auxiliar.cpp"
-        include/backup_auxiliar.h
+    src/backup_nube/backup_nube_bajada.cpp
+    src/backup_local/backup_auxiliar.cpp
+    src/backup_nube/backup_nube_listado.cpp
 )
 
 target_include_directories(sentinel PRIVATE ${LIBNOTIFY_INCLUDE_DIRS})

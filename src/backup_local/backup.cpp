@@ -11,7 +11,7 @@
 #include "sentinel_estado.h"
 #include "config_compartida.h"
 #include "monitor.h"
-#include "backup_nube.h"
+#include "backup_nube_bajada.h"
 namespace fs = std::filesystem;
 
 ResultadoVerificacionRecursos verificarRecursosBackup(const ConfigBackup& configBackup, const ConfigMonitor& configMonitor) {
@@ -46,7 +46,7 @@ std::string verificarCarpetasBackup(const std::vector<std::string>& carpetas, co
     if (!fs::exists(destino)){
         try {
             fs::create_directories(destino);
-            logWarning("La carpeta destinataria no existe, se creo la carpeta destinataria del backup: " + destino, "sentinel.log");
+            logWarning("La carpeta destinataria no existe, se creo la carpeta destinataria del backup_local: " + destino, "sentinel.log");
         }
         catch (const std::filesystem::filesystem_error& e) {
             throw ErrorBackup("No se pudo crear la carpeta destino '" + destino + "' "
@@ -98,7 +98,7 @@ void ejecutarBackup(const std::vector<std::string>& carpetas, const std::string&
             continue;
             }
     }
-    logInfo("Se a completado el backup local de forma exitosa", "sentinel.log");
+    logInfo("Se a completado el backup_local local de forma exitosa", "sentinel.log");
 }
 
 void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_monitor){
@@ -115,20 +115,20 @@ void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_
         ResultadoVerificacionRecursos resultado = verificarRecursosBackup(config_backup, config_monitor);
 
         if (resultado == ResultadoVerificacionRecursos::FORZADO) {
-            logInfo("Continuando con el backup a pesar de recursos elevados (forzar_backup activo)", "sentinel.log");
-            enviarNotificación("Backup", "Continuando con el backup a pesar de recursos elevados (forzar_backup activo)", "WARNING");
+            logInfo("Continuando con el backup_local a pesar de recursos elevados (forzar_backup activo)", "sentinel.log");
+            enviarNotificación("Backup", "Continuando con el backup_local a pesar de recursos elevados (forzar_backup activo)", "WARNING");
         }
         else if (resultado == ResultadoVerificacionRecursos::CANCELADO_CPU) {
-            logInfo("Se cancelo el backup 'Se regitro un uso elevado del cpu'", "sentinel.log");
-            enviarNotificación("Backup","Se cancelo el backup luego de varios intentos  'Se regitro un uso elevado del cpu'", "WARNING");
+            logInfo("Se cancelo el backup_local 'Se regitro un uso elevado del cpu'", "sentinel.log");
+            enviarNotificación("Backup","Se cancelo el backup_local luego de varios intentos  'Se regitro un uso elevado del cpu'", "WARNING");
             return;
         }else if (resultado == ResultadoVerificacionRecursos::CANCELADO_DISCO) {
-            logInfo("Se cancelo el backup 'Se regitro espacio elevado en el disco'", "sentinel.log");
-            enviarNotificación("Backup","Se cancelo el backup 'Se regitro espacio elevado en el disco'", "WARNING");
+            logInfo("Se cancelo el backup_local 'Se regitro espacio elevado en el disco'", "sentinel.log");
+            enviarNotificación("Backup","Se cancelo el backup_local 'Se regitro espacio elevado en el disco'", "WARNING");
             return;
         }
         else {
-            logInfo("Se inicio correctamente el backup a las: " + hora_actual, "sentinel.log");
+            logInfo("Se inicio correctamente el backup_local a las: " + hora_actual, "sentinel.log");
         }
 
         std::string carpetas_msg = verificarCarpetasBackup(config_backup.carpetas, config_backup.destino);
@@ -139,13 +139,13 @@ void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_
 
     }
     catch(const ErrorBackup& e){
-        logError("Error en backup - " + std::string(e.what()), "sentinel.log");
-        enviarNotificación("Error backup", "Ocurrio un error en el intento de bakup: " + std::string(e.what()), "ERROR");
+        logError("Error en backup_local - " + std::string(e.what()), "sentinel.log");
+        enviarNotificación("Error backup_local", "Ocurrio un error en el intento de bakup: " + std::string(e.what()), "ERROR");
     }
 
     catch(const DaemonError& e){
-        logError("Error en backup - " + std::string(e.what()), "sentinel.log");
-        enviarNotificación("Error Deamon-backup", "Ocurrio un error en el intento de bakup: " + std::string(e.what()), "ERROR");
+        logError("Error en backup_local - " + std::string(e.what()), "sentinel.log");
+        enviarNotificación("Error Deamon-backup_local", "Ocurrio un error en el intento de bakup: " + std::string(e.what()), "ERROR");
     }
 }
 

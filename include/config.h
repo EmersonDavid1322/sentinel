@@ -46,3 +46,9 @@ struct MetricasSistema {
     double cpu;
     double disco;
 };
+
+struct ArchivoRemoto {
+    std::string nombre;
+    std::string ruta;
+    bool esCarpeta;
+};
