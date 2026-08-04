@@ -14,6 +14,7 @@
 #include "comandos_monitor.h"
 #include "comandos_organizador.h"
 #include "comandos_estado.h"
+#include "comandos_backup_nube.h"
 
 void enviarRespuesta(const std::string& mensaje) {
     std::filesystem::path ruta_estado = obtenerRutaBase() / "config" / "sentinel_estado.txt";
@@ -44,19 +45,29 @@ void procesarEstado(std::string modulo, std::string& accion){
 //backup_local
 void procesarComandoBackup(std::string& accion, std::string& valor, const ConfigBackup& configBackup, const ConfigMonitor& configMonitor){
     if (accion == "activar" || accion == "desactivar"){
-        procesarEstado("backup_local", accion);
+        procesarEstado("backup", accion);
     }
     else if (accion == "añadir_carpeta") {
         agregarCarpetaBackup(valor);
     }
     else if (accion == "destino") {
-        cambiarDireccion("backup_local",accion ,valor);
+        cambiarDireccion("backup",accion ,valor);
     }
     else if (accion == "ahora") {
         ejecutarBackupComando(configBackup, configMonitor);
     }
     else {
-        enviarRespuesta("Accion '" + accion + "' no disponible en el modulo de backup_local");
+        enviarRespuesta("Accion '" + accion + "' no disponible en el modulo de backup local");
+    }
+}
+
+//backup_nube
+void procesarComandoBN(std::string& accion, std::string& valor, const ConfigBackupNube& config) {
+    if (accion == "activar" || accion == "desactivar") {
+        procesarEstado("backup_nube", accion);
+    }
+    else if (accion == "lista_nube") {
+        mostrarListadoComando(config);
     }
 }
 
@@ -97,7 +108,7 @@ void procesarComandoEstado(std::string& accion, const ConfigSentinel& config) {
     if (accion.empty()) {
         enviarRespuesta(generarDiagnostico(config));
     }
-    else if (accion == "backup_local") {
+    else if (accion == "backup") {
         enviarRespuesta(estadoBackup(config.backup));
     }
     else if (accion == "monitor") {
@@ -105,6 +116,9 @@ void procesarComandoEstado(std::string& accion, const ConfigSentinel& config) {
     }
     else if (accion == "organizador") {
         enviarRespuesta(estadoOrganizador(config.organizador));
+    }
+    else {
+        enviarRespuesta("No se a encontrado: " + accion);
     }
 }
 
@@ -114,8 +128,10 @@ void procesarComando(const std::string& comando, const ConfigSentinel& config) {
     stream >> modulo >> accion;
     std::getline(stream, valor);
 
-    if (modulo == "backup_local") {
+    if (modulo == "backup") {
         procesarComandoBackup(accion, valor, config.backup, config.monitor);
+    }else if (modulo == "backup_nube") {
+        procesarComandoBN(accion, valor, config.backup_nube);
     } else if (modulo == "monitor") {
         procesarComandoMonitor(accion, valor);
     } else if (modulo == "organizador") {

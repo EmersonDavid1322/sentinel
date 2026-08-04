@@ -35,7 +35,7 @@ Utilizar comandos para controlar el Sentinel:
 
 **Comando activar/desactivar módulos**
 ```bash
-bash sentinel-cli.sh backup_local activar 
+bash sentinel-cli.sh backup activar 
 ```
 ```bash
 bash sentinel-cli.sh organizador desactivar
@@ -45,17 +45,17 @@ bash sentinel-cli.sh organizador desactivar
 
 - Añadir alguna carpeta a la lista de carpetas del backup
 ```bash
-bash sentinel-cli.sh backup_local añadir_carpeta dirección
+bash sentinel-cli.sh backup añadir_carpeta dirección
 ```
 
 - Modificar el destino del backup
 ```bash
-bash sentinel-cli.sh backup_local destino dirección
+bash sentinel-cli.sh backup destino dirección
 ```
 
 - Ejecutar un backup
 ```bash
-bash sentinel-cli.sh backup_local ahora
+bash sentinel-cli.sh backup ahora
 ```
 
 **Comandos Monitor**

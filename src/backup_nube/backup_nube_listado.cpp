@@ -5,8 +5,8 @@
 #include <vector>
 #include <curl/curl.h>
 #include <iostream>
-
 #include "comandos_auxiliar.h"
+#include "logger.h"
 
 bool obtenerPaginaListado(const std::string& url, const std::string& cuerpo,
                           const std::string& token, std::vector<ArchivoRemoto>& lista,
@@ -44,7 +44,8 @@ bool obtenerPaginaListado(const std::string& url, const std::string& cuerpo,
     if (codigo_http != 200) {
         curl_slist_free_all(headers);
         curl_easy_cleanup(curl);
-        throw ErrorBackupAPI("Dropbox respondió con código " + std::to_string(codigo_http) + ": " + respuesta);
+        throw ErrorBackupAPI("Dropbox respondió con código al la peticion del listado de archivos remotos: "
+            + std::to_string(codigo_http) + ": " + respuesta);
     }
 
     json respuesta_jso = json::parse(respuesta);
@@ -65,8 +66,23 @@ bool obtenerPaginaListado(const std::string& url, const std::string& cuerpo,
 
     cursorSalida = respuesta_jso["cursor"];
     bool hayMas = respuesta_jso["has_more"];
-    if (hayMas) {
-        return true;
+
+    return hayMas;
+}
+
+std::vector<ArchivoRemoto> listaArchivosRemotos(const ConfigBackupNube& config) {
+    std::vector<ArchivoRemoto> info_archivos;
+    std::string cursorSalida;
+
+    std::string cuerpoInicial = R"({"path": ")" + config.carpeta_remota + R"(", "recursive": true})";
+
+    bool hayMas = obtenerPaginaListado("https://api.dropboxapi.com/2/files/list_folder", cuerpoInicial,
+        config.token, info_archivos, cursorSalida);
+
+    while (hayMas) {
+        std::string cuerpoContinuar = R"({"cursor": ")" + cursorSalida + R"("})";
+        hayMas = obtenerPaginaListado("https://api.dropboxapi.com/2/files/list_folder/continue", cuerpoContinuar,
+            config.token, info_archivos, cursorSalida);
     }
-    return false;
+    return info_archivos;
 }

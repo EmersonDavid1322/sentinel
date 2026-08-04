@@ -32,6 +32,7 @@ add_executable(sentinel
     src/backup_nube/backup_nube_bajada.cpp
     src/backup_local/backup_auxiliar.cpp
     src/backup_nube/backup_nube_listado.cpp
+    src/comandos/comandos_backup_nube.cpp
 )
 
 target_include_directories(sentinel PRIVATE ${LIBNOTIFY_INCLUDE_DIRS})

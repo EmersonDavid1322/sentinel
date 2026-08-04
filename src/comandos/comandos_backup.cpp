@@ -21,10 +21,10 @@ void agregarCarpetaBackup(const std::string& carpeta) {
     std::filesystem::path ruta = obtenerRutaBase() / "config" / "sentinel.json";
     json datos = leerJSONActual(ruta);
 
-    std::vector<std::string> carpetas = datos["backup_local"]["carpetas"];
+    std::vector<std::string> carpetas = datos["backup"]["carpetas"];
     carpetas.push_back(carpeta_limpia);
 
-    datos["backup_local"]["carpetas"] = carpetas;
+    datos["backup"]["carpetas"] = carpetas;
 
     guardarJSON(datos, ruta);
     enviarRespuesta("Se a añadido la carpeta: " + carpeta_limpia);

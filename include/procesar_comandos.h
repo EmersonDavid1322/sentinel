@@ -11,6 +11,8 @@ void procesarComandoMonitor(std::string& accion, std::string& valor);
 
 void procesarComandoBackup(std::string& accion, std::string& valor, const ConfigBackup& configBackup, const ConfigMonitor& configMonitor);
 
+void procesarComandoBN(std::string& accion, std::string& valor, const ConfigBackupNube& config);
+
 void procesarComandoOrganizador(std::string& accion, std::string& valor);
 
 void procesarComandoEstado(std::string& accion, const ConfigSentinel& config);
