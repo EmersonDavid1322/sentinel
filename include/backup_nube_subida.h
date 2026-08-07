@@ -5,9 +5,6 @@
 #include "config_compartida.h"
 namespace fs = std::filesystem;
 
-//auxiliar
-size_t escribirRespuesta(void* datos, size_t tamano, size_t cantidad, std::string* salida);
-
 bool debeIgnorarce(const fs::path& ruta, const std::vector<std::string>& lista_ignorar);
 
 //subida

@@ -18,6 +18,9 @@ struct ConfigBackupNube {
     std::string carpeta_remota;
     std::vector<std::string> ignorar;
     std::string token;
+    std::string clienteID;
+    std::string clienteSecret;
+    std::string refresh_token;
     std::string hora;
     bool activo;
 };

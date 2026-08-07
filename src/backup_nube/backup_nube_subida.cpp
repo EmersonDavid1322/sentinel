@@ -1,19 +1,14 @@
-#include "backup_nube_bajada.h"
+#include "backup_nube_subida.h"
 #include "errores.h"
 #include "sentinel_estado.h"
 #include "logger.h"
 #include "backup_auxiliar.h"
-#include  <string>
+#include "backup_nube_auxiliar.h"
+#include <string>
 #include <curl/curl.h>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-
-size_t escribirRespuesta(void* datos, size_t tamano, size_t cantidad, std::string* salida) {
-    size_t bytesTotales = tamano * cantidad;
-    salida->append((char*)datos, bytesTotales);
-    return bytesTotales;
-}
 
 void subirArchivo(std::string ruta, std::string& ruta_remota, std::string token) {
     std::ifstream archivo(ruta, std::ios::binary | std::ios::ate);

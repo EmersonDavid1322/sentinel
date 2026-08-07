@@ -20,9 +20,13 @@ void mostrarListadoComando(const ConfigBackupNube& config) {
     catch (const ErrorBackupAPI& e) {
         logError("Ocurrio un error con el API del backup a la nube al intentar conseguir el listado de archivos remotos: "
             + std::string(e.what()), "sentinel.log");
+        enviarRespuesta("Ocurrio un error con el API del backup a la nube al intentar conseguir el listado de archivos remotos: "
+            + std::string(e.what()));
     }
     catch (const ErrorBackupRED& e) {
         logError("Ocurrio un error con la peticion al servidor al intentar conseguir el listado de archivos remotos: "
             + std::string(e.what()),"sentinel.log");
+        enviarRespuesta("Ocurrio un error con la peticion al servidor al intentar conseguir el listado de archivos remotos: "
+            + std::string(e.what()));
     }
 }

@@ -1,12 +1,11 @@
 #include "backup_nube_listado.h"
 #include "config.h"
-#include "backup_nube_bajada.h"
+#include "backup_nube_auxiliar.h"
 #include "errores.h"
 #include <vector>
 #include <curl/curl.h>
 #include <iostream>
 #include "comandos_auxiliar.h"
-#include "logger.h"
 
 bool obtenerPaginaListado(const std::string& url, const std::string& cuerpo,
                           const std::string& token, std::vector<ArchivoRemoto>& lista,

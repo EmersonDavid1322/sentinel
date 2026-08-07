@@ -11,7 +11,7 @@
 #include "sentinel_estado.h"
 #include "config_compartida.h"
 #include "monitor.h"
-#include "backup_nube_bajada.h"
+#include "backup_nube_subida.h"
 namespace fs = std::filesystem;
 
 ResultadoVerificacionRecursos verificarRecursosBackup(const ConfigBackup& configBackup, const ConfigMonitor& configMonitor) {

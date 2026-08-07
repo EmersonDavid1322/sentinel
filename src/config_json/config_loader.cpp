@@ -34,6 +34,9 @@ ConfigBackupNube cargarBackupNube(const json& datos) {
     std::string carpeta_remota = datos["backup_nube"]["carpeta_remota"];
     std::vector<std::string> ignorar = datos["backup_nube"]["ignorar"];
     std::string token = datos["backup_nube"]["token"];
+    std::string clienteID = datos["backup_nube"]["cliente_id"];
+    std::string clienteSecret = datos["backup_nube"]["cliente_secret"];
+    std::string refresh_token = datos["backup_nube"]["refresh_token"];
     std::string hora = datos["backup_nube"]["hora"];
     bool activo = datos["backup_nube"]["activo"];
 
@@ -42,6 +45,9 @@ ConfigBackupNube cargarBackupNube(const json& datos) {
     nube.carpeta_remota = carpeta_remota;
     nube.ignorar = ignorar;
     nube.token = token;
+    nube.clienteID = clienteID;
+    nube.clienteSecret = clienteSecret;
+    nube.refresh_token = refresh_token;
     nube.hora = hora;
     nube.activo = activo;
 
