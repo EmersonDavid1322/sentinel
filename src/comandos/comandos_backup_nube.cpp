@@ -25,10 +25,12 @@ void mostrarListadoComando(const ConfigBackupNube& config) {
             logInfo("Se a actualizado el token", "sentinel.log");
             enviarRespuesta("Se a actualizado el token, vuelva a intentarlo");
         }
-        logError("Ocurrio un error con el API del backup a la nube al intentar conseguir el listado de archivos remotos: "
+        else {
+            logError("Ocurrio un error con el API del backup a la nube al intentar conseguir el listado de archivos remotos: "
             + std::string(e.what()), "sentinel.log");
-        enviarRespuesta("Ocurrio un error con el API del backup a la nube al intentar conseguir el listado de archivos remotos: "
-            + std::string(e.what()));
+            enviarRespuesta("Ocurrio un error con el API del backup a la nube al intentar conseguir el listado de archivos remotos: "
+                + std::string(e.what()));
+        }
     }
     catch (const ErrorBackupRED& e) {
         logError("Ocurrio un error con la peticion al servidor al intentar conseguir el listado de archivos remotos: "

@@ -80,55 +80,55 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
     logInfo("Se incio el backup a la nube " + hora_actual, "sentinel.log");
 
     namespace fs = std::filesystem;
-    try {
-        for (const auto& carpeta : config.carpetas) {
-            fs::path origen(carpeta);
-            for (auto it = fs::recursive_directory_iterator(origen); it != fs::recursive_directory_iterator(); ++it) {
-                const auto& entrada = *it;
+    for (const auto& carpeta : config.carpetas) {
+        fs::path origen(carpeta);
+        for (auto it = fs::recursive_directory_iterator(origen); it != fs::recursive_directory_iterator(); ++it) {
+            const auto& entrada = *it;
 
-                fs::path archivo = origen / entrada;
+            fs::path archivo = origen / entrada;
 
-                if (fs::is_directory(entrada) && debeIgnorarce(entrada.path(), config.ignorar)) {
-                    logWarning("Se ignoro la carpeta completa: " + entrada.path().string(), "backups.log");
-                    it.disable_recursion_pending();
-                    continue;
-                }
+            if (fs::is_directory(entrada) && debeIgnorarce(entrada.path(), config.ignorar)) {
+                logWarning("Se ignoro la carpeta completa: " + entrada.path().string(), "backups.log");
+                it.disable_recursion_pending();
+                continue;
+            }
 
-                if (debeIgnorarce(entrada.path(), config.ignorar)) {
-                    logWarning("Se ignoro un archivo :" + entrada.path().string(), "backups.log");
-                    continue;
-                }
+            if (debeIgnorarce(entrada.path(), config.ignorar)) {
+                logWarning("Se ignoro un archivo :" + entrada.path().string(), "backups.log");
+                continue;
+            }
 
-                if (!fs::is_regular_file(entrada)) {
-                    logWarning("Se ignoro un archivo de tipo no regular: " + archivo.string(), "backups.log");
-                    continue;
-                }
+            if (!fs::is_regular_file(entrada)) {
+                logWarning("Se ignoro un archivo de tipo no regular: " + archivo.string(), "backups.log");
+                continue;
+            }
 
-                fs::path ruta_relativa = fs::relative(entrada.path(), origen);
-                std::string ruta_remota = config.carpeta_remota + "/" + ruta_relativa.string();
+            fs::path ruta_relativa = fs::relative(entrada.path(), origen);
+            std::string ruta_remota = config.carpeta_remota + "/" + ruta_relativa.string();
 
+            try{
                 subirArchivo(archivo.string(),ruta_remota, config.token);
             }
-            logInfo("Se a completado el backup a la nube de forma exitosa", "sentinel.log");
+            catch (const std::filesystem::filesystem_error& e) {
+                logError("Ocurrio un error con el manejo de archivos loca: " + std::string(e.what()), "sentinel.log");
+            }
+            catch (const ErrorBackupAPI& e) {
+                if (e.codigoHTTP == 401) {
+                    std::string token_nuvo = renovarAccessToken(config);
+                    actualizarToken(token_nuvo);
+                    logInfo("Se a actualizado el token", "sentinel.log");
+                    subirArchivo(archivo.string(),ruta_remota, token_nuvo);
+                }else {
+                    logError("Ocurrio un error con la petición del backup: " + std::string(e.what()), "sentinel.log");
+                }
+            }
+            catch (const ErrorBackupRED& e) {
+                logError("Ocurrio un error con la red al intentar realizar el backup a la nube" + std::string(e.what()), "sentinel.log");
+            }
+            catch (const DaemonError& e) {
+                logError("Ocurrio un error inesperado: " + std::string(e.what()), "sentinel.log");
+            }
         }
-    }
-    catch (const std::filesystem::filesystem_error& e) {
-        logError("Ocurrio un error con el manejo de archivos loca: " + std::string(e.what()), "sentinel.log");
-    }
-    catch (const ErrorBackupRED& e) {
-        logError("Ocurrio un error con la red al intentar realizar el backup a la nube" + std::string(e.what()), "sentinel.log");
-    }
-    catch (const ErrorBackupAPI& e) {
-        if (e.codigoHTTP == 401) {
-            std::string token_nuvo = renovarAccessToken(config);
-            actualizarToken(token_nuvo);
-            logInfo("Se a actualizado el token", "sentinel.log");
-        }else {
-            logError("Ocurrio un error con la petición del backup: " + std::string(e.what()), "sentinel.log");
-        }
-    }
-    catch (const DaemonError& e) {
-        logError("Ocurrio un error inesperado: " + std::string(e.what()), "sentinel.log");
     }
 }
 
@@ -139,7 +139,6 @@ void loopBackupNube(ConfigCompartida& config_compartida) {
         if (config.backup_nube.activo) {
             ejecutarBackupNube(config.backup_nube);
         }
-
         std::unique_lock<std::mutex> lock(mtx_apagado);
         cv_apagado.wait_for(lock, std::chrono::seconds(60), [] { return !corriendo.load(); });
     }
