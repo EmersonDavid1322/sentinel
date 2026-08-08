@@ -3,6 +3,7 @@
 #include "logger.h"
 #include "errores.h"
 #include "procesar_comandos.h"
+#include "backup_nube_auxiliar.h"
 #include <vector>
 
 void mostrarListadoComando(const ConfigBackupNube& config) {
@@ -18,6 +19,12 @@ void mostrarListadoComando(const ConfigBackupNube& config) {
         enviarRespuesta(mensaje);
     }
     catch (const ErrorBackupAPI& e) {
+        if (e.codigoHTTP == 401) {
+            std::string token_nuvo = renovarAccessToken(config);
+            actualizarToken(token_nuvo);
+            logInfo("Se a actualizado el token", "sentinel.log");
+            enviarRespuesta("Se a actualizado el token, vuelva a intentarlo");
+        }
         logError("Ocurrio un error con el API del backup a la nube al intentar conseguir el listado de archivos remotos: "
             + std::string(e.what()), "sentinel.log");
         enviarRespuesta("Ocurrio un error con el API del backup a la nube al intentar conseguir el listado de archivos remotos: "

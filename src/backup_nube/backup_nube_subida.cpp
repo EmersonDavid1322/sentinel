@@ -10,7 +10,7 @@
 #include <fstream>
 #include <iostream>
 
-void subirArchivo(std::string ruta, std::string& ruta_remota, std::string token) {
+void subirArchivo(const std::string& ruta,const std::string& ruta_remota,const std::string& token) {
     std::ifstream archivo(ruta, std::ios::binary | std::ios::ate);
     if (!archivo.is_open()) {
         throw ErrorBackup("Error en el archivo: " + ruta);
@@ -60,7 +60,7 @@ void subirArchivo(std::string ruta, std::string& ruta_remota, std::string token)
     if (codigo_http != 200) {
         curl_slist_free_all(headers);
         curl_easy_cleanup(curl);
-        throw ErrorBackupAPI("Dropbox respondió con código " + std::to_string(codigo_http) + ": " + respuesta);
+        throw ErrorBackupAPI("Dropbox respondió con código " + std::to_string(codigo_http) + ": " + respuesta, codigo_http);
     }
 
     curl_slist_free_all(headers);
@@ -81,7 +81,7 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
 
     namespace fs = std::filesystem;
     try {
-        for (std::string carpeta : config.carpetas) {
+        for (const auto& carpeta : config.carpetas) {
             fs::path origen(carpeta);
             for (auto it = fs::recursive_directory_iterator(origen); it != fs::recursive_directory_iterator(); ++it) {
                 const auto& entrada = *it;
@@ -119,7 +119,13 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
         logError("Ocurrio un error con la red al intentar realizar el backup a la nube" + std::string(e.what()), "sentinel.log");
     }
     catch (const ErrorBackupAPI& e) {
-        logError("Ocurrio un error con la petición del backup: " + std::string(e.what()), "sentinel.log");
+        if (e.codigoHTTP == 401) {
+            std::string token_nuvo = renovarAccessToken(config);
+            actualizarToken(token_nuvo);
+            logInfo("Se a actualizado el token", "sentinel.log");
+        }else {
+            logError("Ocurrio un error con la petición del backup: " + std::string(e.what()), "sentinel.log");
+        }
     }
     catch (const DaemonError& e) {
         logError("Ocurrio un error inesperado: " + std::string(e.what()), "sentinel.log");

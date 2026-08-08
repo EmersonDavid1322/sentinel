@@ -1,8 +1,10 @@
 #include "backup_nube_auxiliar.h"
 #include <curl/curl.h>
+#include <fstream>
 #include "errores.h"
 #include "json.hpp"
-using json = nlohmann::json;
+#include "rutas.h"
+#include "comandos_auxiliar.h"
 
 size_t escribirRespuesta(void* datos, size_t tamano, size_t cantidad, std::string* salida) {
     size_t bytesTotales = tamano * cantidad;
@@ -37,9 +39,19 @@ std::string renovarAccessToken(const ConfigBackupNube& config) {
     curl_easy_cleanup(curl);
 
     if (codigo_http != 200) {
-        throw ErrorBackupAPI("No se pudo renovar el token: " + respuesta);
+        throw ErrorBackupAPI("No se pudo renovar el token: " + respuesta, codigo_http);
     }
 
     json respuesta_json = json::parse(respuesta);
     return respuesta_json["access_token"];
+}
+
+void actualizarToken(const std::string& token) {
+    std::filesystem::path rutaConfig = obtenerRutaBase() / "config" / "sentinel.json";
+
+    json datos = leerJSONActual(rutaConfig);
+
+    datos["backup_nube"]["token"] = token;
+
+    guardarJSON(datos, rutaConfig);
 }

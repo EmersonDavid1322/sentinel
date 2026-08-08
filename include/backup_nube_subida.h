@@ -8,7 +8,7 @@ namespace fs = std::filesystem;
 bool debeIgnorarce(const fs::path& ruta, const std::vector<std::string>& lista_ignorar);
 
 //subida
-void subirArchivo(std::string archivo ,std::string& ruta_remota, std::string& token);
+void subirArchivo(const std::string& ruta,const std::string& ruta_remota,const std::string& token);
 
 void ejecutarBackupNube(const ConfigBackupNube& config);
 

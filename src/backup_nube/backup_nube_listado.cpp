@@ -44,7 +44,7 @@ bool obtenerPaginaListado(const std::string& url, const std::string& cuerpo,
         curl_slist_free_all(headers);
         curl_easy_cleanup(curl);
         throw ErrorBackupAPI("Dropbox respondió con código al la peticion del listado de archivos remotos: "
-            + std::to_string(codigo_http) + ": " + respuesta);
+            + std::to_string(codigo_http) + ": " + respuesta, codigo_http);
     }
 
     json respuesta_jso = json::parse(respuesta);
