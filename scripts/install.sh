@@ -62,7 +62,7 @@ rm -rf "$PROYECTO_DIR/build"
 if [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ]; then
   echo "No se detectó entorno gráfico, instalando en modo servidor"
   
-        sudo bash -c "cat > /etc/systemd/system/sentinel.service" <<EOF
+        bash -c "cat > /etc/systemd/system/sentinel.service" <<EOF
 [Unit]
 Description=Daemon Sentinel (modo servidor)
 After=network.target
@@ -77,10 +77,10 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 
-sudo systemctl  daemon-reload
-sudo systemctl  enable sentinel.service
-sudo systemctl  start sentinel.service
-sudo systemctl  status sentinel.service
+systemctl  daemon-reload
+systemctl  enable sentinel.service
+systemctl  start sentinel.service
+systemctl  status sentinel.service
 
 else
   echo "Entorno gráfico detectado, instalando en modo escritorio"
