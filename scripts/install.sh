@@ -53,9 +53,6 @@ if [ -f "$DESTINO_DEAMON/sentinel" ]; then
 fi
 
 cp "$PROYECTO_DIR/build/sentinel" "$DESTINO_DEAMON/"
-if [ ! -f "$DESTINO_DEAMON/config/sentinel.json" ]; then
-    cp "$PROYECTO_DIR/config/sentinel.json" "$DESTINO_DEAMON/config/"
-fi
 
 chmod +x "$DESTINO_DEAMON/sentinel"
 
