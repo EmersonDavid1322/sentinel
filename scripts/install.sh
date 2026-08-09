@@ -22,7 +22,7 @@ fi
 # INSTALACIÓN DE DEPENDENCIAS
 if ! command -v g++ &> /dev/null; then
     echo "g++ no encontrado. Instalando..."
-    
+
     if command -v sudo &> /dev/null; then
       sudo "$INSTALAR" g++ build-essential
     else
@@ -38,6 +38,26 @@ if ! command -v cmake &> /dev/null; then
     else
       $INSTALAR cmake
     fi
+fi
+
+if ! command -v curl &> /dev/null; then
+
+  if command -v apt &> /dev/null; then
+      INSTALARCURL="apt install libcurl4-openssl-dev -y"
+  elif command -v dnf &> /dev/null; then
+      INSTALARCURL="dnf install libcurl-devel -y"
+  elif command -v pacman &> /dev/null; then
+      INSTALARCURL="pacman -S curl --noconfirm"
+  else
+      echo "Gestor de paquetes no soportado"
+      exit 1
+  fi
+
+  if ! command -v cmake &> /dev/null; then
+    sudo "$INSTALARCURL"
+  else
+    $INSTALARCURL
+  fi
 fi
 
 # limpieza
@@ -56,7 +76,7 @@ if [ -f "$HOME/.config/systemd/user/sentinel.service" ]; then
     echo "Se limpió el servicio anterior"
 fi
 
-# Por si el proceso quedó 'huérfano' suelto en la memoria (fuera de systemd)
+# Por si el proceso quedó 'huérfano' suelto en la memoria
 if pgrep -x "sentinel" > /dev/null; then
     echo "Detectado proceso huérfano en ejecución. Enviando SIGTERM..."
     pkill -15 -x "sentinel" || true
