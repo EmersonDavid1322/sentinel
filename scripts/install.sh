@@ -30,9 +30,8 @@ if ! command -v g++ &> /dev/null; then
     fi
 fi
 
-if ! command -v curl &> /dev/null; then
+if ! dpkg -s libcurl4-openssl-dev &> /dev/null; then
 
-  # 1. Detectar el gestor de paquetes
   if command -v apt &> /dev/null; then
       INSTALARCURL="apt install libcurl4-openssl-dev -y"
   elif command -v dnf &> /dev/null; then
@@ -45,12 +44,14 @@ if ! command -v curl &> /dev/null; then
   fi
 
   if command -v sudo &> /dev/null; then
-
     eval "sudo $INSTALARCURL"
   else
     eval "$INSTALARCURL"
   fi
+else
+  echo "La librería de desarrollo de CURL ya está instalada."
 fi
+
 
 
 # limpieza
