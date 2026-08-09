@@ -53,10 +53,10 @@ if ! command -v curl &> /dev/null; then
       exit 1
   fi
 
-  if ! command -v sudo &> /dev/null; then
-    sudo "$INSTALARCURL"
+  if command -v sudo &> /dev/null; then
+    "sudo $INSTALARCURL"
   else
-    $INSTALARCURL
+    "$INSTALARCURL"
   fi
 fi
 
