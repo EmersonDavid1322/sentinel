@@ -83,12 +83,38 @@ chmod +x "$DESTINO_DEAMON/sentinel"
 # Limpieza de la carpeta temporal de compilación
 rm -rf "$PROYECTO_DIR/build"
 
+if [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ]; then
+  echo "No se detectó entorno gráfico, instalando en modo servidor"
+  
+        sudo bash -c "cat > /etc/systemd/system/sentinel.service" <<EOF
+[Unit]
+Description=Daemon Sentinel (modo servidor)
+After=network.target
+
+[Service]
+ExecStart=$DESTINO_DEAMON/sentinel
+WorkingDirectory=$DESTINO_DEAMON
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl  daemon-reload
+sudo systemctl  enable sentinel.service
+sudo systemctl  start sentinel.service
+sudo systemctl  status sentinel.service
+
+else
+  echo "Entorno gráfico detectado, instalando en modo escritorio"
+
 # CONFIGURACIÓN DEL NUEVO SERVICIO SYSTEMD
 echo "Configurando service..."
 DIR_SERVICIOS_USER="$HOME/.config/systemd/user"
 mkdir -p "$DIR_SERVICIOS_USER"
 
-cat > "$DIR_SERVICIOS_USER/sentinel.service" <<EOF
+cat > "$DIR_SERVICIOS_USER/sentinel.service" << EOF
 [Unit]
 Description=Daemon Sentinel
 After=graphical-session.target
@@ -113,9 +139,7 @@ systemctl --user daemon-reload
 systemctl --user enable sentinel.service
 systemctl --user start sentinel.service
 systemctl --user status sentinel.service
-
-echo "Instalación completa de manera exitosa"
-
+fi
 
 if [ -f "$PROYECTO_DIR/scripts/sentinel-cli.sh" ]; then
     cp "$PROYECTO_DIR/scripts/sentinel-cli.sh" "$DESTINO_DEAMON"
@@ -124,3 +148,5 @@ if [ -f "$PROYECTO_DIR/scripts/sentinel-cli.sh" ]; then
 else
     echo "No se encontro el cliente sentinel-cli.sh"
 fi
+
+echo "Instalación completa de manera exitosa"
