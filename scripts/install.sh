@@ -52,6 +52,27 @@ else
   echo "La librería de desarrollo de CURL ya está instalada."
 fi
 
+# Verificar e instalar pkg-config si falta
+if ! command -v pkg-config &> /dev/null; then
+  echo "Instalando pkg-config..."
+
+  if command -v apt &> /dev/null; then
+      INSTALARPKG="apt install pkg-config -y"
+  elif command -v dnf &> /dev/null; then
+      INSTALARPKG="dnf install pkgconf-pkg-config -y"
+  elif command -v pacman &> /dev/null; then
+      INSTALARPKG="pacman -S --noconfirm pkgconf"
+  else
+      echo "Error: Gestor de paquetes no soportado."
+      exit 1
+  fi
+
+  if command -v sudo &> /dev/null; then
+    eval "sudo $INSTALARPKG"
+  else
+    eval "$INSTALARPKG"
+  fi
+fi
 
 
 # limpieza
