@@ -9,11 +9,11 @@ mkdir -p "$DESTINO_DEAMON"
 
 # DETECCIÓN DE ENTORNO Y GESTOR DE PAQUETES
 if command -v apt &> /dev/null; then 
-    INSTALAR="sudo apt install -y"
+    INSTALAR="apt install -y"
 elif command -v dnf &> /dev/null; then 
-    INSTALAR="sudo dnf install -y"
+    INSTALAR="dnf install -y"
 elif command -v pacman &> /dev/null; then
-    INSTALAR="sudo pacman -S --noconfirm"
+    INSTALAR="pacman -S --noconfirm"
 else 
     echo "Gestor de paquetes no soportado"
     exit 1
@@ -22,12 +22,22 @@ fi
 # INSTALACIÓN DE DEPENDENCIAS
 if ! command -v g++ &> /dev/null; then
     echo "g++ no encontrado. Instalando..."
-    $INSTALAR g++ build-essential
+    
+    if command -v sudo &> /dev/null; then
+      sudo "$INSTALAR" g++ build-essential
+    else
+      $INSTALAR g++ build-essential
+    fi
 fi
 
 if ! command -v cmake &> /dev/null; then
     echo "Cmake no encontrado. Instalando..."
-    $INSTALAR cmake
+
+    if command -v sudo &> /dev/null; then
+      sudo "$INSTALAR" cmake
+    else
+      $INSTALAR cmake
+    fi
 fi
 
 # limpieza
