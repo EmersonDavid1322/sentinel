@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e
 
-bash install_dep.sh
-
 BASE_DIR=$(dirname "$(readlink -f "$0")")
 PROYECTO_DIR=$(dirname "$BASE_DIR")
 DESTINO_DEAMON="$HOME/apps/deamon"
+
+bash "$PROYECTO_DIR/install_dep.sh"
 
 mkdir -p "$DESTINO_DEAMON"
 
