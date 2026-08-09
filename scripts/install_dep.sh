@@ -28,7 +28,8 @@ echo "📦 Detectado gestor: $PM. Preparando instalación..."
 if command -v sudo &> /dev/null && [ "$EUID" -ne 0 ]; then
     PREFIX="sudo"
 else
-    PREFIX=""
+    echo "Error: No se a detectado sudo"
+    exit 1;
 fi
 
 echo "⏳ Instalando dependencias: ${PAQUETES[*]}..."

@@ -59,15 +59,29 @@ chmod +x "$DESTINO_DEAMON/sentinel"
 # Limpieza de la carpeta temporal de compilación
 rm -rf "$PROYECTO_DIR/build"
 
+if [ -f "$PROYECTO_DIR/config/sentinel.json" ]; then
+  if [ ! -f "$DESTINO_DEAMON/config/sentinel.json" ]; then
+    mv "$PROYECTO_DIR/config/sentinel.json" "$DESTINO_DEAMON/config/sentinel.json"
+    chmod 600 "$DESTINO_DEAMON/config/sentinel.json"
+  fi
+else
+  echo "Error: no se encontro el archivo de configuraciones"
+  return 1
+fi
+
 if [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ]; then
   echo "No se detectó entorno gráfico, instalando en modo servidor"
-  
-        bash -c "cat > /etc/systemd/system/sentinel.service" <<EOF
+
+      USUARIO=$(whoami)
+      echo "Usuario actual $USUARIO"
+      sudo  bash -c "cat > /etc/systemd/system/sentinel.service" <<EOF
 [Unit]
 Description=Daemon Sentinel (modo servidor)
 After=network.target
 
 [Service]
+User=$USUARIO
+Group=$USUARIO
 ExecStart=$DESTINO_DEAMON/sentinel
 WorkingDirectory=$DESTINO_DEAMON
 Restart=always
@@ -77,10 +91,10 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 
-systemctl  daemon-reload
-systemctl  enable sentinel.service
-systemctl  start sentinel.service
-systemctl  status sentinel.service
+sudo systemctl  daemon-reload
+sudo systemctl  enable sentinel.service
+sudo systemctl  start sentinel.service
+sudo systemctl  status sentinel.service
 
 else
   echo "Entorno gráfico detectado, instalando en modo escritorio"
