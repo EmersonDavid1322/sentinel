@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # 1. Definir listas de paquetes según la distribución
-DEBIAN_PKGS=("pkg-config" "libcurl4-openssl-dev" "libnotify-dev" "g++ build-essential")
-FEDORA_PKGS=("pkgconf-pkg-config" "libcurl-devel" "libnotify-devel" "g++ build-essential")
-ARCH_PKGS=("pkgconf" "curl" "libnotify" "g++ build-essential")
+DEBIAN_PKGS=("pkg-config" "libcurl4-openssl-dev" "libnotify-dev" "g++ build-essential" "cmake")
+FEDORA_PKGS=("pkgconf-pkg-config" "libcurl-devel" "libnotify-devel" "g++ build-essential" "cmake")
+ARCH_PKGS=("pkgconf" "curl" "libnotify" "g++ build-essential" "cmake")
 
 # 2. Detectar el gestor de paquetes del sistema
 if command -v apt &> /dev/null; then
