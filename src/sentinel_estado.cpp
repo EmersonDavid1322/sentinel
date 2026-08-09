@@ -1,5 +1,6 @@
 #include <atomic>
 #include <csignal>
+#include <cstdlib>
 #include "sentinel_estado.h"
 
 std::atomic<bool> corriendo{true};
@@ -15,4 +16,10 @@ void manejoSenal(int senal){
 void capturarSenal(){
     signal(SIGINT, manejoSenal);
     signal(SIGTERM, manejoSenal);
+}
+
+std::atomic<bool> hayEntornoGrafico{false};
+
+void verficarEntornoGrafico() {
+    hayEntornoGrafico = std::getenv("DISPLAY") != nullptr || std::getenv("WAYLAND_DISPLAY") != nullptr;
 }

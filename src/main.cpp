@@ -16,7 +16,14 @@
 namespace fs = std::filesystem;
 
 int main() {
-    notify_init("Sentinel");
+    verficarEntornoGrafico();
+
+    if (hayEntornoGrafico) {
+        notify_init("Sentinel");
+        logInfo("Se a detectado entorno grafico. Notificaciones activadas", "sentinel.log");
+    }else {
+        logInfo("No se detectó entorno gráfico. Las notificaciones quedan desactivadas (modo servidor)", "sentinel.log");
+    }
     capturarSenal();
     fs::create_directories(obtenerRutaBase() / "logs");
     
@@ -51,11 +58,16 @@ int main() {
 
     } catch (const DaemonError& e) {
         logError("Error critico al iniciar: " + std::string(e.what()), "sentinel.log");
-        notify_uninit();
+        if (hayEntornoGrafico) {
+            notify_uninit();
+        }
         logInfo("Sentinel detenido correctamente", "sentinel.log");
         return 1;
-    }    
-    notify_uninit();
+    }
+
+    if (hayEntornoGrafico) {
+        notify_uninit();
+    }
     logInfo("Sentinel detenido correctamente", "sentinel.log");
     return 0;
 }

@@ -6,9 +6,14 @@
 #include "notificador.h"
 #include "logger.h"
 #include "json.hpp"
+#include "sentinel_estado.h"
 std::mutex mutex_notificador;
 
 void enviarNotificación(std::string titulo, std::string mensaje, std::string nivel){
+    if (!hayEntornoGrafico) {
+        return;
+    }
+
     std::lock_guard<std::mutex> lock(mutex_notificador);
     NotifyUrgency urgencia;
     std::string icon;

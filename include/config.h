@@ -2,7 +2,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "json.hpp"
 
 struct ConfigBackup {
     std::vector<std::string> carpetas;
