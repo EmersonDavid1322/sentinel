@@ -107,6 +107,7 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
             std::string ruta_remota = config.carpeta_remota + "/" + ruta_relativa.string();
 
             try{
+                logInfo("Se incio la subida del archivo: " + archivo.string(), "backups.log");
                 subirArchivo(archivo.string(),ruta_remota, config.token);
             }
             catch (const std::filesystem::filesystem_error& e) {
@@ -130,6 +131,7 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
             }
         }
     }
+    logInfo("Se compelto el backup a DropBox de forma correcta", "Sentinel.log");
 }
 
 void loopBackupNube(ConfigCompartida& config_compartida) {

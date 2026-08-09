@@ -5,5 +5,6 @@ sentinel
 logs/
 .vscode/
 *.fifo
+config/
 sentinel_estado.txt
 .idea/
