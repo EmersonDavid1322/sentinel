@@ -1,79 +1,13 @@
 #!/bin/bash
 set -e
 
+bash install_dep.sh
+
 BASE_DIR=$(dirname "$(readlink -f "$0")")
 PROYECTO_DIR=$(dirname "$BASE_DIR")
 DESTINO_DEAMON="$HOME/apps/deamon"
 
 mkdir -p "$DESTINO_DEAMON"
-
-# DETECCIÓN DE ENTORNO Y GESTOR DE PAQUETES
-if command -v apt &> /dev/null; then 
-    INSTALAR="apt install -y"
-elif command -v dnf &> /dev/null; then 
-    INSTALAR="dnf install -y"
-elif command -v pacman &> /dev/null; then
-    INSTALAR="pacman -S --noconfirm"
-else 
-    echo "Gestor de paquetes no soportado"
-    exit 1
-fi
-
-# INSTALACIÓN DE DEPENDENCIAS
-if ! command -v g++ &> /dev/null; then
-    echo "g++ no encontrado. Instalando..."
-
-    if command -v sudo &> /dev/null; then
-      sudo "$INSTALAR" g++ build-essential
-    else
-      $INSTALAR g++ build-essential
-    fi
-fi
-
-if ! dpkg -s libcurl4-openssl-dev &> /dev/null; then
-
-  if command -v apt &> /dev/null; then
-      INSTALARCURL="apt install libcurl4-openssl-dev -y"
-  elif command -v dnf &> /dev/null; then
-      INSTALARCURL="dnf install libcurl-devel -y"
-  elif command -v pacman &> /dev/null; then
-      INSTALARCURL="pacman -S --noconfirm curl"
-  else
-      echo "Error: Gestor de paquetes no soportado."
-      exit 1
-  fi
-
-  if command -v sudo &> /dev/null; then
-    eval "sudo $INSTALARCURL"
-  else
-    eval "$INSTALARCURL"
-  fi
-else
-  echo "La librería de desarrollo de CURL ya está instalada."
-fi
-
-# Verificar e instalar pkg-config si falta
-if ! command -v pkg-config &> /dev/null; then
-  echo "Instalando pkg-config..."
-
-  if command -v apt &> /dev/null; then
-      INSTALARPKG="apt install pkg-config -y"
-  elif command -v dnf &> /dev/null; then
-      INSTALARPKG="dnf install pkgconf-pkg-config -y"
-  elif command -v pacman &> /dev/null; then
-      INSTALARPKG="pacman -S --noconfirm pkgconf"
-  else
-      echo "Error: Gestor de paquetes no soportado."
-      exit 1
-  fi
-
-  if command -v sudo &> /dev/null; then
-    eval "sudo $INSTALARPKG"
-  else
-    eval "$INSTALARPKG"
-  fi
-fi
-
 
 # limpieza
 echo "Deteniendo servicios e instancias previas de Sentinel..."
