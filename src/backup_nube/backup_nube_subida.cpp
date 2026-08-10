@@ -9,63 +9,178 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include "json.hpp"
+using json = nlohmann::json;
 
-void subirArchivo(const std::string& ruta,const std::string& ruta_remota,const std::string& token) {
-    std::ifstream archivo(ruta, std::ios::binary | std::ios::ate);
-    if (!archivo.is_open()) {
-        throw ErrorBackup("Error en el archivo: " + ruta);
-    }
 
-    std::streamsize tamaño = archivo.tellg();
-    archivo.seekg(0, std::ios::beg);
-    std::string datosArchivo(tamaño, '\0');
-
-    archivo.read(&datosArchivo[0], tamaño);
-
+std::string iniciarSesion(const std::string& trozo, const std::string& token) {
     CURL* curl = curl_easy_init();
     if (!curl) {
-        curl_easy_cleanup(curl);
-        throw DaemonError("Error al intentar incializar el curl de dropbox");
+        throw DaemonError("Error al inicializar curl para iniciar sesión de subida");
     }
 
     std::string autorizacion = "Authorization: Bearer " + token;
-    std::string header_arg = "Dropbox-API-Arg: {\"path\": \"" + ruta_remota + "\", \"mode\": \"overwrite\"}";
-
     struct curl_slist* headers = nullptr;
     headers = curl_slist_append(headers, autorizacion.c_str());
-    headers = curl_slist_append(headers, header_arg.c_str());
+    headers = curl_slist_append(headers, "Dropbox-API-Arg: {\"close\": false}");
     headers = curl_slist_append(headers, "Content-Type: application/octet-stream");
 
-    curl_easy_setopt(curl, CURLOPT_URL, "https://content.dropboxapi.com/2/files/upload");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://content.dropboxapi.com/2/files/upload_session/start");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, datosArchivo.data());
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, static_cast<long>(tamaño));
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, trozo.data());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, trozo.size());
 
     std::string respuesta;
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, escribirRespuesta);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &respuesta);
 
     CURLcode resultado = curl_easy_perform(curl);
-
     if (resultado != CURLE_OK) {
         curl_slist_free_all(headers);
         curl_easy_cleanup(curl);
-        throw ErrorBackupRED("Error en la petición: " + std::string(curl_easy_strerror(resultado)));
+        throw ErrorBackupRED("Error al iniciar sesión: " + std::string(curl_easy_strerror(resultado)));
     }
 
     long codigo_http = 0;
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &codigo_http);
-
-    if (codigo_http != 200) {
-        curl_slist_free_all(headers);
-        curl_easy_cleanup(curl);
-        throw ErrorBackupAPI("Dropbox respondió con código " + std::to_string(codigo_http) + ": " + respuesta, codigo_http);
-    }
-
     curl_slist_free_all(headers);
     curl_easy_cleanup(curl);
-    logInfo("Se subio el archvio\n" + ruta, "backups.log");
+
+    if (codigo_http != 200) {
+        throw ErrorBackupAPI("Error al iniciar sesión: " + respuesta, codigo_http);
+    }
+
+    json respuesta_json = json::parse(respuesta);
+    return respuesta_json["session_id"];
+}
+
+void continuarSesion(const std::string& sessionId, const size_t& offset, const std::string& trozo, const std::string& token) {
+    CURL* curl = curl_easy_init();
+    if (!curl) {
+        throw DaemonError("Error al inicializar curl para continuar la sesión de subida");
+    }
+
+    std::string autorizacion = "Authorization: Bearer " + token;
+
+    std::string argumento = "{\"cursor\": {\"session_id\": \"" + sessionId + "\", \"offset\": " + std::to_string(offset) + "}, \"close\": false}";
+    std::string header_arg = "Dropbox-API-Arg: " + argumento;
+
+    struct curl_slist* headers = nullptr;
+    headers = curl_slist_append(headers, autorizacion.c_str());
+    headers = curl_slist_append(headers, header_arg.c_str());
+    headers = curl_slist_append(headers, "Content-Type: application/octet-stream");
+
+    curl_easy_setopt(curl, CURLOPT_URL, "https://content.dropboxapi.com/2/files/upload_session/append_v2");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, trozo.data());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, trozo.size());
+
+    std::string respuesta;
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, escribirRespuesta);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &respuesta);
+
+    CURLcode resultado = curl_easy_perform(curl);
+    if (resultado != CURLE_OK) {
+        curl_slist_free_all(headers);
+        curl_easy_cleanup(curl);
+        throw ErrorBackupRED("Error al continuar la sesión: " + std::string(curl_easy_strerror(resultado)));
+    }
+
+    long codigo_http = 0;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &codigo_http);
+    curl_slist_free_all(headers);
+    curl_easy_cleanup(curl);
+
+    if (codigo_http != 200) {
+        throw ErrorBackupAPI("Error al continuar la sesión: " + respuesta, codigo_http);
+    }
+}
+
+void finalizarSesion(const std::string& sessionId, const size_t& offset, const std::string& dirrecion,
+    const std::string& trozo, const std::string& token) {
+    CURL* curl = curl_easy_init();
+    if (!curl) {
+        throw DaemonError("Error al inicializar curl para finalizara la sesión de subida");
+    }
+
+    std::string autorizacion = "Authorization: Bearer " + token;
+
+    json arg;
+    arg["cursor"]["session_id"] = sessionId;
+    arg["cursor"]["offset"] = offset;
+
+    arg["commit"]["path"] =dirrecion;
+    arg["commit"]["mode"] = "overwrite";
+    std::string header_arg = "Dropbox-API-Arg: " + arg.dump();
+
+    struct curl_slist* headers = nullptr;
+    headers = curl_slist_append(headers, autorizacion.c_str());
+    headers = curl_slist_append(headers, header_arg.c_str());
+    headers = curl_slist_append(headers, "Content-Type: application/octet-stream");
+
+    curl_easy_setopt(curl, CURLOPT_URL, "https://content.dropboxapi.com/2/files/upload_session/finish");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, trozo.data());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, trozo.size());
+
+    std::string respuesta;
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, escribirRespuesta);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &respuesta);
+
+    CURLcode resultado = curl_easy_perform(curl);
+    if (resultado != CURLE_OK) {
+        curl_slist_free_all(headers);
+        curl_easy_cleanup(curl);
+        throw ErrorBackupRED("Error al finalizar la sesión: " + std::string(curl_easy_strerror(resultado)));
+    }
+
+    long codigo_http = 0;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &codigo_http);
+    curl_slist_free_all(headers);
+    curl_easy_cleanup(curl);
+
+    if (codigo_http != 200) {
+        throw ErrorBackupAPI("Error al finalizar la sesión: " + respuesta, codigo_http);
+    }
+}
+
+void subirArchivoStreaming(const std::string& ruta, const std::string& rutaRemota, const std::string& token) {
+    std::ifstream archivo(ruta, std::ios::binary | std::ios::ate);
+    if (!archivo.is_open()) {
+        throw ErrorBackup("No se pudo abrir el archivo: " + ruta);
+    }
+
+    std::streamsize tamañoTotal = archivo.tellg();
+    archivo.seekg(0, std::ios::beg);
+
+    const size_t TAMANO_TROZO = 8 * 1024 * 1024;
+    size_t offset = 0;
+    bool esPrimero = true;
+    std::string sessionId;
+
+    while (static_cast<std::streamsize>(offset) < tamañoTotal) {
+        size_t restante = tamañoTotal - offset;
+        size_t tamañoLectura = std::min(restante, TAMANO_TROZO);
+        bool esUltimo = (restante <= TAMANO_TROZO);
+
+        std::string trozo(tamañoLectura, '\0');
+        archivo.read(&trozo[0], tamañoLectura);
+
+        if (esPrimero) {
+            sessionId = iniciarSesion(trozo, token);
+            esPrimero = false;
+
+            if (esUltimo) {
+                finalizarSesion(sessionId, tamañoLectura, "", rutaRemota, token);
+            }
+        } else if (esUltimo) {
+            finalizarSesion(sessionId, offset, trozo, rutaRemota, token);
+        } else {
+            continuarSesion(sessionId, offset, trozo, token);
+        }
+
+        offset += tamañoLectura;
+    }
 }
 
 void ejecutarBackupNube(const ConfigBackupNube& config) {
@@ -108,7 +223,7 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
 
             try{
                 logInfo("Se incio la subida del archivo: " + archivo.string(), "backups.log");
-                subirArchivo(archivo.string(),ruta_remota, config.token);
+                subirArchivoStreaming(archivo.string(), ruta_remota, config.token);
             }
             catch (const std::filesystem::filesystem_error& e) {
                 logError("Ocurrio un error con el manejo de archivos loca: " + std::string(e.what()), "sentinel.log");
@@ -118,7 +233,7 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
                     std::string token_nuvo = renovarAccessToken(config);
                     actualizarToken(token_nuvo);
                     logInfo("Se a actualizado el token", "sentinel.log");
-                    subirArchivo(archivo.string(),ruta_remota, token_nuvo);
+                    subirArchivoStreaming(archivo.string(),ruta_remota, token_nuvo);
                 }else {
                     logError("Ocurrio un error con la petición del backup: " + std::string(e.what()), "sentinel.log");
                 }
