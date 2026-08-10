@@ -12,7 +12,10 @@ std::string iniciarSesion(const std::string& trozo, const std::string& token);
 
 void continuarSecion(const std::string& sessionId, const size_t& offset, const std::string& trozo, const std::string& token);
 
-void continuarSesion(const std::string& sessionId, const size_t& offset, const std::string& trozo, const std::string& token);
+void finalizarSesion(const std::string& sessionId, const size_t& offset, const std::string& dirrecion,
+const std::string& trozo, const std::string& token);
+
+void subirArchivoStreaming(const std::string& ruta, const std::string& rutaRemota, const std::string& token);
 
 void ejecutarBackupNube(const ConfigBackupNube& config);
 
