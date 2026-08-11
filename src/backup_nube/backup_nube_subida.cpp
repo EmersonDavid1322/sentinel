@@ -220,7 +220,6 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
 
             fs::path ruta_relativa = fs::relative(entrada.path(), origen);
             std::string ruta_remota = config.carpeta_remota + "/" + ruta_relativa.string();
-            std::cout << ruta_remota << std::endl;
 
             try{
                 logInfo("Se incio la subida del archivo: " + archivo.string(), "backups.log");
@@ -236,11 +235,13 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
                     logInfo("Se a actualizado el token", "sentinel.log");
                     subirArchivoStreaming(archivo.string(),ruta_remota, token_nuvo);
                 }else {
-                    logError("Ocurrio un error con la petición del backup: " + std::string(e.what()), "sentinel.log");
+                    logError("Ocurrio un error con la petición del backup: " + std::string(e.what())
+                    + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "sentinel.log");
                 }
             }
             catch (const ErrorBackupRED& e) {
-                logError("Ocurrio un error con la red al intentar realizar el backup a la nube" + std::string(e.what()), "sentinel.log");
+                logError("Ocurrio un error con la red al intentar realizar el backup a la nube" + std::string(e.what())
+                + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "sentinel.log");
             }
             catch (const DaemonError& e) {
                 logError("Ocurrio un error inesperado: " + std::string(e.what()), "sentinel.log");
