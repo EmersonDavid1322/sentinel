@@ -9,15 +9,24 @@
     },
     "backup_nube": {
         "activo": true,
-        "carpeta_remota": "",
+        "carpeta_remota": "/backup",
         "ignorar": [],
-        "carpetas": [],
-        "hora": "00:00",
-        "token": "",
-        "cliente_id":  "",
-        "cliente_secret": "",
-        "refresh_token": ""
-},
+        "carpetas": ["/home/Emerson/Imágenes"],
+        "cliente_id": "v1pi7dtgr3gc55p",
+        "cliente_secret": "gy8nrkvx3wbwaqx",
+        "hora": "18:15",
+        "ignorar": [
+            ".git",
+            ".venv",
+            "venv",
+            "build",
+            ".obsidian",
+            ".trash",
+            ".idea"
+        ],
+        "refresh_token": "I2ckZnlktAEAAAAAAAAAAXXp4eaRUJLw8IDKSyS2nb87QeXwioT80F1dio1Yrnkq",
+        "token": "sl.u.AGqBX0u6C90vQsqm-FYneSsVzSjFyO3kpcmBpKlEGYM1LUBB0t9U2xBNB_7Cx9MGcoLlXTNCdghLoW5xx3o2ZuzgPMbELY5Y8Nh3saKcQ-ke5U-hf_vONc9I9DNXq6x6cHYeamWBHbs2nYg5DDRUYKbZ83jUbdOJBfybzRvaW0Uy6YyAAXfwEZOP4Vt7Fq511Ly7PvMHNh3YDxMU3Jgwo2nzJRx_vCjGM0f3T-Qni2CpftKAWy7J2wZO0gyDNFpc7s38mZB4Vy4GtisEEvHacwGvfqdfO9mWUoYdFmTFA1BndxlQoRQhW_h41CYavzLWPhLlSeQgNg8GZwWrQXpk4AM5_16hd9iMg_BSrvGQlgqYv3ZlkKCFbhH2GZutdFbY-CDgPsn9M8hZGL4oY9IEzzuE_48DgMvx7hIov2CQdbR-yPBzvzygiD-UtISRJl1hHMYSexleezv8T5gwsUgpdiAvMHPQdda8gxCCMF80aD0mebWxJVh5UIfjL-aeDbvQLqMOBApaDmJ17nuPf4Vjju242yh1cQNq4IkNZsPvldKhDdaHk1YH_JT3-Xu-53mkCrLnvedU_2lpfXUcC5Lifut0-mhO27qmZAGEn8rv1jyUq3BFNvwAtpNF4mqUDKZd32gPAhzHpBlPU8pN1yKpfLB0iwwRp1itukDZucXYOVmFz4re656vYW7dw0fvfBD9lL0RW05ScrxP4MZkHC93f7xFG23NPkvRwcBndoNGxayZ29u2X3v_5h-Bw00Sct2QsgsVaD0QHOEMVY--X3dSK5R9EGDps23RMIumTVhUMVy8olHcEfZy7ULYxoQLoLUwDl1WUkiVv4BmY9LFZmaCe_w5MoAR3e35GsaHnOMI4WftPIWP9QTFLoh5AKH6h3_KF7B1h8HnDxBqs8xSHddIdQ807kjlBgXDSW_t49MSQVZjVO_-l4Enp_6zeZENYkWysq6QVkNfGtPZOCU0Xz91xxOjY52SbY5h6PosZ0kAQPFs7D5Sy98VfWTKWoHQaJAXRN01Huyc4yRMe87yffc9Aqo8tvvAQOpWCiVFXtGkKr0enn-TdLyhaSWWNfEzAz0BIDjmRUxcw83zyv2PuRZCzypmtOOqLi6BbA1j21OVHuZdHM8hQ2DM6VdTLhTt47jYrzPRHT4ijjFUwKOmJy52hVNeM6-osbmVLC6NxyupA3gzW1H-ddUWrbIF8s5Sgfjp-VELcv5R8Q7J7FWOcVvWm-0EXa_tjJQ6aG5vpKIFvmMyWB-XNGRhuaM4lNeZL1gvY9i-J7IMkBLDN0iEn4eEwr6jgxl04Z0WC4OTWcCvyCtmBQ"
+    },
     "monitor": {
         "activo": false,
         "limite_cpu": 70,
