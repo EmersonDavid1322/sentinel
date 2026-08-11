@@ -248,7 +248,7 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
             }
         }
     }
-    logInfo("Se compelto el backup a DropBox de forma correcta", "Sentinel.log");
+    logInfo("Se compelto el backup a DropBox de forma correcta", "sentinel.log");
 }
 
 void loopBackupNube(ConfigCompartida& config_compartida) {
