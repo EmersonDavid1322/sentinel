@@ -171,7 +171,7 @@ void subirArchivoStreaming(const std::string& ruta, const std::string& rutaRemot
             esPrimero = false;
 
             if (esUltimo) {
-                finalizarSesion(sessionId, tamañoLectura, "", rutaRemota, token);
+                finalizarSesion(sessionId, tamañoLectura, rutaRemota, "", token);
             }
         } else if (esUltimo) {
             finalizarSesion(sessionId, offset, rutaRemota, trozo, token);
