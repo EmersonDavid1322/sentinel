@@ -174,7 +174,7 @@ void subirArchivoStreaming(const std::string& ruta, const std::string& rutaRemot
                 finalizarSesion(sessionId, tamañoLectura, "", rutaRemota, token);
             }
         } else if (esUltimo) {
-            finalizarSesion(sessionId, offset, trozo, rutaRemota, token);
+            finalizarSesion(sessionId, offset, rutaRemota, trozo, token);
         } else {
             continuarSesion(sessionId, offset, trozo, token);
         }
@@ -220,6 +220,7 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
 
             fs::path ruta_relativa = fs::relative(entrada.path(), origen);
             std::string ruta_remota = config.carpeta_remota + "/" + ruta_relativa.string();
+            std::cout << ruta_remota << std::endl;
 
             try{
                 logInfo("Se incio la subida del archivo: " + archivo.string(), "backups.log");
