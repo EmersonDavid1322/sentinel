@@ -5,6 +5,11 @@ BASE_DIR=$(dirname "$(readlink -f "$0")")
 PROYECTO_DIR=$(dirname "$BASE_DIR")
 DESTINO_DEAMON="$HOME/apps/deamon"
 
+if [ "$EUID" -eq 0 ]; then
+  echo "No se permite ejecutar el scrips como root"
+  exit 1
+fi
+
 bash "$PROYECTO_DIR/scripts/install_dep.sh"
 
 mkdir -p "$DESTINO_DEAMON"
