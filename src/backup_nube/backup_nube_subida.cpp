@@ -172,9 +172,11 @@ void subirArchivoStreaming(const std::string& ruta, const std::string& rutaRemot
 
             if (esUltimo) {
                 finalizarSesion(sessionId, tamañoLectura, rutaRemota, "", token);
+                logInfo("Se a subido correctamente el archivo " + rutaRemota, "backups.log");
             }
         } else if (esUltimo) {
             finalizarSesion(sessionId, offset, rutaRemota, trozo, token);
+            logInfo("Se a subido correctamente el archivo " + rutaRemota, "backups.log");
         } else {
             continuarSesion(sessionId, offset, trozo, token);
         }
@@ -209,7 +211,7 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
             }
 
             if (debeIgnorarce(entrada.path(), config.ignorar)) {
-                logWarning("Se ignoro un archivo :" + entrada.path().string(), "backups.log");
+                logWarning("Se ignoro un archivo: " + entrada.path().string(), "backups.log");
                 continue;
             }
 
