@@ -193,6 +193,7 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
     if (hora_actual != config.hora){
         return;
     }
+
     logInfo("Se incio el backup a la nube " + hora_actual, "sentinel.log");
     limpiarLog();
     std::string token = config.token;

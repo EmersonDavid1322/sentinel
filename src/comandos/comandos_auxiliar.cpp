@@ -73,3 +73,22 @@ void cambiarEstadoSeccion(const std::string& seccion, bool activo){
     datos [seccion]["activo"] = activo;
     guardarJSON(datos, ruta);
 }
+
+//ignorar para backup local y nube
+void aniadirIgnorar(const std::string& parametro, const std::string& valor) {
+    std::string valor_limpio = limpiarEspacios(valor);
+    if (valor_limpio.empty()) {
+        enviarRespuesta("No se permiten valores vacios en destino");
+        return;
+    }
+
+    std::filesystem::path ruta = obtenerRutaConfig();
+    json datos = leerJSONActual(ruta);
+
+    std::vector<std::string> lista_ignorados = datos[parametro]["ignorar"];
+    lista_ignorados.push_back(valor_limpio);
+
+    datos[parametro]["ignorar"] = lista_ignorados;
+    guardarJSON(datos, ruta);
+    enviarRespuesta("Se añadido " + valor_limpio + " a la lista de ignorar");
+}

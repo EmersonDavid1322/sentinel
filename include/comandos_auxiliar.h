@@ -15,3 +15,6 @@ void cambiarEstadoSeccion(const std::string& seccion, bool activo);
 std::string limpiarEspacios(const std::string& texto);
 
 void cambiarDireccion(const std::string& parametro,const std::string& llave , const std::string& dirrecion);
+
+//ignorar para backup loca y nube
+void aniadirIgnorar(const std::string& parametro, const std::string& valor);

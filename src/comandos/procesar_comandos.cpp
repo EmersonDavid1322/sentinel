@@ -56,6 +56,12 @@ void procesarComandoBackup(std::string& accion, std::string& valor, const Config
     else if (accion == "ahora") {
         ejecutarBackupComando(configBackup, configMonitor);
     }
+    else if (accion == "modo") {
+        cambiarForzarBackup(valor);
+    }
+    else if (accion == "ignorar") {
+        aniadirIgnorar("backup", valor);
+    }
     else {
         enviarRespuesta("Accion '" + accion + "' no disponible en el modulo de backup local");
     }
@@ -68,6 +74,12 @@ void procesarComandoBN(std::string& accion, std::string& valor, const ConfigBack
     }
     else if (accion == "lista_nube") {
         mostrarListadoComando(config);
+    }
+    else if (accion == "ignorar") {
+        aniadirIgnorar("backup_nube", valor);
+    }
+    else if (accion == "ahora") {
+        ejecutarBackupNubeComando(config);
     }
     else{
         enviarRespuesta("Accion '" + accion + "' no disponible en el modulo de backup nube");
