@@ -12,7 +12,6 @@
 #include "json.hpp"
 using json = nlohmann::json;
 
-
 std::string iniciarSesion(const std::string& trozo, const std::string& token) {
     CURL* curl = curl_easy_init();
     if (!curl) {
@@ -195,6 +194,8 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
         return;
     }
     logInfo("Se incio el backup a la nube " + hora_actual, "sentinel.log");
+    limpiarLog();
+    std::string token = config.token;
 
     namespace fs = std::filesystem;
     for (const auto& carpeta : config.carpetas) {
@@ -225,17 +226,17 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
 
             try{
                 logInfo("Se incio la subida del archivo: " + archivo.string(), "backups.log");
-                subirArchivoStreaming(archivo.string(), ruta_remota, config.token);
+                subirArchivoStreaming(archivo.string(), ruta_remota, token);
             }
             catch (const std::filesystem::filesystem_error& e) {
                 logError("Ocurrio un error con el manejo de archivos loca: " + std::string(e.what()), "sentinel.log");
             }
             catch (const ErrorBackupAPI& e) {
                 if (e.codigoHTTP == 401) {
-                    std::string token_nuvo = renovarAccessToken(config);
-                    actualizarToken(token_nuvo);
+                    token = renovarAccessToken(config);
+                    actualizarToken(token);
                     logInfo("Se a actualizado el token", "sentinel.log");
-                    subirArchivoStreaming(archivo.string(),ruta_remota, token_nuvo);
+                    subirArchivoStreaming(archivo.string(),ruta_remota, token);
                 }else {
                     logError("Ocurrio un error con la petición del backup: " + std::string(e.what())
                     + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "sentinel.log");

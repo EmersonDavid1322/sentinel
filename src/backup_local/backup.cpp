@@ -12,6 +12,7 @@
 #include "config_compartida.h"
 #include "monitor.h"
 #include "backup_nube_subida.h"
+#include "backup_nube_auxiliar.h"
 namespace fs = std::filesystem;
 
 ResultadoVerificacionRecursos verificarRecursosBackup(const ConfigBackup& configBackup, const ConfigMonitor& configMonitor) {
@@ -131,6 +132,7 @@ void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_
             logInfo("Se inicio correctamente el backup_local a las: " + hora_actual, "sentinel.log");
         }
 
+        limpiarLog();
         std::string carpetas_msg = verificarCarpetasBackup(config_backup.carpetas, config_backup.destino);
         ejecutarBackup(config_backup.carpetas, config_backup.destino, config_backup.ignorar);
 
