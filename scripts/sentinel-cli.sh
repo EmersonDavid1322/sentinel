@@ -1,9 +1,8 @@
 #!/bin/bash
 set -e
 
-BASE_DIR=$(dirname "$(readlink -f "$0")")
-RUTA_FIFO="$BASE_DIR/config/sentinel.fifo"
-RUTA_ESTADO="$BASE_DIR/config/sentinel_estado.txt"
+RUTA_FIFO="/var/lib/sentinel/sentinel.fifo"
+RUTA_ESTADO="/var/lib/sentinel/sentinel_estado.txt"
 
 TIEMPO_ANTES=$(stat -c %Y "$RUTA_ESTADO" 2>/dev/null || echo 0)
 

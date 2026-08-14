@@ -18,7 +18,7 @@ void agregarCarpetaBackup(const std::string& carpeta) {
         return;
     }
 
-    std::filesystem::path ruta = obtenerRutaBase() / "config" / "sentinel.json";
+    std::filesystem::path ruta = obtenerRutaConfig();
     json datos = leerJSONActual(ruta);
 
     std::vector<std::string> carpetas = datos["backup"]["carpetas"];
@@ -32,7 +32,7 @@ void agregarCarpetaBackup(const std::string& carpeta) {
 
 void ejecutarBackupComando(const ConfigBackup& configBackup, const ConfigMonitor& configMonitor) {
     try {
-        std::filesystem::path ruta = obtenerRutaBase() / "config" / "sentinel.json";
+        std::filesystem::path ruta = obtenerRutaConfig();
         json datos = leerJSONActual(ruta);
 
         ResultadoVerificacionRecursos resultado = verificarRecursosBackup(configBackup, configMonitor);

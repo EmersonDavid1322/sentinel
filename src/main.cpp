@@ -25,9 +25,8 @@ int main() {
         logInfo("No se detectó entorno gráfico. Las notificaciones quedan desactivadas (modo servidor)", "sentinel.log");
     }
     capturarSenal();
-    fs::create_directories(obtenerRutaBase() / "logs");
     
-    std::filesystem::path rutaConfig = obtenerRutaBase() / "config" / "sentinel.json";
+    std::filesystem::path rutaConfig = obtenerRutaConfig();
 
     try {
         asegurarConfigExiste(rutaConfig);

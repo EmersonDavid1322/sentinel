@@ -47,7 +47,7 @@ std::string renovarAccessToken(const ConfigBackupNube& config) {
 }
 
 void actualizarToken(const std::string& token) {
-    std::filesystem::path rutaConfig = obtenerRutaBase() / "config" / "sentinel.json";
+    std::filesystem::path rutaConfig = obtenerRutaConfig();
 
     json datos = leerJSONActual(rutaConfig);
 

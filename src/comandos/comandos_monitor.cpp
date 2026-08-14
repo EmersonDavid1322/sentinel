@@ -10,7 +10,7 @@
 
 //comandos monitor
 void cambiarValorMonitor(const std::string& parametro, double valor){
-    std::filesystem::path ruta = obtenerRutaBase() / "config" / "sentinel.json";
+    std::filesystem::path ruta = obtenerRutaConfig();
 
     json datos = leerJSONActual(ruta);
     datos ["monitor"][parametro] = valor;

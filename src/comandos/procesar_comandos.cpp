@@ -17,7 +17,7 @@
 #include "comandos_backup_nube.h"
 
 void enviarRespuesta(const std::string& mensaje) {
-    std::filesystem::path ruta_estado = obtenerRutaBase() / "config" / "sentinel_estado.txt";
+    std::filesystem::path ruta_estado = obtenerRutaEstado() / "sentinel_estado.txt";
     std::ofstream salida(ruta_estado);
     if (salida.is_open()) {
         salida << mensaje << std::endl;
@@ -68,6 +68,9 @@ void procesarComandoBN(std::string& accion, std::string& valor, const ConfigBack
     }
     else if (accion == "lista_nube") {
         mostrarListadoComando(config);
+    }
+    else{
+        enviarRespuesta("Accion '" + accion + "' no disponible en el modulo de backup nube");
     }
 }
 
@@ -144,8 +147,8 @@ void procesarComando(const std::string& comando, const ConfigSentinel& config) {
 }
 
 void loopComandos(ConfigCompartida& config_compartida) {
-    std::string ruta_fifo = (obtenerRutaBase() / "config" / "sentinel.fifo").string();
-    std::string ruta_estado = obtenerRutaBase() / "config" / "sentinel_estado.txt";
+    std::string ruta_fifo = (obtenerRutaEstado()/ "sentinel.fifo").string();
+    std::string ruta_estado = obtenerRutaEstado()/ "sentinel_estado.txt";
 
     mkfifo(ruta_fifo.c_str(), 0666);
     std::ofstream salida(ruta_estado);

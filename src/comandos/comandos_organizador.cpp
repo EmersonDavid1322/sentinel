@@ -16,7 +16,7 @@ void agregarReglaOrganizador(const std::string& extension, const std::string& ca
         return;
     }
 
-    std::filesystem::path ruta = obtenerRutaBase() / "config" / "sentinel.json";
+    std::filesystem::path ruta = obtenerRutaConfig();
     json datos = leerJSONActual(ruta);
 
     std::map<std::string, std::string> reglas = datos["organizador"]["reglas"];

@@ -51,7 +51,7 @@ void cambiarDireccion(const std::string& parametro,const std::string& llave ,con
         return;
     }
 
-    std::filesystem::path ruta = obtenerRutaBase() / "config" / "sentinel.json";
+    std::filesystem::path ruta = obtenerRutaConfig();
 
     json datos = leerJSONActual(ruta);
 
@@ -67,7 +67,7 @@ void cambiarDireccion(const std::string& parametro,const std::string& llave ,con
 
 //cambiar estado acitvo modulo
 void cambiarEstadoSeccion(const std::string& seccion, bool activo){
-    std::filesystem::path ruta = obtenerRutaBase() / "config" / "sentinel.json";
+    std::filesystem::path ruta = obtenerRutaConfig();
 
     json datos = leerJSONActual(ruta);
     datos [seccion]["activo"] = activo;

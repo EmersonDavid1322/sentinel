@@ -3,31 +3,16 @@ set -e
 
 BASE_DIR=$(dirname "$(readlink -f "$0")")
 PROYECTO_DIR=$(dirname "$BASE_DIR")
-DESTINO_DEAMON="$HOME/apps/deamon"
 
-if [ "$EUID" -eq 0 ]; then
-  echo "No se permite ejecutar el scrips como root"
-  exit 1
-fi
+NOMBRE_USUARIO="${1:-sentinel}"
 
 bash "$PROYECTO_DIR/scripts/install_dep.sh"
-
-mkdir -p "$DESTINO_DEAMON"
 
 # limpieza
 echo "Deteniendo servicios e instancias previas de Sentinel..."
 
 if systemctl --user is-active --quiet sentinel.service 2>/dev/null; then
     systemctl --user stop sentinel.service || true
-fi
-
-# Deshabilitar y eliminar el archivo de servicio viejo
-if [ -f "$HOME/.config/systemd/user/sentinel.service" ]; then
-    systemctl --user disable sentinel.service || true
-    rm -f "$HOME/.config/systemd/user/sentinel.service"
-    systemctl --user reset-failed sentinel.service || true
-    systemctl --user daemon-reload
-    echo "Se limpió el servicio anterior"
 fi
 
 # Por si el proceso quedó 'huérfano' suelto en la memoria
@@ -50,45 +35,70 @@ cd "$PROYECTO_DIR/build"
 cmake "$PROYECTO_DIR" -DCMAKE_BUILD_TYPE=Release
 make
 
-mkdir -p "$DESTINO_DEAMON/config"
-
-if [ -f "$DESTINO_DEAMON/sentinel" ]; then
+if [ -f "/usr/local/bin/sentinel" ]; then
     echo "Eliminando versión de ejecutable anterior..."
-    rm "$DESTINO_DEAMON/sentinel"
+    sudo rm "/usr/local/bin/sentinel"
 fi
 
-cp "$PROYECTO_DIR/build/sentinel" "$DESTINO_DEAMON/"
+sudo cp "$PROYECTO_DIR/build/sentinel" "/usr/local/bin/"
 
-chmod +x "$DESTINO_DEAMON/sentinel"
+sudo chmod +x /usr/local/bin/sentinel
 
 # Limpieza de la carpeta temporal de compilación
 rm -rf "$PROYECTO_DIR/build"
 
+# crear carpetas y archivos
+sudo mkdir -p "/etc/sentinel/"
+sudo mkdir -p "/var/log/sentinel/"
+sudo mkdir -p "/var/lib/sentinel/"
+
 if [ -f "$PROYECTO_DIR/config/sentinel.json" ]; then
-  if [ ! -f "$DESTINO_DEAMON/config/sentinel.json" ]; then
-    mv "$PROYECTO_DIR/config/sentinel.json" "$DESTINO_DEAMON/config/sentinel.json"
-    chmod 600 "$DESTINO_DEAMON/config/sentinel.json"
+  if [ ! -f "/etc/sentinel/sentinel.json" ]; then
+    sudo cp "$PROYECTO_DIR/config/sentinel.json" "/etc/sentinel/sentinel.json"
+    sudo chmod 600 "/etc/sentinel/sentinel.json"
   fi
 else
   echo "Error: no se encontro el archivo de configuraciones"
-  return 1
+  exit 1
+fi
+
+if [ -f "$PROYECTO_DIR/scripts/sentinel-cli.sh" ]; then
+    sudo cp "$PROYECTO_DIR/scripts/sentinel-cli.sh" "/usr/local/bin/sentinel-cli"
+    sudo chmod +x /usr/local/bin/sentinel-cli
+    echo "Se copio el scrips cliente correctamente"
+else
+    echo "No se encontro el cliente sentinel-cli.sh"
+    exit 1
 fi
 
 if [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ]; then
   echo "No se detectó entorno gráfico, instalando en modo servidor"
 
-      USUARIO=$(whoami)
-      echo "Usuario actual $USUARIO"
-      sudo  bash -c "cat > /etc/systemd/system/sentinel.service" <<EOF
+  if [ -f "/etc/systemd/system/sentinel.service" ]; then
+      sudo systemctl disable sentinel.service || true
+      sudo rm -f "/etc/systemd/system/sentinel.service"
+      sudo systemctl reset-failed sentinel.service || true
+      sudo systemctl daemon-reload
+      echo "Se limpió el servicio anterior (modo servidor)"
+  fi
+
+  if ! id "$NOMBRE_USUARIO" &> /dev/null; then
+    sudo useradd --system --no-create-home --shell /usr/sbin/nologin "$NOMBRE_USUARIO"
+    echo "Usuario de sistema '$NOMBRE_USUARIO' creado"
+  fi
+
+  sudo chown -R "$NOMBRE_USUARIO:$NOMBRE_USUARIO" /etc/sentinel /var/log/sentinel /var/lib/sentinel /usr/local/bin/sentinel /usr/local/bin/sentinel-cli
+
+
+      sudo bash -c "cat > /etc/systemd/system/sentinel.service" <<EOF
 [Unit]
 Description=Daemon Sentinel (modo servidor)
 After=network.target
 
 [Service]
-User=$USUARIO
-Group=$USUARIO
-ExecStart=$DESTINO_DEAMON/sentinel
-WorkingDirectory=$DESTINO_DEAMON
+User=$NOMBRE_USUARIO
+Group=$NOMBRE_USUARIO
+ExecStart=/usr/local/bin/sentinel
 Restart=always
 RestartSec=5
 
@@ -96,13 +106,26 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 
-sudo systemctl  daemon-reload
-sudo systemctl  enable sentinel.service
-sudo systemctl  start sentinel.service
-sudo systemctl  status sentinel.service
+sudo systemctl daemon-reload
+sudo systemctl enable sentinel.service
+sudo systemctl start sentinel.service
+sudo systemctl status sentinel.service
 
 else
   echo "Entorno gráfico detectado, instalando en modo escritorio"
+
+  if [ -f "$HOME/.config/systemd/user/sentinel.service" ]; then
+      systemctl --user disable sentinel.service || true
+      rm -f "$HOME/.config/systemd/user/sentinel.service"
+      systemctl --user reset-failed sentinel.service || true
+      systemctl --user daemon-reload
+      echo "Se limpió el servicio anterior"
+  fi
+
+  if [ -n "$1" ]; then
+      echo "Aviso: el argumento de usuario '$1' se ignora en modo escritorio (el servicio corre como tu usuario actual: $USER)"
+  fi
+  sudo chown -R "$USER:$USER" /etc/sentinel /var/log/sentinel /var/lib/sentinel /usr/local/bin/sentinel /usr/local/bin/sentinel-cli
 
 # CONFIGURACIÓN DEL NUEVO SERVICIO SYSTEMD
 echo "Configurando service..."
@@ -115,8 +138,7 @@ Description=Daemon Sentinel
 After=graphical-session.target
 
 [Service]
-ExecStart=$DESTINO_DEAMON/sentinel
-WorkingDirectory=$DESTINO_DEAMON
+ExecStart=/usr/local/bin/sentinel
 KillMode=control-group
 Restart=always
 RestartSec=5
@@ -134,14 +156,6 @@ systemctl --user daemon-reload
 systemctl --user enable sentinel.service
 systemctl --user start sentinel.service
 systemctl --user status sentinel.service
-fi
-
-if [ -f "$PROYECTO_DIR/scripts/sentinel-cli.sh" ]; then
-    cp "$PROYECTO_DIR/scripts/sentinel-cli.sh" "$DESTINO_DEAMON"
-    chmod +x "$DESTINO_DEAMON/sentinel-cli.sh"
-    echo "Se copio el scrips cliente correctamente"
-else
-    echo "No se encontro el cliente sentinel-cli.sh"
 fi
 
 echo "Instalación completa de manera exitosa"

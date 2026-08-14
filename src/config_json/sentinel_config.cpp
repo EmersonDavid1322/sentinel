@@ -23,7 +23,7 @@ std::ifstream comprobar_json(const std::filesystem::path& ruta){
 
 void actualizarJSON(ConfigCompartida& configCompartida){
     try{
-        fs::path ruta = (obtenerRutaBase() / "config" / "sentinel.json");
+        fs::path ruta = obtenerRutaConfig();
         VigilanteInotify vigilante(ruta.c_str(), IN_MODIFY);
 
         struct pollfd pfd;
