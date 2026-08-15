@@ -13,10 +13,7 @@
 using json = nlohmann::json;
 
 std::string iniciarSesion(const std::string& trozo, const std::string& token) {
-    CURL* curl = curl_easy_init();
-    if (!curl) {
-        throw DaemonError("Error al inicializar curl para iniciar sesión de subida");
-    }
+    CURL* curl = inicializarCurl("Iniciar seción subida");
 
     std::string autorizacion = "Authorization: Bearer " + token;
     struct curl_slist* headers = nullptr;
@@ -54,10 +51,7 @@ std::string iniciarSesion(const std::string& trozo, const std::string& token) {
 }
 
 void continuarSesion(const std::string& sessionId, const size_t& offset, const std::string& trozo, const std::string& token) {
-    CURL* curl = curl_easy_init();
-    if (!curl) {
-        throw DaemonError("Error al inicializar curl para continuar la sesión de subida");
-    }
+    CURL* curl = inicializarCurl("Continuar sección de subida");
 
     std::string autorizacion = "Authorization: Bearer " + token;
 
@@ -97,10 +91,7 @@ void continuarSesion(const std::string& sessionId, const size_t& offset, const s
 
 void finalizarSesion(const std::string& sessionId, const size_t& offset, const std::string& dirrecion,
     const std::string& trozo, const std::string& token) {
-    CURL* curl = curl_easy_init();
-    if (!curl) {
-        throw DaemonError("Error al inicializar curl para finalizara la sesión de subida");
-    }
+    CURL* curl = inicializarCurl("Finzalizar seción subida");
 
     std::string autorizacion = "Authorization: Bearer " + token;
 

@@ -67,3 +67,12 @@ void limpiarLog() {
     }
     logFile.close();
 }
+
+CURL* inicializarCurl(const std::string& contexto) {
+    CURL* curl = curl_easy_init();
+    if (!curl) {
+        throw DaemonError("Error al inicializar el curl: " + contexto);
+    }
+    curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+    return curl;
+}
