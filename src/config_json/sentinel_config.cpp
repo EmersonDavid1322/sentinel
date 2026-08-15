@@ -87,6 +87,7 @@ void crearConfigPorDefecto(const std::filesystem::path& rutaJSON){
     config["backup_nube"]["activo"] = false;
 
     config["monitor"] = {};
+    config["monitor"]["intervalo"] = 60;
     config["monitor"]["limite_cpu"] = 70;
     config["monitor"]["limite_ram"] = 70;
     config["monitor"]["limite_disco"] = 70;

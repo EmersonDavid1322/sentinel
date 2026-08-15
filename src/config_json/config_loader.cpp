@@ -1,7 +1,6 @@
 #include "config_loader.h"
 #include <string>
 #include <vector>
-#include "config_loader.h"
 #include "json.hpp"
 #include "errores.h"
 #include "sentinel_config.h"
@@ -56,12 +55,14 @@ ConfigBackupNube cargarBackupNube(const json& datos) {
 
 ConfigMonitor cargarMonitor(const json& datos){
 
+    int intervalo = datos["monitor"]["intervalo"];
     int cpu = datos["monitor"]["limite_cpu"];
     int ram = datos["monitor"]["limite_ram"];
     int disco = datos["monitor"]["limite_disco"];
     bool activo = datos["monitor"]["activo"];
 
     ConfigMonitor monitor;
+    monitor.intervalo = intervalo;
     monitor.cpu = cpu;
     monitor.ram = ram;
     monitor.disco = disco;

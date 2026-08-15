@@ -172,6 +172,6 @@ void loopMonitor(ConfigCompartida& config_compartida) {
         }
 
         std::unique_lock<std::mutex> lock(mtx_apagado);
-        cv_apagado.wait_for(lock, std::chrono::seconds(60), [] { return !corriendo.load(); });
+        cv_apagado.wait_for(lock, std::chrono::seconds(config.monitor.intervalo), [] { return !corriendo.load(); });
     }
 }

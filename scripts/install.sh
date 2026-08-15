@@ -109,6 +109,7 @@ EOF
 sudo systemctl daemon-reload
 sudo systemctl enable sentinel.service
 sudo systemctl start sentinel.service
+sudo systemctl restart sentinel.service
 sudo systemctl status sentinel.service
 
 else

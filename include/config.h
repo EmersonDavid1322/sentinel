@@ -25,6 +25,7 @@ struct ConfigBackupNube {
 };
 
 struct ConfigMonitor {
+    int intervalo;
     double cpu;
     double ram;
     double disco;
