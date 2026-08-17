@@ -162,9 +162,11 @@ void subirArchivoStreaming(const std::string& ruta, const std::string& rutaRemot
 
             if (esUltimo) {
                 finalizarSesion(sessionId, tamañoLectura, rutaRemota, "", token);
+                logInfo("Se a subido correctamente el archivo " + rutaRemota, "backups.log");
             }
         } else if (esUltimo) {
             finalizarSesion(sessionId, offset, rutaRemota, trozo, token);
+            logInfo("Se a subido correctamente el archivo " + rutaRemota, "backups.log");
         } else {
             continuarSesion(sessionId, offset, trozo, token);
         }
@@ -198,14 +200,17 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
 
             if (fs::is_directory(entrada) && debeIgnorarce(entrada.path(), config.ignorar)) {
                 it.disable_recursion_pending();
+                logWarning("Se ignoro la carpeta completa: " + entrada.path().string(), "backups.log");
                 continue;
             }
 
             if (debeIgnorarce(entrada.path(), config.ignorar)) {
+                logWarning("Se ignoro un archivo: " + entrada.path().string(), "backups.log");
                 continue;
             }
 
             if (!fs::is_regular_file(entrada)) {
+                logWarning("Se ignoro un archivo de tipo no regular: " + archivo.string(), "backups.log");
                 continue;
             }
 
@@ -246,8 +251,8 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
         logInfo("Se compelto el backup a DropBox de forma correcta", "sentinel.log");
         logInfo("Se compelto el backup a DropBox de forma correcta", "backups.log");
     }else {
-        logInfo("Se compelto el backup a DropBox, hubo problemas con algunos archivos, por favor revise 'backups.log' para mas información", "sentinel.log");
-        logInfo("Se compelto el backup a DropBox, hubo algunos error con archivos", "backups.log");
+        logInfo("Se completo el backup a DropBox, hubo problemas con algunos archivos, por favor revise 'backups.log' para mas información", "sentinel.log");
+        logInfo("Se completo el backup a DropBox, hubo algunos error con archivos", "backups.log");
     }
 }
 
