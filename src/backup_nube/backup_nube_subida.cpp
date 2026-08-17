@@ -162,15 +162,12 @@ void subirArchivoStreaming(const std::string& ruta, const std::string& rutaRemot
 
             if (esUltimo) {
                 finalizarSesion(sessionId, tamañoLectura, rutaRemota, "", token);
-                logInfo("Se a subido correctamente el archivo " + rutaRemota, "backups.log");
             }
         } else if (esUltimo) {
             finalizarSesion(sessionId, offset, rutaRemota, trozo, token);
-            logInfo("Se a subido correctamente el archivo " + rutaRemota, "backups.log");
         } else {
             continuarSesion(sessionId, offset, trozo, token);
         }
-
         offset += tamañoLectura;
     }
 }
@@ -186,8 +183,10 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
     }
 
     logInfo("Se incio el backup a la nube " + hora_actual, "sentinel.log");
+    logInfo("Se incio el backup a la nube " + hora_actual + " Destino: " + config.carpeta_remota, "backups.log");
     limpiarLog();
     std::string token = config.token;
+    bool hubo_errores = false;
 
     namespace fs = std::filesystem;
     for (const auto& carpeta : config.carpetas) {
@@ -198,18 +197,15 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
             fs::path archivo = origen / entrada;
 
             if (fs::is_directory(entrada) && debeIgnorarce(entrada.path(), config.ignorar)) {
-                logWarning("Se ignoro la carpeta completa: " + entrada.path().string(), "backups.log");
                 it.disable_recursion_pending();
                 continue;
             }
 
             if (debeIgnorarce(entrada.path(), config.ignorar)) {
-                logWarning("Se ignoro un archivo: " + entrada.path().string(), "backups.log");
                 continue;
             }
 
             if (!fs::is_regular_file(entrada)) {
-                logWarning("Se ignoro un archivo de tipo no regular: " + archivo.string(), "backups.log");
                 continue;
             }
 
@@ -217,33 +213,42 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
             std::string ruta_remota = config.carpeta_remota + "/" + ruta_relativa.string();
 
             try{
-                logInfo("Se incio la subida del archivo: " + archivo.string(), "backups.log");
                 subirArchivoStreaming(archivo.string(), ruta_remota, token);
             }
             catch (const std::filesystem::filesystem_error& e) {
-                logError("Ocurrio un error con el manejo de archivos loca: " + std::string(e.what()), "sentinel.log");
+                logError("Ocurrio un error con el manejo de archivos loca: " + std::string(e.what()), "backups.log");
+                hubo_errores = true;
             }
             catch (const ErrorBackupAPI& e) {
                 if (e.codigoHTTP == 401) {
                     token = renovarAccessToken(config);
                     actualizarToken(token);
-                    logInfo("Se a actualizado el token", "sentinel.log");
+                    logInfo("Se a actualizado el token", "backups.log");
                     subirArchivoStreaming(archivo.string(),ruta_remota, token);
                 }else {
                     logError("Ocurrio un error con la petición del backup: " + std::string(e.what())
-                    + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "sentinel.log");
+                    + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "backups.log");
+                    hubo_errores = true;
                 }
             }
             catch (const ErrorBackupRED& e) {
                 logError("Ocurrio un error con la red al intentar realizar el backup a la nube" + std::string(e.what())
-                + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "sentinel.log");
+                + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "backups.log");
+                hubo_errores = true;
             }
             catch (const DaemonError& e) {
-                logError("Ocurrio un error inesperado: " + std::string(e.what()), "sentinel.log");
+                logError("Ocurrio un error inesperado: " + std::string(e.what()), "backups.log");
+                hubo_errores = true;
             }
         }
     }
-    logInfo("Se compelto el backup a DropBox de forma correcta", "sentinel.log");
+    if (!hubo_errores) {
+        logInfo("Se compelto el backup a DropBox de forma correcta", "sentinel.log");
+        logInfo("Se compelto el backup a DropBox de forma correcta", "backups.log");
+    }else {
+        logInfo("Se compelto el backup a DropBox, hubo problemas con algunos archivos, por favor revise 'backups.log' para mas información", "sentinel.log");
+        logInfo("Se compelto el backup a DropBox, hubo algunos error con archivos", "backups.log");
+    }
 }
 
 void loopBackupNube(ConfigCompartida& config_compartida) {
