@@ -21,6 +21,8 @@ struct ConfigBackupNube {
     std::string clienteSecret;
     std::string refresh_token;
     std::string hora;
+    std::string hora_bajada;
+    std::string carpeta_destino;
     bool activo;
 };
 

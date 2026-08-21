@@ -37,17 +37,21 @@ ConfigBackupNube cargarBackupNube(const json& datos) {
     std::string clienteSecret = datos["backup_nube"]["cliente_secret"];
     std::string refresh_token = datos["backup_nube"]["refresh_token"];
     std::string hora = datos["backup_nube"]["hora"];
+    std::string hora_bajada = datos["backup_nube"]["hora_bajada"];
+    std::string carpeta_destino = datos["backup_nube"]["carpeta_destino"];
     bool activo = datos["backup_nube"]["activo"];
 
     ConfigBackupNube nube;
     nube.carpetas = carpetas;
     nube.carpeta_remota = carpeta_remota;
+    nube.carpeta_destino = carpeta_destino;
     nube.ignorar = ignorar;
     nube.token = token;
     nube.clienteID = clienteID;
     nube.clienteSecret = clienteSecret;
     nube.refresh_token = refresh_token;
     nube.hora = hora;
+    nube.hora_bajada = hora_bajada;
     nube.activo = activo;
 
     return nube;

@@ -4,6 +4,7 @@
 #include "logger.h"
 #include "backup_auxiliar.h"
 #include "backup_nube_auxiliar.h"
+#include "backup_nube_bajada.h"
 #include <string>
 #include <curl/curl.h>
 #include <filesystem>
@@ -262,6 +263,7 @@ void loopBackupNube(ConfigCompartida& config_compartida) {
 
         if (config.backup_nube.activo) {
             ejecutarBackupNube(config.backup_nube);
+            ejecutarBajadaArchivosNube(config.backup_nube);
         }
         std::unique_lock<std::mutex> lock(mtx_apagado);
         cv_apagado.wait_for(lock, std::chrono::seconds(60), [] { return !corriendo.load(); });

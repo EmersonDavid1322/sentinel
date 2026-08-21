@@ -4,7 +4,6 @@
 #include "errores.h"
 #include <vector>
 #include <curl/curl.h>
-#include <iostream>
 #include "comandos_auxiliar.h"
 
 bool obtenerPaginaListado(const std::string& url, const std::string& cuerpo,
