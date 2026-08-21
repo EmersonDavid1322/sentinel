@@ -76,31 +76,25 @@ void ejecutarBackupNubeComando(const ConfigBackupNube& config) {
             std::string ruta_remota = config.carpeta_remota + "/" + ruta_relativa.string();
 
             try{
-                logInfo("Se incio la subida del archivo: " + archivo.string(), "backups.log");
-                subirArchivoStreaming(archivo.string(), ruta_remota, token);
+                conReintento(config, token, [&]() {
+                    subirArchivoStreaming(archivo.string(), ruta_remota, token);
+                });
             }
             catch (const std::filesystem::filesystem_error& e) {
-                logError("Ocurrio un error con el manejo de archivos loca: " + std::string(e.what()), "sentinel.log");
+                logError("Ocurrio un error con el manejo de archivos loca: " + std::string(e.what()), "backups.log");
             }
             catch (const ErrorBackupAPI& e) {
-                if (e.codigoHTTP == 401) {
-                    token = renovarAccessToken(config);
-                    actualizarToken(token);
-                    logInfo("Se a actualizado el token", "sentinel.log");
-                    subirArchivoStreaming(archivo.string(),ruta_remota, token);
-                }else {
-                    logError("Ocurrio un error con la petición del backup: " + std::string(e.what())
-                    + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "sentinel.log");
-                }
+                logError("Ocurrio un error con la petición del backup: " + std::string(e.what())
+                + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "backups.log");
             }
             catch (const ErrorBackupRED& e) {
                 logError("Ocurrio un error con la red al intentar realizar el backup a la nube" + std::string(e.what())
-                + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "sentinel.log");
+                + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "backups.log");
             }
             catch (const DaemonError& e) {
-                logError("Ocurrio un error inesperado: " + std::string(e.what()), "sentinel.log");
+                logError("Ocurrio un error inesperado: " + std::string(e.what()), "backups.log");
             }
         }
     }
-    logInfo("Se compelto el backup a DropBox de forma correcta", "sentinel.log");
+    logInfo("Se completo el backup a DropBox", "backups.log");
 }

@@ -18,5 +18,3 @@ const std::string& trozo, const std::string& token);
 void subirArchivoStreaming(const std::string& ruta, const std::string& rutaRemota, const std::string& token);
 
 void ejecutarBackupNube(const ConfigBackupNube& config);
-
-void loopBackupNube(ConfigCompartida& config_compartida);

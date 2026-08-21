@@ -219,23 +219,18 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
             std::string ruta_remota = config.carpeta_remota + "/" + ruta_relativa.string();
 
             try{
-                subirArchivoStreaming(archivo.string(), ruta_remota, token);
+                conReintento(config, token, [&]() {
+                    subirArchivoStreaming(archivo.string(), ruta_remota, token);
+                });
             }
             catch (const std::filesystem::filesystem_error& e) {
                 logError("Ocurrio un error con el manejo de archivos loca: " + std::string(e.what()), "backups.log");
                 hubo_errores = true;
             }
             catch (const ErrorBackupAPI& e) {
-                if (e.codigoHTTP == 401) {
-                    token = renovarAccessToken(config);
-                    actualizarToken(token);
-                    logInfo("Se a actualizado el token", "backups.log");
-                    subirArchivoStreaming(archivo.string(),ruta_remota, token);
-                }else {
-                    logError("Ocurrio un error con la petición del backup: " + std::string(e.what())
-                    + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "backups.log");
-                    hubo_errores = true;
-                }
+                logError("Ocurrio un error con la petición del backup: " + std::string(e.what())
+                + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "backups.log");
+                hubo_errores = true;
             }
             catch (const ErrorBackupRED& e) {
                 logError("Ocurrio un error con la red al intentar realizar el backup a la nube" + std::string(e.what())
@@ -254,18 +249,5 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
     }else {
         logInfo("Se completo el backup a DropBox, hubo problemas con algunos archivos, por favor revise 'backups.log' para mas información", "sentinel.log");
         logInfo("Se completo el backup a DropBox, hubo algunos error con archivos", "backups.log");
-    }
-}
-
-void loopBackupNube(ConfigCompartida& config_compartida) {
-    while (corriendo) {
-        ConfigSentinel config = config_compartida.obtener();
-
-        if (config.backup_nube.activo) {
-            ejecutarBackupNube(config.backup_nube);
-            ejecutarBajadaArchivosNube(config.backup_nube);
-        }
-        std::unique_lock<std::mutex> lock(mtx_apagado);
-        cv_apagado.wait_for(lock, std::chrono::seconds(60), [] { return !corriendo.load(); });
     }
 }

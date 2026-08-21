@@ -3,7 +3,6 @@
 #include <libnotify/notify.h>
 #include "config_loader.h"
 #include "backup.h"
-#include "backup_nube_subida.h"
 #include "monitor.h"
 #include "organizer.h"
 #include "logger.h"
@@ -13,6 +12,7 @@
 #include "sentinel_estado.h"
 #include "procesar_comandos.h"
 #include "config_compartida.h"
+#include "loop_backup_nube.h"
 namespace fs = std::filesystem;
 
 int main() {

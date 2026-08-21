@@ -72,9 +72,13 @@ void ejecutarBajadaArchivosNube(const ConfigBackupNube& config) {
     limpiarLog();
 
     std::string token = config.token;
+    std::vector<ArchivoRemoto> listaNube;
 
     namespace fs = std::filesystem;
-    std::vector<ArchivoRemoto> listaNube = listaArchivosRemotos(config);
+
+    conReintento(config, token, [&]() {
+         listaNube = listaArchivosRemotos(config);
+    });
 
     std::sort(listaNube.begin(), listaNube.end(), [](const ArchivoRemoto& a, const ArchivoRemoto& b) {
     return a.esCarpeta > b.esCarpeta;
@@ -91,22 +95,17 @@ void ejecutarBajadaArchivosNube(const ConfigBackupNube& config) {
             if (archivo.esCarpeta) {
                 fs::create_directories(rutaLocal);
             }else {
-                backupNubeBajada(token, archivo.ruta, rutaLocal);
+                conReintento(config, token, [&]() {
+                    backupNubeBajada(token, archivo.ruta, rutaLocal);
+                });
             }
         }
         catch (const std::filesystem::filesystem_error& e) {
             logError("Ocurrio un error con el manejo de archivos loca: " + std::string(e.what()), "backups.log");
         }
         catch (const ErrorBackupAPI& e) {
-            if (e.codigoHTTP == 401) {
-                token = renovarAccessToken(config);
-                actualizarToken(token);
-                logInfo("Se a actualizado el token", "backups.log");
-                backupNubeBajada(token, archivo.ruta, rutaLocal);
-            }else {
-                logError("Ocurrio un error con la petición de bajda de archivos: " + std::string(e.what())
-                + " ruta remota: " + archivo.ruta + " ruta sistema: " + rutaLocal.string(), "backups.log");
-            }
+            logError("Ocurrio un error con la petición de bajda de archivos: " + std::string(e.what())
+            + " ruta remota: " + archivo.ruta + " ruta sistema: " + rutaLocal.string(), "backups.log");
         }
         catch (const ErrorBackupRED& e) {
             logError("Ocurrio un error con la red al intentar bajar un archivo: " + std::string(e.what())

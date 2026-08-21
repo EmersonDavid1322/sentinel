@@ -2,6 +2,7 @@
 #include <curl/curl.h>
 #include <fstream>
 #include <filesystem>
+#include <thread>
 #include "errores.h"
 #include "json.hpp"
 #include "rutas.h"
