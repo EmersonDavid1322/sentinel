@@ -38,5 +38,39 @@ add_executable(sentinel
     src/backup_nube/loop_backup_nube.cpp
 )
 
+enable_testing()
+
+find_package(GTest REQUIRED)
+
+add_executable(sentinel_test
+        tests/backup_auxiliar_test.cpp
+        src/backup_local/backup_auxiliar.cpp
+)
+
+target_link_libraries(sentinel_test
+        PRIVATE
+        GTest::gtest_main
+)
+
+target_include_directories(sentinel_test
+        PRIVATE
+        include
+)
+
+include(GoogleTest)
+
+gtest_discover_tests(sentinel_test)
+
 target_include_directories(sentinel PRIVATE ${LIBNOTIFY_INCLUDE_DIRS})
 target_link_libraries(sentinel Threads::Threads ${LIBNOTIFY_LIBRARIES} CURL::libcurl)
+target_compile_options(hello_test PRIVATE
+        --coverage
+        -fprofile-arcs
+        -ftest-coverage
+)
+
+target_link_options(hello_test PRIVATE
+        -fprofile-arcs
+        -ftest-coverage
+)
+

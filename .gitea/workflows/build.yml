@@ -15,11 +15,5 @@ jobs:
       - name: Compilar
         run: cmake --build build
 
-      - name: Confirmar que el binario existe
-        run: |
-          if [ -f build/sentinel ]; then
-            echo "Compilación exitosa, binario generado"
-          else
-            echo "No se encontró el binario esperado"
-            exit 1
-          fi
+      - name: Ejecutar test
+        run: ctest --test-dir build --output-on-failure

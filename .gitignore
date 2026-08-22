@@ -7,3 +7,7 @@ logs/
 *.fifo
 sentinel_estado.txt
 .idea/
+coverage/
+coverage.info
+*.gcda
+*.gcno
