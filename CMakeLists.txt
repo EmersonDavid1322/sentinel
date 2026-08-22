@@ -63,13 +63,13 @@ gtest_discover_tests(sentinel_test)
 
 target_include_directories(sentinel PRIVATE ${LIBNOTIFY_INCLUDE_DIRS})
 target_link_libraries(sentinel Threads::Threads ${LIBNOTIFY_LIBRARIES} CURL::libcurl)
-target_compile_options(hello_test PRIVATE
+target_compile_options(sentinel_test PRIVATE
         --coverage
         -fprofile-arcs
         -ftest-coverage
 )
 
-target_link_options(hello_test PRIVATE
+target_link_options(sentinel_test PRIVATE
         -fprofile-arcs
         -ftest-coverage
 )
