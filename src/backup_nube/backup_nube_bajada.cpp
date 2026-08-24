@@ -1,6 +1,7 @@
 #include "backup_nube_bajada.h"
-#include "backup_nube_auxiliar.h"
+#include "backup_nube_auxiliar_dropbox.h"
 #include "backup_nube_listado.h"
+#include "backup_nube_auxiliar.h"
 #include "config.h"
 #include "errores.h"
 #include "logger.h"
@@ -10,6 +11,7 @@
 #include <filesystem>
 #include <iostream>
 #include <curl/curl.h>
+namespace fs = std::filesystem;
 
 size_t escribirEnArchivo(void* datos, size_t tamano, size_t cantidad, std::ofstream* archivo) {
     size_t bytesTotales = tamano * cantidad;
@@ -84,12 +86,10 @@ void ejecutarBajadaArchivosNube(const ConfigBackupNube& config) {
     return a.esCarpeta > b.esCarpeta;
     });
 
+    std::string carpetaRemota = config.carpeta_remota;
+
     for (const auto& archivo : listaNube) {
-        std::string rutaRelativa = archivo.ruta.substr(config.carpeta_remota.size());
-        if (!rutaRelativa.empty() && rutaRelativa.front() == '/') {
-            rutaRelativa = rutaRelativa.substr(1);
-        }
-        fs::path rutaLocal = std::filesystem::path(config.carpeta_destino) / rutaRelativa;
+        fs::path rutaLocal = calcularRutaLocal(archivo.ruta, carpetaRemota, config.carpeta_destino);
 
         try{
             if (archivo.esCarpeta) {

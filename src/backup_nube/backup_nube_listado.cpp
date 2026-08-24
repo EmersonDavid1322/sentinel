@@ -1,6 +1,6 @@
 #include "backup_nube_listado.h"
 #include "config.h"
-#include "backup_nube_auxiliar.h"
+#include "backup_nube_auxiliar_dropbox.h"
 #include "errores.h"
 #include <vector>
 #include <curl/curl.h>

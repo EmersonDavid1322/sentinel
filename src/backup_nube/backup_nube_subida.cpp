@@ -1,10 +1,8 @@
 #include "backup_nube_subida.h"
 #include "errores.h"
-#include "sentinel_estado.h"
 #include "logger.h"
 #include "backup_auxiliar.h"
-#include "backup_nube_auxiliar.h"
-#include "backup_nube_bajada.h"
+#include "backup_nube_auxiliar_dropbox.h"
 #include <string>
 #include <curl/curl.h>
 #include <filesystem>

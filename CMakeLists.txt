@@ -33,9 +33,10 @@ add_executable(sentinel
     src/backup_local/backup_auxiliar.cpp
     src/backup_nube/backup_nube_listado.cpp
     src/comandos/comandos_backup_nube.cpp
-    src/backup_nube/backup_nube_auxiliar.cpp
+    src/backup_nube/backup_nube_auxiliar_dropbox.cpp
     src/backup_nube/backup_nube_bajada.cpp
     src/backup_nube/loop_backup_nube.cpp
+    src/backup_nube/backup_nube_auxiliar.cpp
 )
 
 enable_testing()
@@ -45,6 +46,7 @@ find_package(GTest REQUIRED)
 add_executable(sentinel_test
         tests/backup_auxiliar_test.cpp
         src/backup_local/backup_auxiliar.cpp
+        src/backup_nube/backup_nube_auxiliar.cpp
 )
 
 target_link_libraries(sentinel_test
@@ -73,4 +75,3 @@ target_link_options(sentinel_test PRIVATE
         -fprofile-arcs
         -ftest-coverage
 )
-

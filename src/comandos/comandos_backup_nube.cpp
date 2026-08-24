@@ -4,7 +4,7 @@
 #include "logger.h"
 #include "errores.h"
 #include "procesar_comandos.h"
-#include "backup_nube_auxiliar.h"
+#include "backup_nube_auxiliar_dropbox.h"
 #include <vector>
 
 void mostrarListadoComando(const ConfigBackupNube& config) {
