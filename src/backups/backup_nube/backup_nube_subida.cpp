@@ -1,7 +1,7 @@
 #include "backup_nube_subida.h"
 #include "errores.h"
 #include "logger.h"
-#include "backup_auxiliar.h"
+#include "auxiliar_compartido.h"
 #include "backup_nube_auxiliar_dropbox.h"
 #include <string>
 #include <curl/curl.h>

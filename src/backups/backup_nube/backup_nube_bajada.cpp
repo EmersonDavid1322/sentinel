@@ -2,6 +2,7 @@
 #include "backup_nube_auxiliar_dropbox.h"
 #include "backup_nube_listado.h"
 #include "backup_nube_auxiliar.h"
+#include "auxiliar_compartido.h"
 #include "config.h"
 #include "errores.h"
 #include "logger.h"

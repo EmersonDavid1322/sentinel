@@ -47,8 +47,6 @@ void cambiarForzarBackup(const std::string& accion) {
 
 void ejecutarBackupComando(const ConfigBackup& configBackup, const ConfigMonitor& configMonitor) {
     try {
-        std::filesystem::path ruta = obtenerRutaConfig();
-        json datos = leerJSONActual(ruta);
 
         ResultadoVerificacionRecursos resultado = verificarRecursosBackup(configBackup, configMonitor);
 
@@ -65,7 +63,7 @@ void ejecutarBackupComando(const ConfigBackup& configBackup, const ConfigMonitor
             return;
         }
         else {
-            logInfo("Se inicio correctamente el backup_local", "sentinel.log");
+            logInfo("Se inicio correctamente el backup local por medio de comando", "sentinel.log");
         }
 
 

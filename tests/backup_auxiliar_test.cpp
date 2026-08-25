@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
-#include "backup_auxiliar.h"
+#include <filesystem>
+#include "auxiliar_compartido.h"
 #include "backup_nube_auxiliar.h"
 #include "errores.h"
+namespace fs = std::filesystem;
 
 //test para rutas a ignorar utilizado en backup local y nube0
 struct CasoIgnorar {

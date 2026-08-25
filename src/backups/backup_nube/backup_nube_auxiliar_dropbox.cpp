@@ -58,17 +58,6 @@ void actualizarToken(const std::string& token) {
     guardarJSON(datos, rutaConfig);
 }
 
-void limpiarLog() {
-    namespace fs = std::filesystem;
-    fs::path logPath = obtenerRutaLogs() / "backups.log";
-    std::ofstream logFile(logPath, std::ios::trunc);
-
-    if (!logFile.is_open()) {
-        throw ErrorBackup("No se podido abrir el archivo: " + logPath.string());
-    }
-    logFile.close();
-}
-
 CURL* inicializarCurl(const std::string& contexto) {
     CURL* curl = curl_easy_init();
     if (!curl) {

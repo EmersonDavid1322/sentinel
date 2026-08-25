@@ -11,8 +11,7 @@
 #include "sentinel_estado.h"
 #include "config_compartida.h"
 #include "monitor.h"
-#include "backup_nube_subida.h"
-#include "backup_nube_auxiliar_dropbox.h"
+#include "auxiliar_compartido.h"
 namespace fs = std::filesystem;
 
 ResultadoVerificacionRecursos verificarRecursosBackup(const ConfigBackup& configBackup, const ConfigMonitor& configMonitor) {

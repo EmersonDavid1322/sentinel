@@ -12,8 +12,6 @@ std::string renovarAccessToken(const ConfigBackupNube& config);
 
 void actualizarToken(const std::string& token);
 
-void limpiarLog();
-
 CURL* inicializarCurl(const std::string& contexto);
 
 template <typename Func>
