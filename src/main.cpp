@@ -32,7 +32,7 @@ int main() {
         asegurarConfigExiste(rutaConfig);
         ConfigCompartida config_compartida;
         config_compartida.actualizar(cargarConfig(rutaConfig));
-        logInfo("Sentinel iniciado correctamente 1.82", "sentinel.log");
+        logInfo("Sentinel iniciado correctamente 1.83", "sentinel.log");
 
         //auxiliares
         std::thread hilo_json(actualizarJSON, std::ref(config_compartida));

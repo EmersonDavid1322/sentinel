@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
 
+if [ "$EUID" -eq 0 ]; then
+    SUDO=""
+else
+    SUDO="sudo"
+fi
+
 BASE_DIR=$(dirname "$(readlink -f "$0")")
 PROYECTO_DIR=$(dirname "$BASE_DIR")
 
@@ -37,25 +43,25 @@ make
 
 if [ -f "/usr/local/bin/sentinel" ]; then
     echo "Eliminando versión de ejecutable anterior..."
-    sudo rm "/usr/local/bin/sentinel"
+    $SUDO rm "/usr/local/bin/sentinel"
 fi
 
-sudo cp "$PROYECTO_DIR/build/sentinel" "/usr/local/bin/"
+$SUDO cp "$PROYECTO_DIR/build/sentinel" "/usr/local/bin/"
 
-sudo chmod +x /usr/local/bin/sentinel
+$SUDO chmod +x /usr/local/bin/sentinel
 
 # Limpieza de la carpeta temporal de compilación
 rm -rf "$PROYECTO_DIR/build"
 
 # crear carpetas y archivos
-sudo mkdir -p "/etc/sentinel/"
-sudo mkdir -p "/var/log/sentinel/"
-sudo mkdir -p "/var/lib/sentinel/"
+$SUDO mkdir -p "/etc/sentinel/"
+$SUDO mkdir -p "/var/log/sentinel/"
+$SUDO mkdir -p "/var/lib/sentinel/"
 
 if [ -f "$PROYECTO_DIR/config/sentinel.json" ]; then
   if [ ! -f "/etc/sentinel/sentinel.json" ]; then
-    sudo cp "$PROYECTO_DIR/config/sentinel.json" "/etc/sentinel/sentinel.json"
-    sudo chmod 600 "/etc/sentinel/sentinel.json"
+    $SUDO cp "$PROYECTO_DIR/config/sentinel.json" "/etc/sentinel/sentinel.json"
+    $SUDO chmod 600 "/etc/sentinel/sentinel.json"
   fi
 else
   echo "Error: no se encontro el archivo de configuraciones"
@@ -63,8 +69,8 @@ else
 fi
 
 if [ -f "$PROYECTO_DIR/scripts/sentinel-cli.sh" ]; then
-    sudo cp "$PROYECTO_DIR/scripts/sentinel-cli.sh" "/usr/local/bin/sentinel-cli"
-    sudo chmod +x /usr/local/bin/sentinel-cli
+    $SUDO cp "$PROYECTO_DIR/scripts/sentinel-cli.sh" "/usr/local/bin/sentinel-cli"
+    $SUDO chmod +x /usr/local/bin/sentinel-cli
     echo "Se copio el scrips cliente correctamente"
 else
     echo "No se encontro el cliente sentinel-cli.sh"
@@ -75,22 +81,22 @@ if [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ]; then
   echo "No se detectó entorno gráfico, instalando en modo servidor"
 
   if [ -f "/etc/systemd/system/sentinel.service" ]; then
-      sudo systemctl disable sentinel.service || true
-      sudo rm -f "/etc/systemd/system/sentinel.service"
-      sudo systemctl reset-failed sentinel.service || true
-      sudo systemctl daemon-reload
+      $SUDO systemctl disable sentinel.service || true
+      $SUDO rm -f "/etc/systemd/system/sentinel.service"
+      $SUDO systemctl reset-failed sentinel.service || true
+      $SUDO systemctl daemon-reload
       echo "Se limpió el servicio anterior (modo servidor)"
   fi
 
   if ! id "$NOMBRE_USUARIO" &> /dev/null; then
-    sudo useradd --system --no-create-home --shell /usr/sbin/nologin "$NOMBRE_USUARIO"
+    $SUDO useradd --system --no-create-home --shell /usr/sbin/nologin "$NOMBRE_USUARIO"
     echo "Usuario de sistema '$NOMBRE_USUARIO' creado"
   fi
 
-  sudo chown -R "$NOMBRE_USUARIO:$NOMBRE_USUARIO" /etc/sentinel /var/log/sentinel /var/lib/sentinel /usr/local/bin/sentinel /usr/local/bin/sentinel-cli
+  $SUDO chown -R "$NOMBRE_USUARIO:$NOMBRE_USUARIO" /etc/sentinel /var/log/sentinel /var/lib/sentinel /usr/local/bin/sentinel /usr/local/bin/sentinel-cli
 
 
-      sudo bash -c "cat > /etc/systemd/system/sentinel.service" <<EOF
+      $SUDO bash -c "cat > /etc/systemd/system/sentinel.service" <<EOF
 [Unit]
 Description=Daemon Sentinel (modo servidor)
 After=network.target
@@ -106,11 +112,11 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 
-sudo systemctl daemon-reload
-sudo systemctl enable sentinel.service
-sudo systemctl start sentinel.service
-sudo systemctl restart sentinel.service
-sudo systemctl status sentinel.service
+$SUDO systemctl daemon-reload
+$SUDO systemctl enable sentinel.service
+$SUDO systemctl start sentinel.service
+$SUDO systemctl restart sentinel.service
+$SUDO systemctl status sentinel.service
 
 else
   echo "Entorno gráfico detectado, instalando en modo escritorio"
@@ -126,7 +132,7 @@ else
   if [ -n "$1" ]; then
       echo "Aviso: el argumento de usuario '$1' se ignora en modo escritorio (el servicio corre como tu usuario actual: $USER)"
   fi
-  sudo chown -R "$USER:$USER" /etc/sentinel /var/log/sentinel /var/lib/sentinel /usr/local/bin/sentinel /usr/local/bin/sentinel-cli
+  $SUDO chown -R "$USER:$USER" /etc/sentinel /var/log/sentinel /var/lib/sentinel /usr/local/bin/sentinel /usr/local/bin/sentinel-cli
 
 # CONFIGURACIÓN DEL NUEVO SERVICIO SYSTEMD
 echo "Configurando service..."

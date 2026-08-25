@@ -17,3 +17,14 @@ jobs:
 
       - name: Ejecutar test
         run: ctest --test-dir build --output-on-failure
+
+      - name: Transferir proyecto al servidor
+        run: |
+        rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
+            --exclude '.git' --exclude 'build' \
+            ./ deploy@192.168.1.11:/home/deploy/sentinel-deploy/
+
+      - name: Ejecutar instalación remota
+        run: |
+        ssh -o StrictHostKeyChecking=no deploy@192.168.1.11 \
+            "sudo /home/deploy/sentinel-deploy/scripts/install.sh"
