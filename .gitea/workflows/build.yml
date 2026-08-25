@@ -1,7 +1,5 @@
 name: Compilar Sentinel
-
 on: [push]
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,16 +13,25 @@ jobs:
       - name: Compilar
         run: cmake --build build
 
-      - name: Ejecutar test
+      - name: Ejecutar tests
         run: ctest --test-dir build --output-on-failure
+
+      - name: Confirmar que el binario existe
+        run: |
+          if [ -f build/sentinel ]; then
+            echo "Compilación exitosa"
+          else
+            echo "No se encontró el binario esperado"
+            exit 1
+          fi
 
       - name: Transferir proyecto al servidor
         run: |
-        rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
             --exclude '.git' --exclude 'build' \
             ./ deploy@192.168.1.11:/home/deploy/sentinel-deploy/
 
       - name: Ejecutar instalación remota
         run: |
-        ssh -o StrictHostKeyChecking=no deploy@192.168.1.11 \
-            "sudo /home/deploy/sentinel-deploy/scripts/install.sh"
+          ssh -o StrictHostKeyChecking=no deploy@192.168.1.11 "
+            sudo /home/deploy/sentinel-deploy/scripts/install.sh"
