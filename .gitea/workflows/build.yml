@@ -34,7 +34,7 @@ jobs:
       - name: Ejecutar instalación remota
         run: |
           ssh -o StrictHostKeyChecking=no deploy@192.168.1.11 "
-            sudo /home/deploy/sentinel-deploy/scripts/install.sh"
+            sudo /home/deploy/sentinel-deploy/scripts/install.sh --server sentinel "
 
       - name: Transferir proyecto a escritorio
         run: |
@@ -45,4 +45,4 @@ jobs:
       - name: Ejecutar instalación remota a escritorio
         run: |
           ssh -o StrictHostKeyChecking=no deploy@192.168.1.6 "
-            sudo /home/deploy/sentinel-deploy/scripts/install.sh"
+            sudo /home/deploy/sentinel-deploy/scripts/install.sh --desktop Emerson "
