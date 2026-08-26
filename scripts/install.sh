@@ -62,12 +62,12 @@ if pgrep -x "sentinel" > /dev/null; then
     fi
 fi
 
-# COMPILACIÓN DEL PROYECTO
-echo "Compilando Sentinel..."
-mkdir -p "$PROYECTO_DIR/build"
-cd "$PROYECTO_DIR/build"
-cmake "$PROYECTO_DIR" -DCMAKE_BUILD_TYPE=Release
-make
+if [ -f "$PROYECTO_DIR/build/sentinel" ]; then
+  echo "Binario detectado"
+else
+  echo "No se a compilado el binario"
+  exit 1
+fi
 
 if [ -f "/usr/local/bin/sentinel" ]; then
     echo "Eliminando versión de ejecutable anterior..."
@@ -79,7 +79,6 @@ $SUDO cp "$PROYECTO_DIR/build/sentinel" "/usr/local/bin/"
 $SUDO chmod +x /usr/local/bin/sentinel
 
 # Limpieza de la carpeta temporal de compilación
-rm -rf "$PROYECTO_DIR/build"
 cd "$PROYECTO_DIR"
 
 # crear carpetas y archivos

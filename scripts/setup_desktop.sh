@@ -1,11 +1,9 @@
 #!/bin/bash
 set -e
 
-# Capturar el usuario que viene desde install.sh
 NOMBRE_USUARIO="$1"
 
 if [ -z "$NOMBRE_USUARIO" ] || [ "$NOMBRE_USUARIO" == "sentinel" ]; then
-    # Por si acaso falló el argumento, intentamos rescatar el usuario real que no sea root
     if [ "$USER" != "root" ]; then
         NOMBRE_USUARIO="$USER"
     else
@@ -30,7 +28,6 @@ chown root:root /usr/local/bin/sentinel /usr/local/bin/sentinel-cli
 DIR_SERVICIOS_USER="$TARGET_HOME/.config/systemd/user"
 mkdir -p "$DIR_SERVICIOS_USER"
 
-# 4. Crear el archivo del servicio con el fix de retraso incluido
 cat << 'EOF' > "$DIR_SERVICIOS_USER/sentinel.service"
 [Unit]
 Description=Daemon Sentinel (Modo Escritorio de Usuario)
@@ -53,11 +50,8 @@ ExecStartPre=/usr/bin/sleep 2
 WantedBy=graphical-session.target
 EOF
 
-# Asegurar propiedad de los archivos en el HOME del usuario
 chown -R "$NOMBRE_USUARIO":"$NOMBRE_USUARIO" "$TARGET_HOME/.config"
 
-# 5. CONTROL REMOTO NATIVO DE SYSTEMD (El estándar moderno de Arch Linux)
-# Usamos el flag --machine para inyectar los comandos directo en el bus del usuario
 echo "Recargando demonio de usuario..."
 systemctl --user --machine="${NOMBRE_USUARIO}@.host" daemon-reload
 

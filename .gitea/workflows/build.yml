@@ -28,7 +28,7 @@ jobs:
       - name: Transferir proyecto al servidor
         run: |
           rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
-            --exclude '.git' --exclude 'build' \
+            --exclude '.git' \
             ./ deploy@192.168.1.11:/home/deploy/sentinel-deploy/
 
       - name: Ejecutar instalación remota
@@ -36,13 +36,23 @@ jobs:
           ssh -o StrictHostKeyChecking=no deploy@192.168.1.11 "
             sudo /home/deploy/sentinel-deploy/scripts/install.sh --server sentinel "
 
+      - name: Eliminar carpeta build servidor
+        run: |
+          ssh -o StrictHostKeyChecking=no deploy@192.168.1.11 "
+          rm -rf /home/deploy/sentinel-deploy/build "
+
       - name: Transferir proyecto a escritorio
         run: |
           rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
-            --exclude '.git' --exclude 'build' \
+            --exclude '.git' \
             ./ deploy@192.168.1.6:/home/deploy/sentinel-deploy/
 
       - name: Ejecutar instalación remota a escritorio
         run: |
           ssh -o StrictHostKeyChecking=no deploy@192.168.1.6 "
             sudo /home/deploy/sentinel-deploy/scripts/install.sh --desktop Emerson "
+
+      - name: Eliminar carpeta build escritorio
+        run: |
+          ssh -o StrictHostKeyChecking=no deploy@192.168.1.6 "
+          rm -rf /home/deploy/sentinel-deploy/build "
