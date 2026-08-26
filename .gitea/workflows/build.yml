@@ -35,3 +35,14 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no deploy@192.168.1.11 "
             sudo /home/deploy/sentinel-deploy/scripts/install.sh"
+
+      - name: Transferir proyecto a escritorio
+        run: |
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
+            --exclude '.git' --exclude 'build' \
+            ./ deploy@192.168.1.6:/home/deploy/sentinel-deploy/
+
+      - name: Ejecutar instalación remota a escritorio
+        run: |
+          ssh -o StrictHostKeyChecking=no deploy@192.168.1.6 "
+            sudo /home/deploy/sentinel-deploy/scripts/install.sh"

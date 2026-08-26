@@ -13,6 +13,7 @@
 #include "procesar_comandos.h"
 #include "config_compartida.h"
 #include "loop_backup_nube.h"
+#include "notificador.h"
 namespace fs = std::filesystem;
 
 int main() {
@@ -32,7 +33,8 @@ int main() {
         asegurarConfigExiste(rutaConfig);
         ConfigCompartida config_compartida;
         config_compartida.actualizar(cargarConfig(rutaConfig));
-        logInfo("Sentinel iniciado correctamente 1.83", "sentinel.log");
+        logInfo("Sentinel iniciado correctamente 1.86", "sentinel.log");
+        enviarNotificación("Inicio", "Sentinel iniciado correctamente 1.86", "INFO");
 
         //auxiliares
         std::thread hilo_json(actualizarJSON, std::ref(config_compartida));
