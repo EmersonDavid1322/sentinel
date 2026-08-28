@@ -2,7 +2,6 @@
 #include <filesystem>
 #include <string>
 #include <chrono>
-#include <thread>
 #include "errores.h"
 #include "backup.h"
 #include "logger.h"
@@ -103,15 +102,6 @@ void ejecutarBackup(const std::vector<std::string>& carpetas, const std::string&
 
 void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_monitor){
     try{
-        time_t ahora = time(0);
-        tm* tiempo = localtime(&ahora);
-        char buffer[6];
-        strftime(buffer, sizeof(buffer), "%H:%M", tiempo);
-        std::string hora_actual = buffer;
-        if (hora_actual != config_backup.hora){
-            return;
-        }
-
         ResultadoVerificacionRecursos resultado = verificarRecursosBackup(config_backup, config_monitor);
 
         if (resultado == ResultadoVerificacionRecursos::FORZADO) {
@@ -128,7 +118,7 @@ void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_
             return;
         }
         else {
-            logInfo("Se inicio correctamente el backup_local a las: " + hora_actual, "sentinel.log");
+            logInfo("Se inicio correctamente el backup_local", "sentinel.log");
         }
 
         limpiarLog();
@@ -155,7 +145,9 @@ void loopBackup(ConfigCompartida& config_compartida){
         ConfigSentinel config = config_compartida.obtener();
 
         if (config.backup.activo) {
-            hacerBackup(config.backup, config.monitor);
+            if (verificarHoraBackup(config.backup.hora)) {
+                hacerBackup(config.backup, config.monitor);
+            }
         }
 
         std::unique_lock<std::mutex> lock(mtx_apagado);

@@ -15,6 +15,8 @@
 #include "comandos_organizador.h"
 #include "comandos_estado.h"
 #include "comandos_backup_nube.h"
+#include "backup.h"
+#include "backup_nube_subida.h"
 
 void enviarRespuesta(const std::string& mensaje) {
     std::filesystem::path ruta_estado = obtenerRutaEstado() / "sentinel_estado.txt";
@@ -24,9 +26,10 @@ void enviarRespuesta(const std::string& mensaje) {
     }else{
         logError("No se pudo abrir el archivo sentinel_estado.txt en: " + ruta_estado.string(), "sentinel.log");
     }
+    salida.close();
 }
 
-void procesarEstado(std::string modulo, std::string& accion){
+void procesarEstado(const std::string& modulo, const std::string& accion){
     try {
         if (accion == "activar") {
             cambiarEstadoSeccion(modulo, true);
@@ -43,7 +46,7 @@ void procesarEstado(std::string modulo, std::string& accion){
 }
 
 //backup_local
-void procesarComandoBackup(std::string& accion, std::string& valor, const ConfigBackup& configBackup, const ConfigMonitor& configMonitor){
+void procesarComandoBackup(const std::string& accion, const std::string& valor, const ConfigBackup& configBackup, const ConfigMonitor& configMonitor){
     if (accion == "activar" || accion == "desactivar"){
         procesarEstado("backup", accion);
     }
@@ -54,7 +57,9 @@ void procesarComandoBackup(std::string& accion, std::string& valor, const Config
         cambiarDireccion("backup",accion ,valor);
     }
     else if (accion == "ahora") {
-        ejecutarBackupComando(configBackup, configMonitor);
+        enviarRespuesta("Se inicio el backup local por comando revise 'backups.log' para información detallada");
+        logInfo("Se inicio el backup local por comando ", "sentinel.log");
+        hacerBackup(configBackup, configMonitor);
     }
     else if (accion == "modo") {
         cambiarForzarBackup(valor);
@@ -68,7 +73,7 @@ void procesarComandoBackup(std::string& accion, std::string& valor, const Config
 }
 
 //backup_nube
-void procesarComandoBN(std::string& accion, std::string& valor, const ConfigBackupNube& config) {
+void procesarComandoBN(const std::string& accion, const std::string& valor, const ConfigBackupNube& config) {
     if (accion == "activar" || accion == "desactivar") {
         procesarEstado("backup_nube", accion);
     }
@@ -79,7 +84,9 @@ void procesarComandoBN(std::string& accion, std::string& valor, const ConfigBack
         aniadirIgnorar("backup_nube", valor);
     }
     else if (accion == "ahora") {
-        ejecutarBackupNubeComando(config);
+        enviarRespuesta("Se inicio el backup a dropbox por comando revise 'backups.log' para información detallada");
+        logInfo("Se inicio el backup a dropbox por comando ", "sentinel.log");
+        ejecutarBackupNube(config);
     }
     else{
         enviarRespuesta("Accion '" + accion + "' no disponible en el modulo de backup nube");
@@ -103,7 +110,7 @@ void procesarComandoMonitor(std::string& accion, std::string& valor){
 }
 
 //organizador
-void procesarComandoOrganizador(std::string& accion, std::string& valor){
+void procesarComandoOrganizador(const std::string& accion, const std::string& valor){
     if (accion == "activar" || accion == "desactivar"){
         procesarEstado("organizador", accion);
     }
@@ -119,7 +126,7 @@ void procesarComandoOrganizador(std::string& accion, std::string& valor){
 }
 
 //estado
-void procesarComandoEstado(std::string& accion, const ConfigSentinel& config) {
+void procesarComandoEstado(const std::string& accion, const ConfigSentinel& config) {
     if (accion.empty()) {
         enviarRespuesta(generarDiagnostico(config));
     }

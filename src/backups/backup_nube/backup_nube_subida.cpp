@@ -162,10 +162,12 @@ void subirArchivoStreaming(const std::string& ruta, const std::string& rutaRemot
             if (esUltimo) {
                 finalizarSesion(sessionId, tamañoLectura, rutaRemota, "", token);
                 logInfo("Se a subido correctamente el archivo " + rutaRemota, "backups.log");
+                archivo.close();
             }
         } else if (esUltimo) {
             finalizarSesion(sessionId, offset, rutaRemota, trozo, token);
             logInfo("Se a subido correctamente el archivo " + rutaRemota, "backups.log");
+            archivo.close();
         } else {
             continuarSesion(sessionId, offset, trozo, token);
         }
@@ -174,17 +176,9 @@ void subirArchivoStreaming(const std::string& ruta, const std::string& rutaRemot
 }
 
 void ejecutarBackupNube(const ConfigBackupNube& config) {
-    time_t ahora = time(0);
-    tm* tiempo = localtime(&ahora);
-    char buffer[6];
-    strftime(buffer, sizeof(buffer), "%H:%M", tiempo);
-    std::string hora_actual = buffer;
-    if (hora_actual != config.hora){
-        return;
-    }
 
-    logInfo("Se incio el backup a la nube " + hora_actual, "sentinel.log");
-    logInfo("Se incio el backup a la nube " + hora_actual + " Destino: " + config.carpeta_remota, "backups.log");
+    logInfo("Se incio el backup a la nube", "sentinel.log");
+    logInfo("Se incio el backup a la nube Destino: " + config.carpeta_remota, "backups.log");
     limpiarLog();
     std::string token = config.token;
     bool hubo_errores = false;

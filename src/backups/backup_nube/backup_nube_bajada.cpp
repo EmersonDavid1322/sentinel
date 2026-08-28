@@ -61,17 +61,9 @@ void backupNubeBajada(const std::string& token, const std::string& rutaRemota, c
 }
 
 void ejecutarBajadaArchivosNube(const ConfigBackupNube& config) {
-    time_t ahora = time(0);
-    tm* tiempo = localtime(&ahora);
-    char buffer[6];
-    strftime(buffer, sizeof(buffer), "%H:%M", tiempo);
-    std::string hora_actual = buffer;
-    if (hora_actual != config.hora_bajada){
-        return;
-    }
 
-    logInfo("Se incio la bajada de archivos de la nube: " + hora_actual, "sentinel.log");
-    logInfo("Se incio la bajada de archivos de la nube: " + hora_actual + " Destino: " + config.carpeta_destino, "backups.log");
+    logInfo("Se incio la bajada de archivos de la nube: ", "sentinel.log");
+    logInfo("Se incio la bajada de archivos de la nube Destino: " + config.carpeta_destino, "backups.log");
     limpiarLog();
 
     std::string token = config.token;
