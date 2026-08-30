@@ -9,7 +9,7 @@
 #include "sentinel_estado.h"
 std::mutex mutex_notificador;
 
-void enviarNotificación(std::string titulo, std::string mensaje, std::string nivel){
+void enviarNotificación(const std::string& titulo, const std::string& mensaje, const std::string& nivel){
     if (!hayEntornoGrafico) {
         return;
     }

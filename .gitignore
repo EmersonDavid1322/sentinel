@@ -11,3 +11,4 @@ coverage/
 coverage.info
 *.gcda
 *.gcno
+.gitea/

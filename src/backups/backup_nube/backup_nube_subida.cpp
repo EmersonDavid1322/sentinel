@@ -3,11 +3,11 @@
 #include "logger.h"
 #include "auxiliar_compartido.h"
 #include "backup_nube_auxiliar_dropbox.h"
+#include "notificador.h"
 #include <string>
 #include <curl/curl.h>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include "json.hpp"
 using json = nlohmann::json;
 
@@ -238,8 +238,11 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
     if (!hubo_errores) {
         logInfo("Se compelto el backup a DropBox de forma correcta", "sentinel.log");
         logInfo("Se compelto el backup a DropBox de forma correcta", "backups.log");
+        enviarNotificación("Backup Nube", "Se compelto el backup a DropBox de forma correcta", "INFO");
     }else {
         logInfo("Se completo el backup a DropBox, hubo problemas con algunos archivos, por favor revise 'backups.log' para mas información", "sentinel.log");
         logInfo("Se completo el backup a DropBox, hubo algunos error con archivos", "backups.log");
+        enviarNotificación("Backup Nube",
+                    "Se completo el backup a DropBox, hubo problemas con algunos archivos, por favor revise 'backups.log' para mas información", "WARNING");
     }
 }

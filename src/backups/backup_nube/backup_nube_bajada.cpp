@@ -3,6 +3,7 @@
 #include "backup_nube_listado.h"
 #include "backup_nube_auxiliar.h"
 #include "auxiliar_compartido.h"
+#include "notificador.h"
 #include "config.h"
 #include "errores.h"
 #include "logger.h"
@@ -110,4 +111,5 @@ void ejecutarBajadaArchivosNube(const ConfigBackupNube& config) {
     }
     logInfo("Se a completado la bajada de archivos, revisa 'backups.log para información detallada", "sentinel.log");
     logInfo("Se a completado la bajada de archivos", "backups.log");
+    enviarNotificación("Bajada archivos", "Se a completado la bajada de archivos, revisa 'backups.log para información detallada", "INFO");
 }

@@ -133,6 +133,9 @@ void procesarComandoEstado(const std::string& accion, const ConfigSentinel& conf
     else if (accion == "backup") {
         enviarRespuesta(estadoBackup(config.backup));
     }
+    else if (accion == "backup_nube") {
+        enviarRespuesta(estadoBackupNube(config.backup_nube));
+    }
     else if (accion == "monitor") {
         enviarRespuesta(estadoMonitor(config.monitor));
     }

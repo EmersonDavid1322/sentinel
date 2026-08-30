@@ -111,7 +111,9 @@ bash sentinel-cli.sh estado organizador
 ```bash
 git clone https://github.com/EmersonDavid1322/sentinel
 cd sentinel
-bash scripts/install.sh
+cmake -S . -B build
+cmake --build build
+bash scripts/install.sh --desktop [USUARIO]
 ```
 
 ## Estado

@@ -43,8 +43,6 @@ void actualizarJSON(ConfigCompartida& configCompartida){
                 for (int i = 0; i < bytes; ) {
                     struct inotify_event* evento = (struct inotify_event*)&buffer[i];
                     if (evento->mask & IN_MODIFY){
-                        logInfo("JSON modificado, actualzando información", "sentinel.log");
-
                         configCompartida.actualizar(cargarConfig(ruta));
                         logInfo("Sentinel actualizado correctamente", "sentinel.log");
                     }

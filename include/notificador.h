@@ -1,4 +1,4 @@
 #pragma once
 #include <iostream>
 
-void enviarNotificación(std::string titulo, std::string mensaje, std::string nivel);
+void enviarNotificación(const std::string& titulo, const std::string& mensaje, const std::string& nivel);

@@ -4,14 +4,20 @@
 
 std::string  estadoBackup(const ConfigBackup& config) {
     std::string carpetas_str;
+    std::string reglas_ignorar_str;
     for (const auto& carpeta : config.carpetas) {
         carpetas_str += carpeta + "\n";
+    }
+
+    for (const auto& reglas_ignorar : config.ignorar) {
+        reglas_ignorar_str += reglas_ignorar + "\n";
     }
 
     std::string mensaje = "=== Estado Backup ===\n";
     mensaje += "Activo: " + std::string(config.activo ? "si" : "no") + "\n";
     mensaje += "Hora: " + config.hora + "\n";
     mensaje += "Destino: " + config.destino + "\n";
+    mensaje += "Ignorar: " + reglas_ignorar_str + "\n";
     mensaje += "Carpetas:\n" + carpetas_str;
 
     return mensaje;
@@ -26,6 +32,28 @@ std::string  estadoMonitor(const ConfigMonitor& config) {
     mensaje += "Limite CPU: " + std::to_string(cpu_entero) + "%\n";
     mensaje += "Limite RAM: " + std::to_string(ram_entero) + "%\n";
     mensaje += "Limite Disco: " + std::to_string(disco_entero) + "%\n";
+
+    return mensaje;
+}
+
+std::string  estadoBackupNube(const ConfigBackupNube& config) {
+    std::string carpetas_str;
+    std::string reglas_ignorar_str;
+
+    for (const auto& carpeta : config.carpetas) {
+        carpetas_str += carpeta + "\n";
+    }
+    for (const auto& reglas_ignorar : config.ignorar) {
+        reglas_ignorar_str += reglas_ignorar + "\n";
+    }
+
+    std::string mensaje = "=== Estado Backup ===\n";
+    mensaje += "Activo: " + std::string(config.activo ? "si" : "no") + "\n";
+    mensaje += "Carpeta Remota: " + config.carpeta_remota + "\n";
+    mensaje += "Reglas:\n" + reglas_ignorar_str;
+    mensaje += "Hora: " + config.hora + "\n";
+    mensaje += "Hora bajada: " + config.hora_bajada + "\n";
+    mensaje += "Carpeta destino bajada: " + config.carpeta_destino + "\n";
 
     return mensaje;
 }
@@ -45,5 +73,6 @@ std::string  estadoOrganizador(const ConfigOrganizador& config) {
 }
 
 std::string generarDiagnostico(const ConfigSentinel& config) {
-    return estadoBackup(config.backup) + "\n" + estadoMonitor(config.monitor) + "\n" + estadoOrganizador(config.organizador);
+    return estadoBackup(config.backup) + "\n" + estadoBackupNube(config.backup_nube) + "\n"  + estadoMonitor(config.monitor) + "\n"
+    + estadoOrganizador(config.organizador);
 }

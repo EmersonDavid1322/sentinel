@@ -1,5 +1,6 @@
 #include <filesystem>
 #include <thread>
+#include <curl/curl.h>
 #include <libnotify/notify.h>
 #include "config_loader.h"
 #include "backup.h"
@@ -17,6 +18,7 @@
 namespace fs = std::filesystem;
 
 int main() {
+    curl_global_init(CURL_GLOBAL_ALL);
     verficarEntornoGrafico();
 
     if (hayEntornoGrafico) {
@@ -54,10 +56,12 @@ int main() {
         hilo_json.join();
         hilo_comandos.join();
         hilo_backup.join();
+        hilo_backupNube.join();
         hilo_monitor.join();
         hilo_organizador.join();
 
     } catch (const DaemonError& e) {
+        curl_global_cleanup();
         logError("Error critico al iniciar: " + std::string(e.what()), "sentinel.log");
         if (hayEntornoGrafico) {
             notify_uninit();
@@ -69,6 +73,7 @@ int main() {
     if (hayEntornoGrafico) {
         notify_uninit();
     }
+    curl_global_cleanup();
     logInfo("Sentinel detenido correctamente", "sentinel.log");
     return 0;
 }
