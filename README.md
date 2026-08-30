@@ -108,12 +108,22 @@ bash sentinel-cli.sh estado organizador
 - systemd
 
 ## Instalación
+-**Versión Escritorio**
 ```bash
 git clone https://github.com/EmersonDavid1322/sentinel
 cd sentinel
 cmake -S . -B build
 cmake --build build
 bash scripts/install.sh --desktop [USUARIO]
+```
+
+-**Versión sin entorno grafico o servidor**
+```bash
+git clone https://github.com/EmersonDavid1322/sentinel
+cd sentinel
+cmake -S . -B build
+cmake --build build
+bash scripts/install.sh --server [USUARIO OPCIONAL]
 ```
 
 ## Estado

@@ -45,7 +45,7 @@ jobs:
         run: |
           rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
             --exclude '.git' \
-            ./ deploy@192.168.1.6:/home/deploy/sentinel-deploy/
+            ./ deploy@192.168.1.4:/home/deploy/sentinel-deploy/
 
       - name: Ejecutar instalación remota a escritorio
         run: |
