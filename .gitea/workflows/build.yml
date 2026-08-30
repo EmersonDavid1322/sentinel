@@ -43,7 +43,7 @@ jobs:
 
       - name: Transferir proyecto a escritorio
         run: |
-          rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
+          rsync -avz -e "ssh -i ~/.ssh/id_deploy_escritorio -o StrictHostKeyChecking=no" \
             --exclude '.git' \
             ./ deploy@192.168.1.4:/home/deploy/sentinel-deploy/
 
