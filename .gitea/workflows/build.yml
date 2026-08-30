@@ -49,7 +49,7 @@ jobs:
 
       - name: Ejecutar instalación remota a escritorio
         run: |
-          ssh -o StrictHostKeyChecking=no deploy@192.168.1.6 "
+          ssh -i ~/.ssh/id_deploy_escritorio -o StrictHostKeyChecking=no "
             sudo /home/deploy/sentinel-deploy/scripts/install.sh --desktop Emerson "
 
       - name: Eliminar carpeta build escritorio
