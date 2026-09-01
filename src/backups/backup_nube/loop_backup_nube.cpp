@@ -13,10 +13,13 @@ void loopBackupNube(ConfigCompartida& config_compartida) {
             if (verificarHoraBackup(config.backup_nube.hora)) {
                 ejecutarBackupNube(config.backup_nube);
             }
+        }
+        if (config.backup_nube.activo_bajada) {
             if (verificarHoraBackup(config.backup_nube.hora_bajada)) {
                 ejecutarBajadaArchivosNube(config.backup_nube);
             }
         }
+
         std::unique_lock<std::mutex> lock(mtx_apagado);
         cv_apagado.wait_for(lock, std::chrono::seconds(60), [] { return !corriendo.load(); });
     }

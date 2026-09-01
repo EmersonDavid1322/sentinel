@@ -35,69 +35,69 @@ Utilizar comandos para controlar el Sentinel:
 
 **Comando activar/desactivar módulos**
 ```bash
-bash sentinel-cli.sh backup activar 
+sentinel-cli backup activar 
 ```
 ```bash
-bash sentinel-cli.sh organizador desactivar
+sentinel-cli organizador desactivar
 ```
 
 **Comandos Backup**
 
 - Añadir alguna carpeta a la lista de carpetas del backup
 ```bash
-bash sentinel-cli.sh backup añadir_carpeta dirección
+sentinel-cli backup añadir_carpeta dirección
 ```
 
 - Modificar el destino del backup
 ```bash
-bash sentinel-cli.sh backup destino dirección
+sentinel-cli backup destino dirección
 ```
 
 - Ejecutar un backup
 ```bash
-bash sentinel-cli.sh backup ahora
+sentinel-cli backup ahora
 ```
 
 **Comandos Monitor**
 
 - Cambiar el valor limite del monitor: limite_cpu, limite_ram, limite_disco
 ```bash
-bash sentinel-cli.sh monitor limite_cpu 90
+sentinel-cli monitor limite_cpu 90
 ```
 
 - Ejecutar un monitoreo con el uso CPU, RAM y disco actual
 ```bash
-bash sentinel-cli.sh monitor consumo
+ sentinel-cli monitor consumo
 ```
 
 **Comandos Organizador**
 
 - Cambiar dirrción de la carpeta vigilada
 ```bash
-bash sentinel-cli.sh organizador carpeta_vigilar dirección
+sentinel-cli organizador carpeta_vigilar dirección
 ```
 
 - Agregar una regla al organizador
 ```bash
-bash sentinel-cli.sh organizador agregar_regla 'extension|dirección_destino'
+sentinel-cli organizador agregar_regla 'extension|dirección_destino'
 ```
 
 **Comandos Estado**
 
 - Ver la configuración actual de todos los modulos
 ```bash
-bash sentinel-cli.sh estado
+sentinel-cli estado
 ```
 
 - Ver la configuración actual de algun modulo
 ```bash
-bash sentinel-cli.sh estado backup_local
+sentinel-cli estado backup_local
 ```
 ```bash
-bash sentinel-cli.sh estado monitor
+sentinel-cli estado monitor
 ```
 ```bash
-bash sentinel-cli.sh estado organizador
+sentinel-cli estado organizador
 ```
 
 ## Requisitos

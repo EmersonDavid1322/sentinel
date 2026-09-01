@@ -24,6 +24,7 @@ struct ConfigBackupNube {
     std::string hora_bajada;
     std::string carpeta_destino;
     bool activo;
+    bool activo_bajada;
 };
 
 struct ConfigMonitor {

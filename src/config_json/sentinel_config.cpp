@@ -85,6 +85,7 @@ void crearConfigPorDefecto(const std::filesystem::path& rutaJSON){
     config["backup_nube"]["hora_bajada"] = "00:00";
     config["backup_nube"]["carpeta_destino"] = "";
     config["backup_nube"]["activo"] = false;
+    config["backup_nube"]["activo_bajada"] = false;
 
     config["monitor"] = {};
     config["monitor"]["intervalo"] = 60;
