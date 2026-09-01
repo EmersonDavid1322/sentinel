@@ -1,0 +1,34 @@
+{
+  "backup": {
+    "activo": false,
+    "carpetas": [],
+    "destino": "",
+    "forzar_backup": false,
+    "solo_modificados_hoy": false,
+    "hora": "00:00",
+    "ignorar": []
+  },
+  "backup_nube": {
+    "activo": false,
+    "activo_bajada": false,
+    "carpeta_remota": "/",
+    "carpetas": [],
+    "cliente_id": "",
+    "cliente_secret": "",
+    "hora": "00:00",
+    "ignorar": [],
+    "refresh_token": "",
+    "token": ""
+  },
+  "monitor": {
+    "activo": false,
+    "limite_cpu": 70,
+    "limite_disco": 70,
+    "limite_ram": 70
+  },
+  "organizador": {
+    "activo": false,
+    "carpeta_vigilar": "",
+    "reglas": {}
+  }
+}

@@ -86,9 +86,9 @@ $SUDO mkdir -p "/etc/sentinel/"
 $SUDO mkdir -p "/var/log/sentinel/"
 $SUDO mkdir -p "/var/lib/sentinel/"
 
-if [ -f "$PROYECTO_DIR/config/sentinel.json" ]; then
+if [ -f "$PROYECTO_DIR/config/sentinel.template.json" ]; then
   if [ ! -f "/etc/sentinel/sentinel.json" ]; then
-    $SUDO cp "$PROYECTO_DIR/config/sentinel.json" "/etc/sentinel/sentinel.json"
+    $SUDO cp "$PROYECTO_DIR/config/sentinel.template.json" "/etc/sentinel/sentinel.json"
     $SUDO chmod 600 "/etc/sentinel/sentinel.json"
   fi
 else

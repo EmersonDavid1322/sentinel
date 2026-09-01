@@ -12,3 +12,4 @@ coverage.info
 *.gcda
 *.gcno
 .gitea/
+sentinel.json
