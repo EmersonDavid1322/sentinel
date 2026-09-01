@@ -16,41 +16,34 @@ jobs:
       - name: Ejecutar tests
         run: ctest --test-dir build --output-on-failure
 
-      - name: Confirmar que el binario existe
-        run: |
-          if [ -f build/sentinel ]; then
-            echo "Compilación exitosa"
-          else
-            echo "No se encontró el binario esperado"
-            exit 1
-          fi
-
+      # --- DESPLIEGUE EN EL SERVIDOR ---
       - name: Transferir proyecto al servidor
         run: |
-          rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
+          rsync -avz -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no" \
             --exclude '.git' \
-            ./ deploy@192.168.1.11:/home/deploy/sentinel-deploy/
+            ./ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:/home/deploy/sentinel-deploy/
 
-      - name: Ejecutar instalación remota
+      - name: Ejecutar instalación remota servidor
         run: |
-          ssh -o StrictHostKeyChecking=no deploy@192.168.1.11 "
+          ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
             sudo /home/deploy/sentinel-deploy/scripts/install.sh --server sentinel "
 
       - name: Eliminar carpeta build servidor
         run: |
-          ssh -o StrictHostKeyChecking=no deploy@192.168.1.11 "
+          ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
           rm -rf /home/deploy/sentinel-deploy/build "
 
+      # --- DESPLIEGUE EN EL ESCRITORIO ---
       - name: Transferir proyecto a escritorio
         run: |
           rsync -avz -e "ssh -i ~/.ssh/id_deploy_escritorio -o StrictHostKeyChecking=no" \
             --exclude '.git' \
-            ./ deploy@192.168.1.4:/home/deploy/sentinel-deploy/
+            ./ ${{ secrets.SERVER_USER }}@${{ secrets.DESKTOP_IP }}:/home/deploy/sentinel-deploy/
 
       - name: Ejecutar instalación remota a escritorio
         run: |
-          ssh -i ~/.ssh/id_deploy_escritorio -o StrictHostKeyChecking=no deploy@192.168.1.4 "sudo /home/deploy/sentinel-deploy/scripts/install.sh --desktop Emerson"
+          ssh -i ~/.ssh/id_deploy_escritorio -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.DESKTOP_IP }} "sudo /home/deploy/sentinel-deploy/scripts/install.sh --desktop ${{ secrets.USER_NAME }}"
 
       - name: Eliminar carpeta build escritorio
         run: |
-          ssh -i ~/.ssh/id_deploy_escritorio -o StrictHostKeyChecking=no deploy@192.168.1.4 "rm -rf /home/deploy/sentinel-deploy/build"
+          ssh -i ~/.ssh/id_deploy_escritorio -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.DESKTOP_IP }} "rm -rf /home/deploy/sentinel-deploy/build"
