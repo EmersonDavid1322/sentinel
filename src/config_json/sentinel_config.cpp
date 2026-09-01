@@ -69,6 +69,7 @@ void crearConfigPorDefecto(const std::filesystem::path& rutaJSON){
     config["backup"]["carpetas"] = std::vector<std::string>{};
     config["backup"]["destino"] = "";
     config["backup"]["ignorar"] = std::vector<std::string>{};
+    config["backup"]["solo_modificados_hoy"] = false;
     config["backup"]["hora"] = "00:00";
     config["backup"]["activo"] = false;
     config["backup"]["forzar_backup"] = false;

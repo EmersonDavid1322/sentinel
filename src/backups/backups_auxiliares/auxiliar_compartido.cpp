@@ -4,6 +4,8 @@
 #include <fstream>
 #include <filesystem>
 #include <string>
+#include <sys/stat.h>
+#include <ctime>
 #include <vector>
 namespace fs = std::filesystem;
 
@@ -39,4 +41,37 @@ void limpiarLog() {
         throw ErrorBackup("No se podido abrir el archivo: " + logPath.string());
     }
     logFile.close();
+}
+
+bool archivoModificadoCreadoHoy(const fs::path& ruta) {
+    if (!fs::exists(ruta)) {
+        throw ErrorBackup("Hubo un error con la ruta: " + ruta.string() + " ruta no existente");
+    }
+
+    struct stat atributos;
+
+    if (stat(ruta.c_str(), &atributos) != 0) {
+        throw ErrorBackup("Ocurrio un erro al intentar leer la fecha del archivo en la ruta: " + ruta.string());
+    }
+
+    std::time_t tiempo_archivo = atributos.st_mtime;
+    std::time_t tiempo_actual = std::time(nullptr);
+
+    std::tm tm_archivo = *std::localtime(&tiempo_archivo);
+    std::tm tm_actual = *std::localtime(&tiempo_actual);
+
+    return (tm_archivo.tm_mday == tm_actual.tm_mday &&
+            tm_archivo.tm_mon  == tm_actual.tm_mon  &&
+            tm_archivo.tm_year == tm_actual.tm_year);
+}
+
+std::string obtenerNombreCarpetaBackup() {
+    std::time_t tiempo_actual = std::time(nullptr);
+    std::tm tm_actual = *std::localtime(&tiempo_actual);
+
+    char buffer[80];
+
+    std::strftime(buffer, sizeof(buffer), "backup_%Y_%m_%d", &tm_actual);
+
+    return std::string(buffer);
 }

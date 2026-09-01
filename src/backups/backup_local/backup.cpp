@@ -38,9 +38,9 @@ std::string verificarCarpetasBackup(const std::vector<std::string>& carpetas, co
         if (!fs::exists(carpeta)){
             throw ErrorBackup("La carpeta no existe: " + carpeta);
         }
-        else{
-            msg_carpetas += " " + carpeta;
-        }
+
+        msg_carpetas += " " + carpeta;
+
     }
     if (!fs::exists(destino)){
         try {
@@ -55,22 +55,25 @@ std::string verificarCarpetasBackup(const std::vector<std::string>& carpetas, co
     return msg_carpetas;
 }
 
-void ejecutarBackup(const std::vector<std::string>& carpetas, const std::string& destino, const std::vector<std::string>& ignorar){
-    for (const std::string& carpeta : carpetas){
+void ejecutarBackup(const ConfigBackup& configBackup){
+    std::string nombre_carpeta = obtenerNombreCarpetaBackup();
+    fs::path destino(configBackup.destino);
+
+    for (const std::string& carpeta : configBackup.carpetas){
         try{
             fs::path origen(carpeta);
-            fs::path carpeta_backup = destino / origen.filename();
+            fs::path carpeta_backup = destino / nombre_carpeta / origen.filename();
             fs::create_directories(carpeta_backup);
             for (auto it = fs::recursive_directory_iterator(origen); it != fs::recursive_directory_iterator(); ++it) {
                 const auto& entrada = *it;
 
-                if (fs::is_directory(entrada) && debeIgnorarce(entrada.path(), ignorar)) {
+                if (fs::is_directory(entrada) && debeIgnorarce(entrada.path(), configBackup.ignorar)) {
                     logWarning("Se ignoro la carpeta completa: " + entrada.path().string(), "backups.log");
                     it.disable_recursion_pending();
                     continue;
                 }
 
-                if (debeIgnorarce(entrada.path(), ignorar)) {
+                if (debeIgnorarce(entrada.path(), configBackup.ignorar)) {
                     logWarning("Se ignoro un archivo :" + entrada.path().string(), "backups.log");
                     continue;
                 }
@@ -80,7 +83,20 @@ void ejecutarBackup(const std::vector<std::string>& carpetas, const std::string&
                     continue;
                 }
 
+                if (configBackup.solo_modificados_hoy) {
+                    if (!archivoModificadoCreadoHoy(entrada.path())) {
+                        logWarning("Backup: se omitió un archivo que no se modificó/creó hoy: " + entrada.path().string(), "backups.log");
+                        continue;
+                    }
+                }
+
                 fs::path destino_final = carpeta_backup / fs::relative(entrada.path(), origen);
+
+                fs::path carpetaDestinoArchvo = destino_final.parent_path();
+
+                if (!fs::exists((carpetaDestinoArchvo))) {
+                    fs::create_directories(carpetaDestinoArchvo);
+                }
 
                 if (fs::is_directory(entrada)) {
                     fs::create_directories(destino_final);
@@ -93,7 +109,7 @@ void ejecutarBackup(const std::vector<std::string>& carpetas, const std::string&
         }
         catch(const fs::filesystem_error& e){
             enviarNotificación("Backup", "Error Backup: -" + std::string(e.what()), "WARNING");
-            logError("Error Backup: -" + std::string(e.what()), "sentinel.log");
+            logError("Error Backup: -" + std::string(e.what()), "backups.log");
             continue;
             }
     }
@@ -123,7 +139,7 @@ void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_
 
         limpiarLog();
         std::string carpetas_msg = verificarCarpetasBackup(config_backup.carpetas, config_backup.destino);
-        ejecutarBackup(config_backup.carpetas, config_backup.destino, config_backup.ignorar);
+        ejecutarBackup(config_backup);
 
         logInfo("Se realizo un bakup de forma correcta de las carpetas: " + carpetas_msg + " Destino: " + config_backup.destino, "sentinel.log");
         enviarNotificación("Backup", "Se completo el bakup correctamente a la carpeta: " + config_backup.destino, "INFO");

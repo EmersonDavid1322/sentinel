@@ -17,13 +17,13 @@ void asegurarCarpetasSentinel() {
 }
 
 std::filesystem::path obtenerRutaConfig() {
-    return "/etc/sentinel/sentinel.json";
+    return "/home/Emerson/proyectos_personales/c++/proyectos/sentinel/config/sentinel.json";
 }
 
 std::filesystem::path obtenerRutaLogs() {
-    return "/var/log/sentinel";
+    return "/home/Emerson/proyectos_personales/c++/proyectos/sentinel/logs/";
 }
 
 std::filesystem::path obtenerRutaEstado() {
-    return "/var/lib/sentinel/";
+    return "/home/Emerson/proyectos_personales/c++/proyectos/sentinel/config/";
 }

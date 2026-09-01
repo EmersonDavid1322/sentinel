@@ -7,6 +7,7 @@ struct ConfigBackup {
     std::vector<std::string> carpetas;
     std::string destino;
     std::vector<std::string> ignorar;
+    bool solo_modificados_hoy;
     std::string hora;
     bool activo;
     bool forzar_backup;
