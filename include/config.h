@@ -26,6 +26,7 @@ struct ConfigBackupNube {
     std::string carpeta_destino;
     bool activo;
     bool activo_bajada;
+    bool solo_subir_modificados_hoy;
 };
 
 struct ConfigMonitor {

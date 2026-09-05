@@ -87,6 +87,7 @@ void crearConfigPorDefecto(const std::filesystem::path& rutaJSON){
     config["backup_nube"]["carpeta_destino"] = "";
     config["backup_nube"]["activo"] = false;
     config["backup_nube"]["activo_bajada"] = false;
+    config["backup_nube"]["solo_subir_modificados_hoy"] = false;
 
     config["monitor"] = {};
     config["monitor"]["intervalo"] = 60;
@@ -117,6 +118,7 @@ void asegurarConfigExiste(const std::filesystem::path& rutaJSON){
 
     if (!fs::exists(rutaJSON)){
         crearConfigPorDefecto(rutaJSON);
-        logInfo("No se encontro el archivo 'sentinel.json' se creo uno nuevo: " + rutaJSON.string(), "sentinel.log");
+        logInfo("No se encontro el archivo 'sentinel.json' se creo uno nuevo: " + rutaJSON.string() +
+            " se recomienda proporcinarle y verificar los permisos correctos", "sentinel.log");
     }
 }

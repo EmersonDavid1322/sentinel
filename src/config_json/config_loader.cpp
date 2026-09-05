@@ -43,6 +43,7 @@ ConfigBackupNube cargarBackupNube(const json& datos) {
     std::string carpeta_destino = datos["backup_nube"]["carpeta_destino"];
     bool activo = datos["backup_nube"]["activo"];
     bool activo_bajada = datos["backup_nube"]["activo_bajada"];
+    bool solo_subir_modificados_hoy = datos["backup_nube"]["solo_subir_modificados_hoy"];
 
     ConfigBackupNube nube;
     nube.carpetas = carpetas;
@@ -57,6 +58,7 @@ ConfigBackupNube cargarBackupNube(const json& datos) {
     nube.hora_bajada = hora_bajada;
     nube.activo = activo;
     nube.activo_bajada = activo_bajada;
+    nube.solo_subir_modificados_hoy = solo_subir_modificados_hoy;
 
     return nube;
 }

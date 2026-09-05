@@ -207,6 +207,13 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
                 continue;
             }
 
+            if (config.solo_subir_modificados_hoy) {
+                if (!archivoModificadoCreadoHoy(entrada.path())) {
+                    logWarning("Backup: se omitió un archivo que no se modificó/creó hoy: " + entrada.path().string(), "backups.log");
+                    continue;
+                }
+            }
+
             fs::path ruta_relativa = fs::relative(entrada.path(), origen);
             std::string ruta_remota = config.carpeta_remota + "/" + ruta_relativa.string();
 
