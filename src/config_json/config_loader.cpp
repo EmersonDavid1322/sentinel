@@ -125,7 +125,6 @@ ConfigOrganizador cargarOrganizador(const json& datos){
 
 ConfigSentinel cargarConfig(const std::filesystem::path& rutaJSON){
     try{
-        inicializarConfiguraciones();
         std::ifstream archivo = comprobar_json(rutaJSON);
         json datos = json::parse(archivo);
 
