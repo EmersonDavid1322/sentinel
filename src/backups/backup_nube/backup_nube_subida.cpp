@@ -183,6 +183,10 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
     std::string token = config.token;
     bool hubo_errores = false;
 
+    if (config.crear_carpeta_backup_nube) {
+        logInfo("Se a creado carpeta de backup", "backups.log");
+    }
+
     namespace fs = std::filesystem;
     for (const auto& carpeta : config.carpetas) {
         fs::path origen(carpeta);
@@ -214,8 +218,16 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
                 }
             }
 
+            std::string nombre_carpeta = obtenerNombreCarpetaBackup();
+            std::string ruta_remota;
+
             fs::path ruta_relativa = fs::relative(entrada.path(), origen);
-            std::string ruta_remota = config.carpeta_remota + "/" + ruta_relativa.string();
+
+            if (config.crear_carpeta_backup_nube) {
+                ruta_remota = config.carpeta_remota + "/" + nombre_carpeta + "/" + ruta_relativa.string();
+            }else {
+                ruta_remota = config.carpeta_remota + "/" + ruta_relativa.string();
+            }
 
             try{
                 conReintento(config, token, [&]() {
@@ -243,9 +255,9 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
         }
     }
     if (!hubo_errores) {
-        logInfo("Se compelto el backup a DropBox de forma correcta", "sentinel.log");
-        logInfo("Se compelto el backup a DropBox de forma correcta", "backups.log");
-        enviarNotificación("Backup Nube", "Se compelto el backup a DropBox de forma correcta", "INFO");
+        logInfo("Se completo el backup a DropBox de forma correcta", "sentinel.log");
+        logInfo("Se completo el backup a DropBox de forma correcta", "backups.log");
+        enviarNotificación("Backup Nube", "Se completo el backup a DropBox de forma correcta", "INFO");
     }else {
         logInfo("Se completo el backup a DropBox, hubo problemas con algunos archivos, por favor revise 'backups.log' para mas información", "sentinel.log");
         logInfo("Se completo el backup a DropBox, hubo algunos error con archivos", "backups.log");

@@ -15,23 +15,12 @@ std::string  estadoBackup(const ConfigBackup& config) {
 
     std::string mensaje = "=== Estado Backup ===\n";
     mensaje += "Activo: " + std::string(config.activo ? "si" : "no") + "\n";
+    mensaje += "Forzar Backup: " + std::string(config.forzar_backup ? "si" : "no") + "\n";
+    mensaje += "Solo backup de archivos modificados/creados hoy: " + std::string(config.solo_modificados_hoy ? "si" : "no") + "\n";
     mensaje += "Hora: " + config.hora + "\n";
     mensaje += "Destino: " + config.destino + "\n";
     mensaje += "Ignorar: " + reglas_ignorar_str + "\n";
     mensaje += "Carpetas:\n" + carpetas_str;
-
-    return mensaje;
-}
-
-std::string  estadoMonitor(const ConfigMonitor& config) {
-    int cpu_entero = static_cast<int>(config.cpu);
-    int ram_entero = static_cast<int>(config.ram);
-    int disco_entero = static_cast<int>(config.disco);
-    std::string mensaje = "=== Estado Monitor ===\n";
-    mensaje += "Activo: " + std::string(config.activo ? "si" : "no") + "\n";
-    mensaje += "Limite CPU: " + std::to_string(cpu_entero) + "%\n";
-    mensaje += "Limite RAM: " + std::to_string(ram_entero) + "%\n";
-    mensaje += "Limite Disco: " + std::to_string(disco_entero) + "%\n";
 
     return mensaje;
 }
@@ -47,13 +36,29 @@ std::string  estadoBackupNube(const ConfigBackupNube& config) {
         reglas_ignorar_str += reglas_ignorar + "\n";
     }
 
-    std::string mensaje = "=== Estado Backup ===\n";
+    std::string mensaje = "=== Estado Backup Nube ===\n";
     mensaje += "Activo: " + std::string(config.activo ? "si" : "no") + "\n";
+    mensaje += "Activo Bajada: " + std::string(config.activo_bajada ? "si" : "no") + "\n";
+    mensaje += "Solo subir archivos modificados/creados hoy: " + std::string(config.solo_subir_modificados_hoy ? "si" : "no") + "\n";
     mensaje += "Carpeta Remota: " + config.carpeta_remota + "\n";
     mensaje += "Reglas:\n" + reglas_ignorar_str;
     mensaje += "Hora: " + config.hora + "\n";
     mensaje += "Hora bajada: " + config.hora_bajada + "\n";
     mensaje += "Carpeta destino bajada: " + config.carpeta_destino + "\n";
+
+    return mensaje;
+}
+
+std::string  estadoMonitor(const ConfigMonitor& config) {
+    int cpu_entero = static_cast<int>(config.cpu);
+    int ram_entero = static_cast<int>(config.ram);
+    int disco_entero = static_cast<int>(config.disco);
+    std::string mensaje = "=== Estado Monitor ===\n";
+    mensaje += "Activo: " + std::string(config.activo ? "si" : "no") + "\n";
+    mensaje += "Intervalo: " + std::to_string(config.intervalo) + "\n";
+    mensaje += "Limite CPU: " + std::to_string(cpu_entero) + "%\n";
+    mensaje += "Limite RAM: " + std::to_string(ram_entero) + "%\n";
+    mensaje += "Limite Disco: " + std::to_string(disco_entero) + "%\n";
 
     return mensaje;
 }

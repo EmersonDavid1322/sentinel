@@ -1,6 +1,7 @@
 {
   "backup": {
     "activo": false,
+    "crear_carpeta_backup": true,
     "carpetas": [],
     "destino": "",
     "forzar_backup": false,
@@ -12,6 +13,7 @@
     "activo": false,
     "activo_bajada": false,
     "solo_subir_modificados_hoy": false,
+    "crear_carpeta_backup_nube": false,
     "carpeta_remota": "/",
     "carpetas": [],
     "cliente_id": "",

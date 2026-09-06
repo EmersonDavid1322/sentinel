@@ -7,10 +7,11 @@ struct ConfigBackup {
     std::vector<std::string> carpetas;
     std::string destino;
     std::vector<std::string> ignorar;
-    bool solo_modificados_hoy;
     std::string hora;
     bool activo;
     bool forzar_backup;
+    bool solo_modificados_hoy;
+    bool crear_carpeta_backup;
 };
 
 struct ConfigBackupNube {
@@ -27,6 +28,7 @@ struct ConfigBackupNube {
     bool activo;
     bool activo_bajada;
     bool solo_subir_modificados_hoy;
+    bool crear_carpeta_backup_nube;
 };
 
 struct ConfigMonitor {

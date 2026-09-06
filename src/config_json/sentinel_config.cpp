@@ -11,7 +11,9 @@
 #include "sentinel_estado.h"
 #include "descriptor_inotify.h"
 #include "notificador.h"
+#include "json.hpp"
 namespace fs = std::filesystem;
+using json = nlohmann::json;
 
 std::ifstream comprobar_json(const std::filesystem::path& ruta){
     std::ifstream archivo(ruta);
@@ -61,6 +63,75 @@ void actualizarJSON(ConfigCompartida& configCompartida){
     }
 }
 
+json obtenerConfiguracionPorDefectoComplete() {
+    return R"({
+        "backup": {
+            "carpetas": [],
+            "destino": "",
+            "ignorar": [],
+            "solo_modificados_hoy": false,
+            "hora": "00:00",
+            "activo": false,
+            "forzar_backup": false,
+            "crear_carpeta_backup": false
+        },
+        "backup_nube": {
+            "carpetas": [],
+            "carpeta_remota": "",
+            "ignorar": [],
+            "token": "",
+            "cliente_id": "",
+            "cliente_secret": "",
+            "refresh_token": "",
+            "hora": "00:00",
+            "hora_bajada": "00:00",
+            "carpeta_destino": "",
+            "activo": false,
+            "activo_bajada": false,
+            "solo_subir_modificados_hoy": false,
+            "crear_carpeta_backup_nube": false
+        },
+        "monitor": {
+            "intervalo": 0,
+            "limite_cpu": 0,
+            "limite_ram": 0,
+            "limite_disco": 0,
+            "activo": false
+        },
+        "organizador": {
+            "carpeta_vigilar": "",
+            "activo": false,
+            "reglas": {}
+        }
+    })"_json;
+}
+
+void inicializarConfiguraciones() {
+    json config_base = obtenerConfiguracionPorDefectoComplete();
+    fs::path rutaConfig = obtenerRutaConfig();
+    json config_usuario;
+
+    std::ifstream archivoConfig(rutaConfig);
+
+    if (!archivoConfig.is_open()) {
+        logError("No se puedo abrir el archivo de configuraciones en: " + rutaConfig.string(), "sentinel.log");
+    }
+
+    try {
+        archivoConfig >> config_usuario;
+        config_base.merge_patch(config_usuario);
+    } catch (const json::parse_error& e) {
+        logError("Error al leer el JSON (archivo corrupto). Se usará el defecto. " + std::string(e.what()), "sentinel.log");
+    }
+    archivoConfig.close();
+
+    std::ofstream archivo_escritura(rutaConfig);
+    if (archivo_escritura.is_open()) {
+        archivo_escritura << config_base.dump(4);
+        archivo_escritura.close();
+    }
+}
+
 void crearConfigPorDefecto(const std::filesystem::path& rutaJSON){
     using json = nlohmann::json;
 
@@ -73,6 +144,7 @@ void crearConfigPorDefecto(const std::filesystem::path& rutaJSON){
     config["backup"]["hora"] = "00:00";
     config["backup"]["activo"] = false;
     config["backup"]["forzar_backup"] = false;
+    config["backup"]["crear_carpeta_backup"] = false;
 
     config["backup_nube"] = {};
     config["backup_nube"]["carpetas"] = std::vector<std::string>{};
@@ -88,6 +160,7 @@ void crearConfigPorDefecto(const std::filesystem::path& rutaJSON){
     config["backup_nube"]["activo"] = false;
     config["backup_nube"]["activo_bajada"] = false;
     config["backup_nube"]["solo_subir_modificados_hoy"] = false;
+    config["backup_nube"]["crear_carpeta_backup_nube"] = false;
 
     config["monitor"] = {};
     config["monitor"]["intervalo"] = 60;

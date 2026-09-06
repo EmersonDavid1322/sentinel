@@ -58,11 +58,20 @@ std::string verificarCarpetasBackup(const std::vector<std::string>& carpetas, co
 void ejecutarBackup(const ConfigBackup& configBackup){
     std::string nombre_carpeta = obtenerNombreCarpetaBackup();
     fs::path destino(configBackup.destino);
+    fs::path carpeta_backup;
+
+    if (configBackup.crear_carpeta_backup) {
+        logInfo("Se creo la carpeta para backup", "backups.log");
+    }
 
     for (const std::string& carpeta : configBackup.carpetas){
         try{
             fs::path origen(carpeta);
-            fs::path carpeta_backup = destino / nombre_carpeta / origen.filename();
+            if (configBackup.crear_carpeta_backup) {
+                carpeta_backup = destino / nombre_carpeta / origen.filename();
+            }else {
+                carpeta_backup = destino  / origen.filename();
+            }
             fs::create_directories(carpeta_backup);
             for (auto it = fs::recursive_directory_iterator(origen); it != fs::recursive_directory_iterator(); ++it) {
                 const auto& entrada = *it;

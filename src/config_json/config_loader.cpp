@@ -7,96 +7,125 @@
 #include "notificador.h"
 using json = nlohmann::json;
 
-ConfigBackup cargarBackup(const json& datos){
+ConfigBackup cargarBackup(const json& datos) {
 
-    std::vector<std::string> carpetas = datos["backup"]["carpetas"];
-    std::string destino = datos["backup"]["destino"];
-    std::vector<std::string> ignorar = datos["backup"]["ignorar"];
-    bool solo_modificados_hoy = datos["backup"]["solo_modificados_hoy"];
-    std::string hora = datos["backup"]["hora"];
-    bool activo = datos["backup"]["activo"];
-    bool forzar_backup = datos["backup"]["forzar_backup"];
+    json plantilla_backup = R"({
+        "backup": {
+            "carpetas": [],
+            "destino": "",
+            "ignorar": [],
+            "solo_modificados_hoy": false,
+            "hora": "00:00",
+            "activo": false,
+            "forzar_backup": false,
+            "crear_carpeta_backup": false
+        }
+    })"_json;
+
+    plantilla_backup.merge_patch(datos);
 
     ConfigBackup backup;
-    backup.carpetas = carpetas;
-    backup.destino = destino;
-    backup.ignorar = ignorar;
-    backup.solo_modificados_hoy = solo_modificados_hoy;
-    backup.hora = hora;
-    backup.activo = activo;
-    backup.forzar_backup = forzar_backup;
+    backup.carpetas             = plantilla_backup["backup"]["carpetas"];
+    backup.destino              = plantilla_backup["backup"]["destino"];
+    backup.ignorar              = plantilla_backup["backup"]["ignorar"];
+    backup.solo_modificados_hoy = plantilla_backup["backup"]["solo_modificados_hoy"];
+    backup.hora                 = plantilla_backup["backup"]["hora"];
+    backup.activo               = plantilla_backup["backup"]["activo"];
+    backup.forzar_backup        = plantilla_backup["backup"]["forzar_backup"];
+    backup.crear_carpeta_backup = plantilla_backup["backup"]["crear_carpeta_backup"];
 
     return backup;
 }
 
 ConfigBackupNube cargarBackupNube(const json& datos) {
 
-    std::vector<std::string> carpetas = datos["backup_nube"]["carpetas"];
-    std::string carpeta_remota = datos["backup_nube"]["carpeta_remota"];
-    std::vector<std::string> ignorar = datos["backup_nube"]["ignorar"];
-    std::string token = datos["backup_nube"]["token"];
-    std::string clienteID = datos["backup_nube"]["cliente_id"];
-    std::string clienteSecret = datos["backup_nube"]["cliente_secret"];
-    std::string refresh_token = datos["backup_nube"]["refresh_token"];
-    std::string hora = datos["backup_nube"]["hora"];
-    std::string hora_bajada = datos["backup_nube"]["hora_bajada"];
-    std::string carpeta_destino = datos["backup_nube"]["carpeta_destino"];
-    bool activo = datos["backup_nube"]["activo"];
-    bool activo_bajada = datos["backup_nube"]["activo_bajada"];
-    bool solo_subir_modificados_hoy = datos["backup_nube"]["solo_subir_modificados_hoy"];
+    json plantilla_nube = R"({
+        "backup_nube": {
+            "carpetas": [],
+            "carpeta_remota": "/",
+            "ignorar": [],
+            "token": "",
+            "cliente_id": "",
+            "cliente_secret": "",
+            "refresh_token": "",
+            "hora": "00:00",
+            "hora_bajada": "00:00",
+            "carpeta_destino": "",
+            "activo": false,
+            "activo_bajada": false,
+            "solo_subir_modificados_hoy": false,
+            "crear_carpeta_backup_nube": false
+        }
+    })"_json;
+
+    plantilla_nube.merge_patch(datos);
 
     ConfigBackupNube nube;
-    nube.carpetas = carpetas;
-    nube.carpeta_remota = carpeta_remota;
-    nube.carpeta_destino = carpeta_destino;
-    nube.ignorar = ignorar;
-    nube.token = token;
-    nube.clienteID = clienteID;
-    nube.clienteSecret = clienteSecret;
-    nube.refresh_token = refresh_token;
-    nube.hora = hora;
-    nube.hora_bajada = hora_bajada;
-    nube.activo = activo;
-    nube.activo_bajada = activo_bajada;
-    nube.solo_subir_modificados_hoy = solo_subir_modificados_hoy;
+    nube.carpetas                  = plantilla_nube["backup_nube"]["carpetas"];
+    nube.carpeta_remota            = plantilla_nube["backup_nube"]["carpeta_remota"];
+    nube.carpeta_destino           = plantilla_nube["backup_nube"]["carpeta_destino"];
+    nube.ignorar                   = plantilla_nube["backup_nube"]["ignorar"];
+    nube.token                     = plantilla_nube["backup_nube"]["token"];
+    nube.clienteID                 = plantilla_nube["backup_nube"]["cliente_id"];
+    nube.clienteSecret             = plantilla_nube["backup_nube"]["cliente_secret"];
+    nube.refresh_token             = plantilla_nube["backup_nube"]["refresh_token"];
+    nube.hora                      = plantilla_nube["backup_nube"]["hora"];
+    nube.hora_bajada               = plantilla_nube["backup_nube"]["hora_bajada"];
+    nube.activo                    = plantilla_nube["backup_nube"]["activo"];
+    nube.activo_bajada             = plantilla_nube["backup_nube"]["activo_bajada"];
+    nube.solo_subir_modificados_hoy = plantilla_nube["backup_nube"]["solo_subir_modificados_hoy"];
+    nube.crear_carpeta_backup_nube = plantilla_nube["backup_nube"]["crear_carpeta_backup_nube"];
 
     return nube;
 }
 
 ConfigMonitor cargarMonitor(const json& datos){
 
-    int intervalo = datos["monitor"]["intervalo"];
-    int cpu = datos["monitor"]["limite_cpu"];
-    int ram = datos["monitor"]["limite_ram"];
-    int disco = datos["monitor"]["limite_disco"];
-    bool activo = datos["monitor"]["activo"];
+    json plantilla_monitor = R"({
+        "monitor": {
+            "intervalo": 15,
+            "limite_cpu": 70,
+            "limite_ram": 70,
+            "limite_disco": 70,
+            "activo": false
+        }
+    })"_json;
+
+    plantilla_monitor.merge_patch(datos);
 
     ConfigMonitor monitor;
-    monitor.intervalo = intervalo;
-    monitor.cpu = cpu;
-    monitor.ram = ram;
-    monitor.disco = disco;
-    monitor.activo = activo;
+    monitor.intervalo = plantilla_monitor["monitor"]["intervalo"];
+    monitor.cpu       = plantilla_monitor["monitor"]["limite_cpu"];
+    monitor.ram       = plantilla_monitor["monitor"]["limite_ram"];
+    monitor.disco     = plantilla_monitor["monitor"]["limite_disco"];
+    monitor.activo    = plantilla_monitor["monitor"]["activo"];
 
     return monitor;
 }
 
 ConfigOrganizador cargarOrganizador(const json& datos){
 
-    std::string carpeta_vigilar = datos["organizador"]["carpeta_vigilar"];
-    bool activado = datos["organizador"]["activo"];
-    std::map<std::string, std::string> reglas = datos["organizador"]["reglas"];
+    json plantilla_organizador = R"({
+        "organizador": {
+            "carpeta_vigilar": "",
+            "activo": false,
+            "reglas": {}
+        }
+    })"_json;
+
+    plantilla_organizador.merge_patch(datos);
 
     ConfigOrganizador organizador;
-    organizador.carpeta_vigilar = carpeta_vigilar;
-    organizador.activo = activado;
-    organizador.reglas = reglas;
+    organizador.carpeta_vigilar = plantilla_organizador["organizador"]["carpeta_vigilar"];
+    organizador.activo          = plantilla_organizador["organizador"]["activo"];
+    organizador.reglas          = plantilla_organizador["organizador"]["reglas"];
 
     return organizador;
 }
 
 ConfigSentinel cargarConfig(const std::filesystem::path& rutaJSON){
     try{
+        inicializarConfiguraciones();
         std::ifstream archivo = comprobar_json(rutaJSON);
         json datos = json::parse(archivo);
 
