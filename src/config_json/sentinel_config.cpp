@@ -63,7 +63,7 @@ void actualizarJSON(ConfigCompartida& configCompartida){
     }
 }
 
-json obtenerConfiguracionPorDefectoComplete() {
+json obtenerConfiguracionPorDefectoCompleta() {
     return R"({
         "backup": {
             "carpetas": [],
@@ -107,7 +107,7 @@ json obtenerConfiguracionPorDefectoComplete() {
 }
 
 void inicializarConfiguraciones() {
-    json config_base = obtenerConfiguracionPorDefectoComplete();
+    json config_base = obtenerConfiguracionPorDefectoCompleta();
     fs::path rutaConfig = obtenerRutaConfig();
     json config_usuario;
 
@@ -133,46 +133,8 @@ void inicializarConfiguraciones() {
 }
 
 void crearConfigPorDefecto(const std::filesystem::path& rutaJSON){
-    using json = nlohmann::json;
 
-    json config;
-    config["backup"] = {};
-    config["backup"]["carpetas"] = std::vector<std::string>{};
-    config["backup"]["destino"] = "";
-    config["backup"]["ignorar"] = std::vector<std::string>{};
-    config["backup"]["solo_modificados_hoy"] = false;
-    config["backup"]["hora"] = "00:00";
-    config["backup"]["activo"] = false;
-    config["backup"]["forzar_backup"] = false;
-    config["backup"]["crear_carpeta_backup"] = false;
-
-    config["backup_nube"] = {};
-    config["backup_nube"]["carpetas"] = std::vector<std::string>{};
-    config["backup_nube"]["carpeta_remota"] = "/";
-    config["backup_nube"]["ignorar"] = std::vector<std::string>{};
-    config["backup_nube"]["token"] = "";
-    config["backup_nube"]["cliente_id"] = "";
-    config["backup_nube"]["cliente_secret"] = "";
-    config["backup_nube"]["refresh_token"] = "";
-    config["backup_nube"]["hora"] = "00:00";
-    config["backup_nube"]["hora_bajada"] = "00:00";
-    config["backup_nube"]["carpeta_destino"] = "";
-    config["backup_nube"]["activo"] = false;
-    config["backup_nube"]["activo_bajada"] = false;
-    config["backup_nube"]["solo_subir_modificados_hoy"] = false;
-    config["backup_nube"]["crear_carpeta_backup_nube"] = false;
-
-    config["monitor"] = {};
-    config["monitor"]["intervalo"] = 60;
-    config["monitor"]["limite_cpu"] = 70;
-    config["monitor"]["limite_ram"] = 70;
-    config["monitor"]["limite_disco"] = 70;
-    config["monitor"]["activo"] = false;
-
-    config["organizador"] = {};
-    config["organizador"]["carpeta_vigilar"] = "";
-    config["organizador"]["activo"] = false;
-    config["organizador"]["reglas"] = json::object();
+    json config = obtenerConfiguracionPorDefectoCompleta();
 
     std::ofstream archivo(rutaJSON);
     if (!archivo.is_open()){

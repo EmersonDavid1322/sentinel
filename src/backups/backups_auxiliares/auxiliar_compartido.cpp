@@ -1,12 +1,14 @@
 #include "auxiliar_compartido.h"
 #include "errores.h"
 #include "rutas.h"
+#include "json.hpp"
 #include <fstream>
 #include <filesystem>
 #include <string>
 #include <sys/stat.h>
 #include <ctime>
 #include <vector>
+#include "logger.h"
 namespace fs = std::filesystem;
 
 bool verificarHoraBackup(const std::string& horaConfigurada) {
@@ -71,7 +73,29 @@ std::string obtenerNombreCarpetaBackup() {
 
     char buffer[80];
 
-    std::strftime(buffer, sizeof(buffer), "backup_%Y_%m_%d", &tm_actual);
+    std::strftime(buffer, sizeof(buffer), "backup_%Y_%m_%d_%H_%M_%S", &tm_actual);
 
     return std::string(buffer);
+}
+
+void guardarNombreUltimoBackup(const std::string& parametro, const std::string& nombre) {
+    using json = nlohmann::json;
+    fs::path rutaConfig = obtenerRutaConfig();
+    std::ifstream archivoConfig(rutaConfig);
+
+    if (!archivoConfig.is_open()) {
+        throw ErrorBackup("No se puedo abrir el archivo de configuraciones en modo lectura");
+    }
+    json datos = json::parse(archivoConfig);
+
+    datos[parametro]["ultimo_backup_registrado"] = nombre;
+    archivoConfig.close();
+
+    std::ofstream archivo(rutaConfig);
+    if (!archivo.is_open()) {
+        throw ErrorBackup("No se puedo abrir el archivo de configuraciones en modo escritura");
+    }
+
+    archivo << datos.dump(4);
+    logInfo("Se guardo correctamente el nombre del backup", "backups.log");
 }

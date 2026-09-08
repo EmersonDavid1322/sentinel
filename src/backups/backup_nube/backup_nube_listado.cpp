@@ -2,9 +2,9 @@
 #include "config.h"
 #include "backup_nube_auxiliar_dropbox.h"
 #include "errores.h"
-#include <vector>
-#include <curl/curl.h>
 #include "comandos_auxiliar.h"
+#include <curl/curl.h>
+#include <vector>
 
 bool obtenerPaginaListado(const std::string& url, const std::string& cuerpo,
                           const std::string& token, std::vector<ArchivoRemoto>& lista,

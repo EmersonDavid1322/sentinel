@@ -46,6 +46,7 @@ void backupNubeBajada(const std::string& token, const std::string& rutaRemota, c
     if (resultado != CURLE_OK) {
         curl_slist_free_all(headers);
         curl_easy_cleanup(curl);
+        archivo.close();
         throw ErrorBackupRED("Error al subir archivo: " + std::string(curl_easy_strerror(resultado)));
     }
 
@@ -72,9 +73,20 @@ void ejecutarBajadaArchivosNube(const ConfigBackupNube& config) {
 
     namespace fs = std::filesystem;
 
-    conReintento(config, token, [&]() {
-         listaNube = listaArchivosRemotos(config);
-    });
+    try {
+        conReintento(config, token, [&]() {
+          listaNube = listaArchivosRemotos(config);
+     });
+    }catch (const ErrorBackupAPI& e) {
+        logError("Ocurrio un error con la petición al intentar conseguir el listado de archivos: " + std::string(e.what()), "sentinel.log");
+    }
+    catch (const ErrorBackupRED& e) {
+        logError("Ocurrio un error con la red al intentar conseguir el listado de archivos: " + std::string(e.what()), "sentinel.log");
+    }
+    catch (const DaemonError& e) {
+        logError("Ocurrio un error inesperado al intentar conseguri el listado de archivos: " + std::string(e.what()), "sentinel.log");
+    }
+
 
     std::sort(listaNube.begin(), listaNube.end(), [](const ArchivoRemoto& a, const ArchivoRemoto& b) {
     return a.esCarpeta > b.esCarpeta;

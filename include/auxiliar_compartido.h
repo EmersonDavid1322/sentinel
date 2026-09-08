@@ -12,3 +12,5 @@ void limpiarLog();
 bool archivoModificadoCreadoHoy(const fs::path& ruta);
 
 std::string obtenerNombreCarpetaBackup();
+
+void guardarNombreUltimoBackup(const std::string& parametro, const std::string& nombre);

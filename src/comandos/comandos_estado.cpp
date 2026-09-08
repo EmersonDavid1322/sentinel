@@ -19,7 +19,7 @@ std::string  estadoBackup(const ConfigBackup& config) {
     mensaje += "Solo backup de archivos modificados/creados hoy: " + std::string(config.solo_modificados_hoy ? "si" : "no") + "\n";
     mensaje += "Hora: " + config.hora + "\n";
     mensaje += "Destino: " + config.destino + "\n";
-    mensaje += "Ignorar: " + reglas_ignorar_str + "\n";
+    mensaje += "Ignorar:\n" + reglas_ignorar_str + "\n";
     mensaje += "Carpetas:\n" + carpetas_str;
 
     return mensaje;
@@ -41,7 +41,7 @@ std::string  estadoBackupNube(const ConfigBackupNube& config) {
     mensaje += "Activo Bajada: " + std::string(config.activo_bajada ? "si" : "no") + "\n";
     mensaje += "Solo subir archivos modificados/creados hoy: " + std::string(config.solo_subir_modificados_hoy ? "si" : "no") + "\n";
     mensaje += "Carpeta Remota: " + config.carpeta_remota + "\n";
-    mensaje += "Reglas:\n" + reglas_ignorar_str;
+    mensaje += "Ignorar:\n" + reglas_ignorar_str;
     mensaje += "Hora: " + config.hora + "\n";
     mensaje += "Hora bajada: " + config.hora_bajada + "\n";
     mensaje += "Carpeta destino bajada: " + config.carpeta_destino + "\n";

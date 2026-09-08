@@ -115,6 +115,10 @@ void ejecutarBackup(const ConfigBackup& configBackup){
                     logInfo("Se copio correctamente el archivo " + entrada.path().string() , "backups.log");
                 }
             }
+            if (configBackup.crear_carpeta_backup) {
+                guardarNombreUltimoBackup("backup", nombre_carpeta);
+            }
+
         }
         catch(const fs::filesystem_error& e){
             enviarNotificación("Backup", "Error Backup: -" + std::string(e.what()), "WARNING");

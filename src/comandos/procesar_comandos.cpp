@@ -73,7 +73,7 @@ void procesarComandoBackup(const std::string& accion, const std::string& valor, 
 }
 
 //backup_nube
-void procesarComandoBN(const std::string& accion, const std::string& valor, const ConfigBackupNube& config) {
+void procesarComandoBackupNube(const std::string& accion, const std::string& valor, const ConfigBackupNube& config) {
     if (accion == "activar" || accion == "desactivar") {
         procesarEstado("backup_nube", accion);
     }
@@ -156,7 +156,7 @@ void procesarComando(const std::string& comando, const ConfigSentinel& config) {
     if (modulo == "backup") {
         procesarComandoBackup(accion, valor, config.backup, config.monitor);
     }else if (modulo == "backup_nube") {
-        procesarComandoBN(accion, valor, config.backup_nube);
+        procesarComandoBackupNube(accion, valor, config.backup_nube);
     } else if (modulo == "monitor") {
         procesarComandoMonitor(accion, valor);
     } else if (modulo == "organizador") {

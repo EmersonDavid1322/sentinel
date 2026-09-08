@@ -10,7 +10,7 @@ void procesarComandoMonitor(std::string& accion, std::string& valor);
 
 void procesarComandoBackup(const std::string& accion, const std::string& valor, const ConfigBackup& configBackup, const ConfigMonitor& configMonitor);
 
-void procesarComandoBN(const std::string& accion, const std::string& valor, const ConfigBackupNube& config);
+void procesarComandoBackupNube(const std::string& accion, const std::string& valor, const ConfigBackupNube& config);
 
 void procesarComandoOrganizador(const std::string& accion, const std::string& valor);
 

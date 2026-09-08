@@ -5,7 +5,7 @@
 
 void actualizarJSON(ConfigCompartida& configCompartida);
 
-nlohmann::json obtenerConfiguracionPorDefectoComplete();
+nlohmann::json obtenerConfiguracionPorDefectoCompleta();
 
 void inicializarConfiguraciones();
 
