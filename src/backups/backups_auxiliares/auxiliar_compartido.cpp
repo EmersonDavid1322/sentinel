@@ -97,5 +97,4 @@ void guardarNombreUltimoBackup(const std::string& parametro, const std::string& 
     }
 
     archivo << datos.dump(4);
-    logInfo("Se guardo correctamente el nombre del backup", "backups.log");
 }
