@@ -1,16 +1,17 @@
 #pragma once
 #include <filesystem>
 #include <vector>
-namespace fs = std::filesystem;
 
 bool verificarHoraBackup(const std::string& horaConfigurada);
 
-bool debeIgnorarce(const fs::path& ruta, const std::vector<std::string>& lista_ignorar);
+bool debeIgnorarce(const std::filesystem::path& ruta, const std::vector<std::string>& lista_ignorar);
 
 void limpiarLog();
 
-bool archivoModificadoCreadoHoy(const fs::path& ruta);
+bool archivoModificadoCreadoHoy(const std::filesystem::path& ruta);
 
 std::string obtenerNombreCarpetaBackup();
 
-void guardarNombreUltimoBackup(const std::string& parametro, const std::string& nombre);
+void guardarRutaUltimoBackup(const std::string& parametro, const std::string& nombre);
+
+std::filesystem::path extraerRutaUltimoBackup(const std::string& parametro);

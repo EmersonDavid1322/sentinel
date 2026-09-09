@@ -18,7 +18,8 @@ ConfigBackup cargarBackup(const json& datos) {
             "hora": "00:00",
             "activo": false,
             "forzar_backup": false,
-            "crear_carpeta_backup": false
+            "crear_carpeta_backup": false,
+            "eliminar_ultimo_backup_registrado": false
         }
     })"_json;
 
@@ -33,6 +34,7 @@ ConfigBackup cargarBackup(const json& datos) {
     backup.activo               = plantilla_backup["backup"]["activo"];
     backup.forzar_backup        = plantilla_backup["backup"]["forzar_backup"];
     backup.crear_carpeta_backup = plantilla_backup["backup"]["crear_carpeta_backup"];
+    backup.eliminar_ultimo_backup_registrado = plantilla_backup["backup"]["eliminar_ultimo_backup_registrado"];
 
     return backup;
 }

@@ -37,6 +37,7 @@ add_executable(sentinel
     src/backups/backup_nube/loop_backup_nube.cpp
     src/backups/backup_nube/backup_nube_auxiliar.cpp
     src/backups/backups_auxiliares/auxiliar_compartido.cpp
+    src/backups/backup_local/auxiliar_backup_local.cpp
 )
 
 enable_testing()

@@ -8,8 +8,8 @@
 #include <sys/stat.h>
 #include <ctime>
 #include <vector>
-#include "logger.h"
 namespace fs = std::filesystem;
+using json = nlohmann::json;
 
 bool verificarHoraBackup(const std::string& horaConfigurada) {
     time_t ahora = time(0);
@@ -78,8 +78,7 @@ std::string obtenerNombreCarpetaBackup() {
     return std::string(buffer);
 }
 
-void guardarNombreUltimoBackup(const std::string& parametro, const std::string& nombre) {
-    using json = nlohmann::json;
+void guardarRutaUltimoBackup(const std::string& parametro, const std::string& nombre) {
     fs::path rutaConfig = obtenerRutaConfig();
     std::ifstream archivoConfig(rutaConfig);
 
@@ -97,4 +96,19 @@ void guardarNombreUltimoBackup(const std::string& parametro, const std::string& 
     }
 
     archivo << datos.dump(4);
+}
+
+std::filesystem::path extraerRutaUltimoBackup(const std::string& parametro) {
+    fs::path rutaConfig = obtenerRutaConfig();
+    std::ifstream archivoConfig(rutaConfig);
+
+    if (!archivoConfig.is_open()) {
+        throw ErrorBackup("No se puedo abrir el archivo de configuraciones en modo lectura");
+    }
+
+    json datos = json::parse(archivoConfig);
+
+    fs::path ruta_ultimo_backup = datos[parametro]["ultimo_backup_registrado"];
+
+    return ruta_ultimo_backup;
 }

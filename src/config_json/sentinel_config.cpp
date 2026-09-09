@@ -73,7 +73,8 @@ json obtenerConfiguracionPorDefectoCompleta() {
             "hora": "00:00",
             "activo": false,
             "forzar_backup": false,
-            "crear_carpeta_backup": false
+            "crear_carpeta_backup": false,
+            "eliminar_ultimo_backup_registrado": false
         },
         "backup_nube": {
             "carpetas": [],

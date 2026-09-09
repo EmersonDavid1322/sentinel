@@ -4,6 +4,7 @@
 #include <chrono>
 #include "errores.h"
 #include "backup.h"
+#include "auxiliar_backup_local.h"
 #include "logger.h"
 #include "config.h"
 #include "notificador.h"
@@ -115,8 +116,14 @@ void ejecutarBackup(const ConfigBackup& configBackup){
                     logInfo("Se copio correctamente el archivo " + entrada.path().string() , "backups.log");
                 }
             }
+            if (configBackup.eliminar_ultimo_backup_registrado) {
+                eliminarAnteriorBackup();
+                logInfo("Se elimino correctamente el ultimo backup registrado: " + extraerRutaUltimoBackup("backup").string(), "backups.log");
+            }
+
             if (configBackup.crear_carpeta_backup) {
-                guardarNombreUltimoBackup("backup", nombre_carpeta);
+                guardarRutaUltimoBackup("backup", carpeta_backup.parent_path().string());
+                logInfo("Se guardo correctamente la ruta del backup: " + carpeta_backup.parent_path().string(), "backups.log");
             }
 
         }
@@ -154,8 +161,8 @@ void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_
         std::string carpetas_msg = verificarCarpetasBackup(config_backup.carpetas, config_backup.destino);
         ejecutarBackup(config_backup);
 
-        logInfo("Se realizo un bakup de forma correcta de las carpetas: " + carpetas_msg + " Destino: " + config_backup.destino, "sentinel.log");
-        enviarNotificación("Backup", "Se completo el bakup correctamente a la carpeta: " + config_backup.destino, "INFO");
+        logInfo("Se realizo un bakup revise 'backups.log': " + carpetas_msg + " Destino: " + config_backup.destino, "sentinel.log");
+        enviarNotificación("Backup", "Se completo el bakup revise 'backups.log': " + config_backup.destino, "INFO");
 
     }
     catch(const ErrorBackup& e){

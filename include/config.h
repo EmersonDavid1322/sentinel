@@ -12,6 +12,7 @@ struct ConfigBackup {
     bool forzar_backup;
     bool solo_modificados_hoy;
     bool crear_carpeta_backup;
+    bool eliminar_ultimo_backup_registrado;
 };
 
 struct ConfigBackupNube {
