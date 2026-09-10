@@ -66,7 +66,7 @@ void ejecutarBackup(const ConfigBackup& configBackup){
     }
 
     for (const std::string& carpeta : configBackup.carpetas){
-        try{
+
             fs::path origen(carpeta);
             if (configBackup.crear_carpeta_backup) {
                 carpeta_backup = destino / nombre_carpeta / origen.filename();
@@ -76,6 +76,8 @@ void ejecutarBackup(const ConfigBackup& configBackup){
             fs::create_directories(carpeta_backup);
             for (auto it = fs::recursive_directory_iterator(origen); it != fs::recursive_directory_iterator(); ++it) {
                 const auto& entrada = *it;
+
+                try{
 
                 if (fs::is_directory(entrada) && debeIgnorarce(entrada.path(), configBackup.ignorar)) {
                     logWarning("Se ignoro la carpeta completa: " + entrada.path().string(), "backups.log");
@@ -116,23 +118,24 @@ void ejecutarBackup(const ConfigBackup& configBackup){
                     logInfo("Se copio correctamente el archivo " + entrada.path().string() , "backups.log");
                 }
             }
-            if (configBackup.eliminar_ultimo_backup_registrado) {
-                eliminarAnteriorBackup();
-                logInfo("Se elimino correctamente el ultimo backup registrado: " + extraerRutaUltimoBackup("backup").string(), "backups.log");
-            }
-
-            if (configBackup.crear_carpeta_backup) {
-                guardarRutaUltimoBackup("backup", carpeta_backup.parent_path().string());
-                logInfo("Se guardo correctamente la ruta del backup: " + carpeta_backup.parent_path().string(), "backups.log");
-            }
-
+                catch(const fs::filesystem_error& e){
+                    enviarNotificación("Backup", "Error Backup: -" + std::string(e.what()), "WARNING");
+                    logError("Error Backup: -" + std::string(e.what()), "backups.log");
+                    continue;
+                }
         }
-        catch(const fs::filesystem_error& e){
-            enviarNotificación("Backup", "Error Backup: -" + std::string(e.what()), "WARNING");
-            logError("Error Backup: -" + std::string(e.what()), "backups.log");
-            continue;
-            }
+
     }
+    if (configBackup.eliminar_ultimo_backup_registrado) {
+        eliminarAnteriorBackup();
+        logInfo("Se elimino correctamente el ultimo backup registrado: " + extraerRutaUltimoBackup("backup").string(), "backups.log");
+    }
+
+    if (configBackup.crear_carpeta_backup) {
+        guardarRutaUltimoBackup("backup", carpeta_backup.parent_path().string());
+        logInfo("Se guardo correctamente la ruta del backup: " + carpeta_backup.parent_path().string(), "backups.log");
+    }
+
     logInfo("Se a completado el backup_local local de forma exitosa", "sentinel.log");
 }
 
