@@ -176,7 +176,6 @@ void subirArchivoStreaming(const std::string& ruta, const std::string& rutaRemot
 }
 
 void ejecutarBackupNube(const ConfigBackupNube& config) {
-
     logInfo("Se incio el backup a la nube", "sentinel.log");
     logInfo("Se incio el backup a la nube Destino: " + config.carpeta_remota, "backups.log");
     limpiarLog();
@@ -260,14 +259,30 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
             }
     }
 
-    if (config.eliminar_ultimo_backup_registrado && !hubo_errores) {
-        elimarAnteriorBackup(extraerRutaUltimoBackup("backup_nube"), token);
-        logInfo("Se elimino corectamente el anterior backup: " + extraerRutaUltimoBackup("backup_nube").string(), "backups.log");
-    }
+    try {
+        if (config.eliminar_ultimo_backup_registrado && !hubo_errores) {
+            logInfo("Se acepto la eliminación del ultimo backup", "backups.log");
+            elimarAnteriorBackupNube(extraerRutaUltimoBackup("backup_nube"), token);
+            logInfo("Se elimino corectamente el anterior backup: " + extraerRutaUltimoBackup("backup_nube").string(), "backups.log");
+        }
 
-    if (config.crear_carpeta_backup_nube) {
-        guardarRutaUltimoBackup("backup_nube", config.carpeta_remota + "/" + nombre_carpeta);
-        logInfo("Se guardo correctamente el registro del backup: " + config.carpeta_remota + "/" + nombre_carpeta, "backups.log");
+        if (config.crear_carpeta_backup_nube) {
+            guardarRutaUltimoBackup("backup_nube", config.carpeta_remota + "/" + nombre_carpeta);
+            logInfo("Se guardo correctamente el registro del backup: " + config.carpeta_remota + "/" + nombre_carpeta, "backups.log");
+        }
+    }
+    catch (const ErrorBackupAPI& e) {
+        logError("Ocurrio un error con la petición del backup: " + std::string(e.what()), "backups.log");
+        hubo_errores = true;
+    }
+    catch (const ErrorBackupRED& e) {
+        logError("Ocurrio un error con la red al intentar realizar el backup a la nube" + std::string(e.what())
+        + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "backups.log");
+        hubo_errores = true;
+    }
+    catch (const DaemonError& e) {
+        logError("Ocurrio un error inesperado: " + std::string(e.what()), "backups.log");
+        hubo_errores = true;
     }
 
     if (!hubo_errores) {

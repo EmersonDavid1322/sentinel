@@ -78,6 +78,7 @@ ConfigBackupNube cargarBackupNube(const json& datos) {
     nube.activo_bajada             = plantilla_nube["backup_nube"]["activo_bajada"];
     nube.solo_subir_modificados_hoy = plantilla_nube["backup_nube"]["solo_subir_modificados_hoy"];
     nube.crear_carpeta_backup_nube = plantilla_nube["backup_nube"]["crear_carpeta_backup_nube"];
+    nube.eliminar_ultimo_backup_registrado = plantilla_nube["backup_nube"]["eliminar_ultimo_backup_registrado"];
 
     return nube;
 }

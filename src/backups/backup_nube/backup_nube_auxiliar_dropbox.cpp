@@ -7,7 +7,6 @@
 #include "json.hpp"
 #include "rutas.h"
 #include "comandos_auxiliar.h"
-#include "logger.h"
 namespace fs = std::filesystem;
 
 size_t escribirRespuesta(void* datos, size_t tamano, size_t cantidad, std::string* salida) {
@@ -50,7 +49,7 @@ std::string renovarAccessToken(const ConfigBackupNube& config) {
     return respuesta_json["access_token"];
 }
 
-void elimarAnteriorBackup(const std::string& dirrecion_backup, const std::string& token) {
+void elimarAnteriorBackupNube(const std::string& dirrecion_backup, const std::string& token) {
     CURL* curl = inicializarCurl("Eliminar anterior backup");
 
     std::string json_payload = R"({"path": ")" + dirrecion_backup + R"("})";
