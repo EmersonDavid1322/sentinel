@@ -95,7 +95,7 @@ void ejecutarBackup(const ConfigBackup& configBackup){
 
                 if (configBackup.solo_modificados_hoy) {
                     if (!archivoModificadoCreadoHoy(entrada.path())) {
-                        logWarning("Backup: se omitió un archivo que no se modificó/creó hoy: " + entrada.path().string(), "backups.log");
+                        logInfo("Backup: se omitió un archivo que no se modificó/creó hoy: " + entrada.path().string(), "backups.log");
                         continue;
                     }
                 }

@@ -25,7 +25,7 @@ public:
     long codigoHTTP;
 
     ErrorBackupAPI(const std::string& mensaje, long codigo)
-        : DaemonError(mensaje), codigoHTTP(codigo) {}
+        : DaemonError(mensaje + std::to_string(codigo)), codigoHTTP(codigo) {}
 };
 
 class ErrorMonitor : public DaemonError {

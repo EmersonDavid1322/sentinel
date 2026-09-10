@@ -238,8 +238,15 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
                 });
 
                 }
+
+            if (config.eliminar_ultimo_backup_registrado && !hubo_errores) {
+                elimarAnteriorBackup(extraerRutaUltimoBackup("backup_nube"), token);
+                logInfo("Se elimino corectamente el anterior backup: " + extraerRutaUltimoBackup("backup_nube").string(), "backups.log");
+            }
+
             if (config.crear_carpeta_backup_nube) {
                 guardarRutaUltimoBackup("backup_nube", config.carpeta_remota + "/" + nombre_carpeta);
+                logInfo("Se guardo correctamente el registro del backup: " + config.carpeta_remota + "/" + nombre_carpeta, "backups.log");
             }
 
             }

@@ -30,6 +30,7 @@ struct ConfigBackupNube {
     bool activo_bajada;
     bool solo_subir_modificados_hoy;
     bool crear_carpeta_backup_nube;
+    bool eliminar_ultimo_backup_registrado;
 };
 
 struct ConfigMonitor {

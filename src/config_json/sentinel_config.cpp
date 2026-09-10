@@ -90,7 +90,8 @@ json obtenerConfiguracionPorDefectoCompleta() {
             "activo": false,
             "activo_bajada": false,
             "solo_subir_modificados_hoy": false,
-            "crear_carpeta_backup_nube": false
+            "crear_carpeta_backup_nube": false,
+            "eliminar_ultimo_backup_registrado": false
         },
         "monitor": {
             "intervalo": 0,

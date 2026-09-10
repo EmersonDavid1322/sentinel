@@ -3,9 +3,11 @@
 #include <fstream>
 #include <filesystem>
 #include "errores.h"
+#include <iostream>
 #include "json.hpp"
 #include "rutas.h"
 #include "comandos_auxiliar.h"
+#include "logger.h"
 namespace fs = std::filesystem;
 
 size_t escribirRespuesta(void* datos, size_t tamano, size_t cantidad, std::string* salida) {
@@ -46,6 +48,38 @@ std::string renovarAccessToken(const ConfigBackupNube& config) {
 
     json respuesta_json = json::parse(respuesta);
     return respuesta_json["access_token"];
+}
+
+void elimarAnteriorBackup(const std::string& dirrecion_backup, const std::string& token) {
+    CURL* curl = inicializarCurl("Eliminar anterior backup");
+
+    std::string json_payload = R"({"path": ")" + dirrecion_backup + R"("})";
+
+    struct curl_slist* headers = nullptr;
+    headers = curl_slist_append(headers, ("Authorization: Bearer " + token).c_str());
+    headers = curl_slist_append(headers, "Content-Type: application/json");
+
+    curl_easy_setopt(curl, CURLOPT_URL, "https://api.dropboxapi.com/2/files/delete_v2");
+    curl_easy_setopt(curl, CURLOPT_POST, 1L);
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json_payload.c_str());
+
+    CURLcode resultado = curl_easy_perform(curl);
+    if (resultado != CURLE_OK) {
+        curl_slist_free_all(headers);
+        curl_easy_cleanup(curl);
+        throw ErrorBackupRED("Error de red al intentar eliminar el anterior backup: " + std::string(curl_easy_strerror(resultado)));
+    }
+
+    long codigo_http = 0;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &codigo_http);
+    curl_slist_free_all(headers);
+    curl_easy_cleanup(curl);
+
+    if (codigo_http != 200) {
+        std::string mensaje_error = "Error de peticion al servidor al intentar eliminar el anterior backup. Codigo HTTP: " + std::to_string(codigo_http);
+        throw ErrorBackupAPI("Error de peticion al servidor al intentar eliminar el anterior backup. Codigo HTTP: ", codigo_http);
+    }
 }
 
 void actualizarToken(const std::string& token) {
