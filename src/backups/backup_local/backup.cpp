@@ -76,55 +76,52 @@ void ejecutarBackup(const ConfigBackup& configBackup){
             fs::create_directories(carpeta_backup);
             for (auto it = fs::recursive_directory_iterator(origen); it != fs::recursive_directory_iterator(); ++it) {
                 const auto& entrada = *it;
-
                 try{
 
-                if (fs::is_directory(entrada) && debeIgnorarce(entrada.path(), configBackup.ignorar)) {
-                    logWarning("Se ignoro la carpeta completa: " + entrada.path().string(), "backups.log");
-                    it.disable_recursion_pending();
-                    continue;
-                }
-
-                if (debeIgnorarce(entrada.path(), configBackup.ignorar)) {
-                    logWarning("Se ignoro un archivo :" + entrada.path().string(), "backups.log");
-                    continue;
-                }
-
-                if (!fs::is_regular_file(entrada) && !fs::is_directory(entrada)) {
-                    logWarning("Backup: se omitió un archivo de tipo especial (no regular ni carpeta): " + entrada.path().string(), "backups.log");
-                    continue;
-                }
-
-                if (configBackup.solo_modificados_hoy) {
-                    if (!archivoModificadoCreadoHoy(entrada.path())) {
-                        logInfo("Backup: se omitió un archivo que no se modificó/creó hoy: " + entrada.path().string(), "backups.log");
+                    if (fs::is_directory(entrada) && debeIgnorarce(entrada.path(), configBackup.ignorar)) {
+                        logWarning("Se ignoro la carpeta completa: " + entrada.path().string(), "backups.log");
+                        it.disable_recursion_pending();
                         continue;
                     }
-                }
 
-                fs::path destino_final = carpeta_backup / fs::relative(entrada.path(), origen);
+                    if (debeIgnorarce(entrada.path(), configBackup.ignorar)) {
+                        logWarning("Se ignoro un archivo :" + entrada.path().string(), "backups.log");
+                        continue;
+                    }
 
-                fs::path carpetaDestinoArchvo = destino_final.parent_path();
+                    if (!fs::is_regular_file(entrada) && !fs::is_directory(entrada)) {
+                        logWarning("Backup: se omitió un archivo de tipo especial (no regular ni carpeta): " + entrada.path().string(), "backups.log");
+                        continue;
+                    }
 
-                if (!fs::exists((carpetaDestinoArchvo))) {
-                    fs::create_directories(carpetaDestinoArchvo);
-                }
+                    if (configBackup.solo_modificados_hoy) {
+                        if (!archivoModificadoCreadoHoy(entrada.path())) {
+                            logInfo("Backup: se omitió un archivo que no se modificó/creó hoy: " + entrada.path().string(), "backups.log");
+                            continue;
+                        }
+                    }
 
-                if (fs::is_directory(entrada)) {
-                    fs::create_directories(destino_final);
-                    logInfo("Se creo correctamente la carpeta " + entrada.path().string() , "backups.log");
-                } else {
-                    fs::copy_file(entrada.path(), destino_final, fs::copy_options::overwrite_existing);
-                    logInfo("Se copio correctamente el archivo " + entrada.path().string() , "backups.log");
-                }
-            }
-                catch(const fs::filesystem_error& e){
+                    fs::path destino_final = carpeta_backup / fs::relative(entrada.path(), origen);
+
+                    fs::path carpetaDestinoArchvo = destino_final.parent_path();
+
+                    if (!fs::exists((carpetaDestinoArchvo))) {
+                        fs::create_directories(carpetaDestinoArchvo);
+                    }
+
+                    if (fs::is_directory(entrada)) {
+                        fs::create_directories(destino_final);
+                        logInfo("Se creo correctamente la carpeta " + entrada.path().string() , "backups.log");
+                    } else {
+                        fs::copy_file(entrada.path(), destino_final, fs::copy_options::overwrite_existing);
+                        logInfo("Se copio correctamente el archivo " + entrada.path().string() , "backups.log");
+                    }
+                }catch(const fs::filesystem_error& e){
                     enviarNotificación("Backup", "Error Backup: -" + std::string(e.what()), "WARNING");
                     logError("Error Backup: -" + std::string(e.what()), "backups.log");
                     continue;
                 }
         }
-
     }
     if (configBackup.eliminar_ultimo_backup_registrado) {
         eliminarAnteriorBackup();
