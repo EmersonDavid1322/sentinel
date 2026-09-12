@@ -101,6 +101,14 @@ void ejecutarBackup(const ConfigBackup& configBackup){
                         }
                     }
 
+                    std::uintmax_t tamaño_archivo = fs::file_size(entrada.path());
+                    fs::space_info informe_espacio = fs::space(configBackup.destino);
+
+                    if (informe_espacio.available < tamaño_archivo) {
+                        logError("No hay suficiente espacio en el destino para el archivo: " + entrada.path().string(), "backups.log");
+                        continue;
+                    }
+
                     fs::path destino_final = carpeta_backup / fs::relative(entrada.path(), origen);
 
                     fs::path carpetaDestinoArchvo = destino_final.parent_path();
@@ -119,7 +127,6 @@ void ejecutarBackup(const ConfigBackup& configBackup){
                 }catch(const fs::filesystem_error& e){
                     enviarNotificación("Backup", "Error Backup: -" + std::string(e.what()), "WARNING");
                     logError("Error Backup: -" + std::string(e.what()), "backups.log");
-                    continue;
                 }
         }
     }

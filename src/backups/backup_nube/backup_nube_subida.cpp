@@ -194,49 +194,47 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
     for (const auto& carpeta : config.carpetas) {
         fs::path origen(carpeta);
 
-        try{
-            for (auto it = fs::recursive_directory_iterator(origen); it != fs::recursive_directory_iterator(); ++it) {
+        for (auto it = fs::recursive_directory_iterator(origen); it != fs::recursive_directory_iterator(); ++it) {
+            try{
 
-                const auto& entrada = *it;
+            const auto& entrada = *it;
 
-                archivo = origen / entrada;
+            archivo = origen / entrada;
 
-                if (fs::is_directory(entrada) && debeIgnorarce(entrada.path(), config.ignorar)) {
-                    it.disable_recursion_pending();
-                    logInfo("Se ignoro la carpeta completa: " + entrada.path().string(), "backups.log");
+            if (fs::is_directory(entrada) && debeIgnorarce(entrada.path(), config.ignorar)) {
+                it.disable_recursion_pending();
+                logInfo("Se ignoro la carpeta completa: " + entrada.path().string(), "backups.log");
+                continue;
+            }
+
+            if (debeIgnorarce(entrada.path(), config.ignorar)) {
+                logInfo("Se ignoro un archivo: " + entrada.path().string(), "backups.log");
+                continue;
+            }
+
+            if (!fs::is_regular_file(entrada)) {
+                logInfo("Se ignoro un archivo de tipo no regular: " + archivo.string(), "backups.log");
+                continue;
+            }
+
+            if (config.solo_subir_modificados_hoy) {
+                if (!archivoModificadoCreadoHoy(entrada.path())) {
+                    logInfo("Backup: se omitió un archivo que no se modificó/creó hoy: " + entrada.path().string(), "backups.log");
                     continue;
                 }
+            }
 
-                if (debeIgnorarce(entrada.path(), config.ignorar)) {
-                    logInfo("Se ignoro un archivo: " + entrada.path().string(), "backups.log");
-                    continue;
-                }
+            fs::path ruta_relativa = fs::relative(entrada.path(), origen);
 
-                if (!fs::is_regular_file(entrada)) {
-                    logInfo("Se ignoro un archivo de tipo no regular: " + archivo.string(), "backups.log");
-                    continue;
-                }
+            if (config.crear_carpeta_backup_nube) {
+                ruta_remota = config.carpeta_remota + "/" + nombre_carpeta + "/" + ruta_relativa.string();
+            }else {
+                ruta_remota = config.carpeta_remota + "/" + ruta_relativa.string();
+            }
 
-                if (config.solo_subir_modificados_hoy) {
-                    if (!archivoModificadoCreadoHoy(entrada.path())) {
-                        logInfo("Backup: se omitió un archivo que no se modificó/creó hoy: " + entrada.path().string(), "backups.log");
-                        continue;
-                    }
-                }
-
-                fs::path ruta_relativa = fs::relative(entrada.path(), origen);
-
-                if (config.crear_carpeta_backup_nube) {
-                    ruta_remota = config.carpeta_remota + "/" + nombre_carpeta + "/" + ruta_relativa.string();
-                }else {
-                    ruta_remota = config.carpeta_remota + "/" + ruta_relativa.string();
-                }
-
-                conReintento(config, token, [&]() {
-                    subirArchivoStreaming(archivo.string(), ruta_remota, token);
-                });
-
-                }
+            conReintento(config, token, [&]() {
+                subirArchivoStreaming(archivo.string(), ruta_remota, token);
+            });
 
             }
             catch (const std::filesystem::filesystem_error& e) {
@@ -245,8 +243,21 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
             }
             catch (const ErrorBackupAPI& e) {
                 logError("Ocurrio un error con la petición del backup: " + std::string(e.what())
-                + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "backups.log");
+                + " Codigo:" + std::to_string(e.codigoHTTP) + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "backups.log");
                 hubo_errores = true;
+                if (e.codigoHTTP == 409) {
+                    json error = json::parse(e.what());
+
+                    if (error.contains("error_summary")) {
+                        std::string summary = error["error_summary"];
+
+                        if (summary.find("insufficient_space") != std::string::npos) {
+                            logError("Se detecto error de espacio insuficiente finalizando backup: " + archivo.string(), "backups.log");
+                            logError("Se detecto error de espacio insuficiente finalizando backup", "sentinel.log");
+                            break;
+                        }
+                    }
+                }
             }
             catch (const ErrorBackupRED& e) {
                 logError("Ocurrio un error con la red al intentar realizar el backup a la nube" + std::string(e.what())
@@ -257,6 +268,7 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
                 logError("Ocurrio un error inesperado: " + std::string(e.what()), "backups.log");
                 hubo_errores = true;
             }
+        }
     }
 
     try {
