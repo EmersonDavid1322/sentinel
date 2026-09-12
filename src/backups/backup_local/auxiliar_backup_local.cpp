@@ -10,7 +10,7 @@ void eliminarAnteriorBackup() {
     fs::path ultimo_backup = extraerRutaUltimoBackup("backup");
 
     if (!fs::exists(ultimo_backup)) {
-        logInfo("Error anterior backups no existente en la dirrecion registrada: " + ultimo_backup.string(), "backups.log");
+        logError("Error anterior backups no existente en la dirrecion registrada: " + ultimo_backup.string(), "backups.log");
     }
 
     fs::remove_all(ultimo_backup);
