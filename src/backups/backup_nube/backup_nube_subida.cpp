@@ -129,7 +129,7 @@ void finalizarSesion(const std::string& sessionId, const size_t& offset, const s
     curl_easy_cleanup(curl);
 
     if (codigo_http != 200) {
-        throw ErrorBackupAPI("Error al finalizar la sesión: " + respuesta, codigo_http);
+        throw ErrorBackupAPI(respuesta, codigo_http);
     }
 }
 

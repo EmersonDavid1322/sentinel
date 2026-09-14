@@ -63,7 +63,7 @@ void ejecutarBackup(const ConfigBackup& configBackup){
     bool hubo_errores = false;
 
     if (configBackup.crear_carpeta_backup) {
-        logInfo("Se creo la carpeta para backup", "backups.log");
+        logInfo("Se creara la carpeta para backup", "backups.log");
     }
 
     for (const std::string& carpeta : configBackup.carpetas){
