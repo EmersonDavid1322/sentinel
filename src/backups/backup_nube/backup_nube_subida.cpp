@@ -243,7 +243,8 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
             }
             catch (const ErrorBackupAPI& e) {
                 logError("Ocurrio un error con la petición del backup: " + std::string(e.what())
-                + " Codigo:" + std::to_string(e.codigoHTTP) + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "backups.log");
+                + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string()
+                + " Codigo:" + std::to_string(e.codigoHTTP), "backups.log");
                 hubo_errores = true;
                 if (e.codigoHTTP == 409) {
                     json error = json::parse(e.what());
@@ -272,19 +273,28 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
     }
 
     try {
-        if (config.eliminar_ultimo_backup_registrado && !hubo_errores) {
-            logInfo("Se acepto la eliminación del ultimo backup", "backups.log");
-            elimarAnteriorBackupNube(extraerRutaUltimoBackup("backup_nube"), token);
-            logInfo("Se elimino corectamente el anterior backup: " + extraerRutaUltimoBackup("backup_nube").string(), "backups.log");
+        if (config.eliminar_ultimo_backup_registrado) {
+            if (!hubo_errores) {
+                logInfo("Se acepto la eliminación del ultimo backup", "backups.log");
+                elimarAnteriorBackupNube(extraerRutaUltimoBackup("backup_nube"), token);
+                logInfo("Se elimino corectamente el anterior backup: " + extraerRutaUltimoBackup("backup_nube").string(), "backups.log");
+            }else {
+                logInfo("No se podra eliminara el anterior backup debido a que hubo errores en el actual", "backups.log");
+            }
         }
 
         if (config.crear_carpeta_backup_nube) {
-            guardarRutaUltimoBackup("backup_nube", config.carpeta_remota + "/" + nombre_carpeta);
-            logInfo("Se guardo correctamente el registro del backup: " + config.carpeta_remota + "/" + nombre_carpeta, "backups.log");
+            if (!hubo_errores) {
+                guardarRutaUltimoBackup("backup_nube", config.carpeta_remota + "/" + nombre_carpeta);
+                logInfo("Se guardo correctamente el registro del backup: " + config.carpeta_remota + "/" + nombre_carpeta, "backups.log");
+            }else {
+                logInfo("No se guardara la ruta del backup debido a que este tuvo errores", "backups.log");
+            }
         }
     }
     catch (const ErrorBackupAPI& e) {
-        logError("Ocurrio un error con la petición del backup: " + std::string(e.what()), "backups.log");
+        logError("Ocurrio un error con la petición del backup: " + std::string(e.what())
+        + " Codigo:" + std::to_string(e.codigoHTTP), "backups.log");
         hubo_errores = true;
     }
     catch (const ErrorBackupRED& e) {

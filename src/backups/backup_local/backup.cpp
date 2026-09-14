@@ -60,8 +60,7 @@ void ejecutarBackup(const ConfigBackup& configBackup){
     std::string nombre_carpeta = obtenerNombreCarpetaBackup();
     fs::path destino(configBackup.destino);
     fs::path carpeta_backup;
-    int cantidad_archivos;
-    int archivos_procesador;
+    bool hubo_errores = false;
 
     if (configBackup.crear_carpeta_backup) {
         logInfo("Se creo la carpeta para backup", "backups.log");
@@ -103,9 +102,6 @@ void ejecutarBackup(const ConfigBackup& configBackup){
                             continue;
                         }
                     }
-                    if (!fs::is_directory(entrada.path())) {
-                        ++cantidad_archivos;
-                    }
 
                     std::uintmax_t tamaño_archivo = fs::file_size(entrada.path());
                     fs::space_info informe_espacio = fs::space(configBackup.destino);
@@ -126,26 +122,33 @@ void ejecutarBackup(const ConfigBackup& configBackup){
                     if (fs::is_directory(entrada)) {
                         fs::create_directories(destino_final);
                         logInfo("Se creo correctamente la carpeta " + entrada.path().string() , "backups.log");
-                        ++archivos_procesador;
                     } else {
                         fs::copy_file(entrada.path(), destino_final, fs::copy_options::overwrite_existing);
                         logInfo("Se copio correctamente el archivo " + entrada.path().string() , "backups.log");
                     }
-                    logInfo("Backup completado se han detectado un total de: " + std::to_string(cantidad_archivos) + " Total procesadors: " + std::to_string(archivos_procesador), "backups.log");
                 }
                 catch(const fs::filesystem_error& e){
+                    hubo_errores = true;
                     enviarNotificación("Backup", "Error Backup: -" + std::string(e.what()), "WARNING");
                     logError("Error Backup: -" + std::string(e.what()), "backups.log");
                 }
             }
             if (configBackup.eliminar_ultimo_backup_registrado) {
-                eliminarAnteriorBackup();
-                logInfo("Se elimino correctamente el ultimo backup registrado: " + extraerRutaUltimoBackup("backup").string(), "backups.log");
+                if (!hubo_errores) {
+                    eliminarAnteriorBackup();
+                    logInfo("Se elimino correctamente el ultimo backup registrado: " + extraerRutaUltimoBackup("backup").string(), "backups.log");
+                }else {
+                    logInfo("No se eliminara el ultimo backup ya que hubieron errores en el actual","backups.log");
+                }
             }
 
             if (configBackup.crear_carpeta_backup) {
-                guardarRutaUltimoBackup("backup", carpeta_backup.parent_path().string());
-                logInfo("Se guardo correctamente la ruta del backup: " + carpeta_backup.parent_path().string(), "backups.log");
+                if (!hubo_errores) {
+                    guardarRutaUltimoBackup("backup", carpeta_backup.parent_path().string());
+                    logInfo("Se guardo correctamente la ruta del backup: " + carpeta_backup.parent_path().string(), "backups.log");
+                }else {
+                    logInfo("No se guardara el actual backup ya que hubieron errores","backups.log");
+                }
             }
         }
         catch(const fs::filesystem_error& e){

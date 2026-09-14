@@ -111,7 +111,7 @@ void ejecutarBajadaArchivosNube(const ConfigBackupNube& config) {
         }
         catch (const ErrorBackupAPI& e) {
             logError("Ocurrio un error con la petición de bajda de archivos: " + std::string(e.what())
-            + " ruta remota: " + archivo.ruta + " ruta sistema: " + rutaLocal.string(), "backups.log");
+            + " Codigo:" + std::to_string(e.codigoHTTP) + " ruta remota: " + archivo.ruta + " ruta sistema: " + rutaLocal.string(), "backups.log");
         }
         catch (const ErrorBackupRED& e) {
             logError("Ocurrio un error con la red al intentar bajar un archivo: " + std::string(e.what())
