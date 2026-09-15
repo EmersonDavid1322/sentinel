@@ -112,3 +112,24 @@ std::filesystem::path extraerRutaUltimoBackup(const std::string& parametro) {
 
     return ruta_ultimo_backup;
 }
+
+FiltroArchivos debeSubirseArchivo(const std::filesystem::directory_entry& entrada, const std::vector<std::string>& ignorar, bool soloModificadosHoy) {
+    if (fs::is_directory(entrada) && debeIgnorarce(entrada.path(), ignorar)) {
+        return FiltroArchivos::IGNORAR_CARPETA;
+    }
+
+    if (debeIgnorarce(entrada.path(), ignorar)) {
+        return FiltroArchivos::IGNORAR;
+    }
+
+    if (!fs::is_regular_file(entrada)) {
+        return FiltroArchivos::IGNORAR;
+    }
+
+    if (soloModificadosHoy) {
+        if (!archivoModificadoCreadoHoy(entrada.path())) {
+            return FiltroArchivos::IGNORAR;
+        }
+    }
+    return FiltroArchivos::ACEPTADO;
+}

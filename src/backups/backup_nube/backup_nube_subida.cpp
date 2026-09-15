@@ -196,46 +196,32 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
 
         for (auto it = fs::recursive_directory_iterator(origen); it != fs::recursive_directory_iterator(); ++it) {
             try{
+                const auto& entrada = *it;
 
-            const auto& entrada = *it;
+                archivo = origen / entrada;
 
-            archivo = origen / entrada;
-
-            if (fs::is_directory(entrada) && debeIgnorarce(entrada.path(), config.ignorar)) {
-                it.disable_recursion_pending();
-                logInfo("Se ignoro la carpeta completa: " + entrada.path().string(), "backups.log");
-                continue;
-            }
-
-            if (debeIgnorarce(entrada.path(), config.ignorar)) {
-                logInfo("Se ignoro un archivo: " + entrada.path().string(), "backups.log");
-                continue;
-            }
-
-            if (!fs::is_regular_file(entrada)) {
-                logInfo("Se ignoro un archivo de tipo no regular: " + archivo.string(), "backups.log");
-                continue;
-            }
-
-            if (config.solo_subir_modificados_hoy) {
-                if (!archivoModificadoCreadoHoy(entrada.path())) {
-                    logInfo("Backup: se omitió un archivo que no se modificó/creó hoy: " + entrada.path().string(), "backups.log");
+                if (debeSubirseArchivo(entrada, config.ignorar, config.solo_subir_modificados_hoy) == FiltroArchivos::IGNORAR_CARPETA) {
+                    it.disable_recursion_pending();
+                    logInfo("Se ignoro la carpeta completa: " + entrada.path().string(), "backups.log");
                     continue;
                 }
-            }
 
-            fs::path ruta_relativa = fs::relative(entrada.path(), origen);
+                if (debeSubirseArchivo(entrada, config.ignorar, config.solo_subir_modificados_hoy) == FiltroArchivos::IGNORAR) {
+                    logInfo("Se ignoro un archivo que no paso los filtros: " + entrada.path().string(), "backups.log");
+                    continue;
+                }
 
-            if (config.crear_carpeta_backup_nube) {
-                ruta_remota = config.carpeta_remota + "/" + nombre_carpeta + "/" + ruta_relativa.string();
-            }else {
-                ruta_remota = config.carpeta_remota + "/" + ruta_relativa.string();
-            }
+                fs::path ruta_relativa = fs::relative(entrada.path(), origen);
 
-            conReintento(config, token, [&]() {
-                subirArchivoStreaming(archivo.string(), ruta_remota, token);
-            });
+                if (config.crear_carpeta_backup_nube) {
+                    ruta_remota = config.carpeta_remota + "/" + nombre_carpeta + "/" + ruta_relativa.string();
+                }else {
+                    ruta_remota = config.carpeta_remota + "/" + ruta_relativa.string();
+                }
 
+                conReintento(config, token, [&]() {
+                    subirArchivoStreaming(archivo.string(), ruta_remota, token);
+                });
             }
             catch (const std::filesystem::filesystem_error& e) {
                 logError("Ocurrio un error con el manejo de archivos loca: " + std::string(e.what()), "backups.log");

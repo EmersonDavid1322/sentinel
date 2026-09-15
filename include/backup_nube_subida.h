@@ -1,6 +1,5 @@
 #pragma once
 #include <string>
-#include <vector>
 #include <filesystem>
 #include "config_compartida.h"
 namespace fs = std::filesystem;

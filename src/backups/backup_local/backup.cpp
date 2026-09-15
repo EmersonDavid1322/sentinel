@@ -80,27 +80,15 @@ void ejecutarBackup(const ConfigBackup& configBackup){
             for (auto it = fs::recursive_directory_iterator(origen); it != fs::recursive_directory_iterator(); ++it) {
                 const auto& entrada = *it;
                 try {
-                    if (fs::is_directory(entrada) && debeIgnorarce(entrada.path(), configBackup.ignorar)) {
-                        logWarning("Se ignoro la carpeta completa: " + entrada.path().string(), "backups.log");
+                    if (debeSubirseArchivo(entrada, configBackup.ignorar, configBackup.solo_modificados_hoy) == FiltroArchivos::IGNORAR_CARPETA) {
                         it.disable_recursion_pending();
+                        logInfo("Se ignoro la carpeta completa: " + entrada.path().string(), "backups.log");
                         continue;
                     }
 
-                    if (debeIgnorarce(entrada.path(), configBackup.ignorar)) {
-                        logWarning("Se ignoro un archivo :" + entrada.path().string(), "backups.log");
+                    if (debeSubirseArchivo(entrada, configBackup.ignorar, configBackup.solo_modificados_hoy) == FiltroArchivos::IGNORAR) {
+                        logInfo("Se ignoro un archivo que no paso los filtros: " + entrada.path().string(), "backups.log");
                         continue;
-                    }
-
-                    if (!fs::is_regular_file(entrada) && !fs::is_directory(entrada)) {
-                        logWarning("Backup: se omitió un archivo de tipo especial (no regular ni carpeta): " + entrada.path().string(), "backups.log");
-                        continue;
-                    }
-
-                    if (configBackup.solo_modificados_hoy) {
-                        if (!archivoModificadoCreadoHoy(entrada.path())) {
-                            logInfo("Backup: se omitió un archivo que no se modificó/creó hoy: " + entrada.path().string(), "backups.log");
-                            continue;
-                        }
                     }
 
                     if (!fs::is_directory(entrada.path())) {
