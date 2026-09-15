@@ -76,11 +76,43 @@ void elimarAnteriorBackupNube(const std::string& dirrecion_backup, const std::st
     curl_easy_cleanup(curl);
 
     if (codigo_http != 200) {
-        std::string mensaje_error = "Error de peticion al servidor al intentar eliminar el anterior backup. Codigo HTTP: " + std::to_string(codigo_http);
         throw ErrorBackupAPI("Error de peticion al servidor al intentar eliminar el anterior backup. Codigo HTTP: ", codigo_http);
     }
 }
 
+bool verificarSiExisteArchivoDropbox(const std::string& accessToken, const std::string& dropboxPath) {
+    CURL* curl = inicializarCurl("Verificar archivo");
+
+
+    curl_easy_setopt(curl, CURLOPT_URL, "https://api.dropboxapi.com/2/files/get_metadata");
+
+    struct curl_slist* headers = nullptr;
+    headers = curl_slist_append(headers, ("Authorization: Bearer " + accessToken).c_str());
+    headers = curl_slist_append(headers, "Content-Type: application/json");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+    std::string jsonPayload = "{\"path\": \"" + dropboxPath + "\"}";
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonPayload.c_str());
+
+    std::string respuesta;
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, escribirRespuesta);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &respuesta);
+
+    CURLcode resultado = curl_easy_perform(curl);
+
+    if (resultado != CURLE_OK) {
+        curl_slist_free_all(headers);
+        curl_easy_cleanup(curl);
+        throw ErrorBackupRED("Error de red al verficar ruta: " + std::string(curl_easy_strerror(resultado)));
+    }
+
+    long codigo_http = 0;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &codigo_http);
+    curl_slist_free_all(headers);
+    curl_easy_cleanup(curl);
+
+    return (codigo_http == 200);
+}
 void actualizarToken(const std::string& token) {
     std::filesystem::path rutaConfig = obtenerRutaConfig();
 

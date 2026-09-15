@@ -14,6 +14,8 @@ void actualizarToken(const std::string& token);
 
 void elimarAnteriorBackupNube(const std::string& dirrecion_backup, const std::string& token);
 
+bool verificarSiExisteArchivoDropbox(const std::string& accessToken, const std::string& dropboxPath);
+
 CURL* inicializarCurl(const std::string& contexto);
 
 template <typename Func>

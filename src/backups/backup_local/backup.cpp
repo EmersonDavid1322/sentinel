@@ -103,12 +103,14 @@ void ejecutarBackup(const ConfigBackup& configBackup){
                         }
                     }
 
-                    std::uintmax_t tamaño_archivo = fs::file_size(entrada.path());
-                    fs::space_info informe_espacio = fs::space(configBackup.destino);
+                    if (!fs::is_directory(entrada.path())) {
+                        std::uintmax_t tamaño_archivo = fs::file_size(entrada.path());
+                        fs::space_info informe_espacio = fs::space(configBackup.destino);
 
-                    if (informe_espacio.available < tamaño_archivo) {
-                        logError("No hay suficiente espacio en el destino para el archivo: " + entrada.path().string(), "backups.log");
-                        continue;
+                        if (informe_espacio.available < tamaño_archivo) {
+                            logError("No hay suficiente espacio en el destino para el archivo: " + entrada.path().string(), "backups.log");
+                            continue;
+                        }
                     }
 
                     fs::path destino_final = carpeta_backup / fs::relative(entrada.path(), origen);
@@ -133,12 +135,17 @@ void ejecutarBackup(const ConfigBackup& configBackup){
                     logError("Error Backup: -" + std::string(e.what()), "backups.log");
                 }
             }
+
             if (configBackup.eliminar_ultimo_backup_registrado) {
                 if (!hubo_errores) {
-                    eliminarAnteriorBackup();
-                    logInfo("Se elimino correctamente el ultimo backup registrado: " + extraerRutaUltimoBackup("backup").string(), "backups.log");
+                    if (!fs::exists(extraerRutaUltimoBackup("backup"))) {
+                        logWarning("Anterior backups no existente en la dirrecion registrada: " + extraerRutaUltimoBackup("backup").string(), "backups.log");
+                    }else {
+                        eliminarAnteriorBackup();
+                        logInfo("Se elimino correctamente el ultimo backup registrado: " + extraerRutaUltimoBackup("backup").string(), "backups.log");
+                    }
                 }else {
-                    logInfo("No se eliminara el ultimo backup ya que hubieron errores en el actual","backups.log");
+                    logInfo("No se eliminara el ultimo backup ya que hubieron errores en el backup actual","backups.log");
                 }
             }
 
@@ -150,8 +157,8 @@ void ejecutarBackup(const ConfigBackup& configBackup){
                     logInfo("No se guardara el actual backup ya que hubieron errores","backups.log");
                 }
             }
-        }
-        catch(const fs::filesystem_error& e){
+
+        }catch(const fs::filesystem_error& e){
             enviarNotificación("Backup", "Error Backup: -" + std::string(e.what()), "WARNING");
             logError("Error Backup filesystem: -" + std::string(e.what()), "backups.log");
         }
@@ -160,7 +167,6 @@ void ejecutarBackup(const ConfigBackup& configBackup){
             logError("Error Backup: -" + std::string(e.what()), "backups.log");
         }
     }
-
     logInfo("Se a completado el backup local", "sentinel.log");
 }
 

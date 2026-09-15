@@ -161,12 +161,12 @@ void subirArchivoStreaming(const std::string& ruta, const std::string& rutaRemot
 
             if (esUltimo) {
                 finalizarSesion(sessionId, tamañoLectura, rutaRemota, "", token);
-                logInfo("Se a subido correctamente el archivo " + rutaRemota, "backups.log");
+                logInfo("Se subio correctamente el archivo " + rutaRemota, "backups.log");
                 archivo.close();
             }
         } else if (esUltimo) {
             finalizarSesion(sessionId, offset, rutaRemota, trozo, token);
-            logInfo("Se a subido correctamente el archivo " + rutaRemota, "backups.log");
+            logInfo("Se subio correctamente el archivo " + rutaRemota, "backups.log");
             archivo.close();
         } else {
             continuarSesion(sessionId, offset, trozo, token);
@@ -276,8 +276,12 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
         if (config.eliminar_ultimo_backup_registrado) {
             if (!hubo_errores) {
                 logInfo("Se acepto la eliminación del ultimo backup", "backups.log");
-                elimarAnteriorBackupNube(extraerRutaUltimoBackup("backup_nube"), token);
-                logInfo("Se elimino corectamente el anterior backup: " + extraerRutaUltimoBackup("backup_nube").string(), "backups.log");
+                if (verificarSiExisteArchivoDropbox(config.token, extraerRutaUltimoBackup("backup_nube"))) {
+                    elimarAnteriorBackupNube(extraerRutaUltimoBackup("backup_nube"), token);
+                    logInfo("Se elimino corectamente el anterior backup: " + extraerRutaUltimoBackup("backup_nube").string(), "backups.log");
+                }else {
+                    logWarning("No se elimino el anterior backup debido a que no se encontro el backup en la ruta registrada", "backups.log");
+                }
             }else {
                 logInfo("No se podra eliminara el anterior backup debido a que hubo errores en el actual", "backups.log");
             }
