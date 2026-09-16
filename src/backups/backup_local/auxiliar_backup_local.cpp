@@ -5,8 +5,6 @@
 namespace fs = std::filesystem;
 
 
-void eliminarAnteriorBackup() {
-    fs::path ultimo_backup = extraerRutaUltimoBackup("backup");
-
-    fs::remove_all(ultimo_backup);
+void eliminarBackup(const fs::path& rutaBackup) {
+    fs::remove_all(rutaBackup);
 }

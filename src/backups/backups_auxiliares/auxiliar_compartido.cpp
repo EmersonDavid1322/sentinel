@@ -108,6 +108,12 @@ std::filesystem::path extraerRutaUltimoBackup(const std::string& parametro) {
 
     json datos = json::parse(archivoConfig);
 
+    if (!datos.contains(parametro) ||
+        !datos[parametro].contains("ultimo_backup_registrado") ||
+        datos[parametro]["ultimo_backup_registrado"].is_null()) {
+        return {};
+    }
+
     fs::path ruta_ultimo_backup = datos[parametro]["ultimo_backup_registrado"];
 
     return ruta_ultimo_backup;

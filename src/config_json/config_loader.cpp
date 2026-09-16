@@ -19,7 +19,8 @@ ConfigBackup cargarBackup(const json& datos) {
             "activo": false,
             "forzar_backup": false,
             "crear_carpeta_backup": false,
-            "eliminar_ultimo_backup_registrado": false
+            "eliminar_ultimo_backup_registrado": false,
+            "ultimo_backup_registrado": ""
         }
     })"_json;
 
@@ -57,7 +58,8 @@ ConfigBackupNube cargarBackupNube(const json& datos) {
             "activo_bajada": false,
             "solo_subir_modificados_hoy": false,
             "crear_carpeta_backup_nube": false,
-            "eliminar_ultimo_backup_registrado": false
+            "eliminar_ultimo_backup_registrado": false,
+            "ultimo_backup_registrado": ""
         }
     })"_json;
 

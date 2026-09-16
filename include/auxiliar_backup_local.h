@@ -1,3 +1,5 @@
 #pragma once
 
-void eliminarAnteriorBackup();
+#include <filesystem>
+
+void eliminarBackup(const std::filesystem::path& rutaBackup);

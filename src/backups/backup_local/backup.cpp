@@ -56,10 +56,25 @@ std::string verificarCarpetasBackup(const std::vector<std::string>& carpetas, co
     return msg_carpetas;
 }
 
-void ejecutarBackup(const ConfigBackup& configBackup){
+void validarConfiguracionBackup(const ConfigBackup& configBackup) {
+    if (configBackup.carpetas.empty()) {
+        throw ErrorBackup("No se configuraron carpetas para el backup local");
+    }
+
+    if (configBackup.destino.empty()) {
+        throw ErrorBackup("No se configuró una carpeta destino para el backup local");
+    }
+
+    if (configBackup.eliminar_ultimo_backup_registrado && !configBackup.crear_carpeta_backup) {
+        throw ErrorBackup(
+            "La opción eliminar_ultimo_backup_registrado requiere crear_carpeta_backup activada");
+    }
+}
+
+ResultadoCopiaBackup copiarCarpetasBackup(const ConfigBackup& configBackup){
     std::string nombre_carpeta = obtenerNombreCarpetaBackup();
     fs::path destino(configBackup.destino);
-    fs::path carpeta_backup;
+    fs::path ruta_backup = configBackup.crear_carpeta_backup ? destino / nombre_carpeta : destino;
     bool hubo_errores = false;
 
     if (configBackup.crear_carpeta_backup) {
@@ -69,14 +84,10 @@ void ejecutarBackup(const ConfigBackup& configBackup){
     for (const std::string& carpeta : configBackup.carpetas){
 
         fs::path origen(carpeta);
-        if (configBackup.crear_carpeta_backup) {
-            carpeta_backup = destino / nombre_carpeta / origen.filename();
-        }else {
-            carpeta_backup = destino  / origen.filename();
-        }
-        fs::create_directories(carpeta_backup);
+        fs::path carpeta_backup = ruta_backup / origen.filename();
 
         try {
+            fs::create_directories(carpeta_backup);
             for (auto it = fs::recursive_directory_iterator(origen); it != fs::recursive_directory_iterator(); ++it) {
                 const auto& entrada = *it;
                 try {
@@ -97,6 +108,7 @@ void ejecutarBackup(const ConfigBackup& configBackup){
 
                         if (informe_espacio.available < tamaño_archivo) {
                             logError("No hay suficiente espacio en el destino para el archivo: " + entrada.path().string(), "backups.log");
+                            hubo_errores = true;
                             continue;
                         }
                     }
@@ -124,42 +136,61 @@ void ejecutarBackup(const ConfigBackup& configBackup){
                 }
             }
 
-            if (configBackup.eliminar_ultimo_backup_registrado) {
-                if (!hubo_errores) {
-                    if (!fs::exists(extraerRutaUltimoBackup("backup"))) {
-                        logWarning("Anterior backups no existente en la dirrecion registrada: " + extraerRutaUltimoBackup("backup").string(), "backups.log");
-                    }else {
-                        eliminarAnteriorBackup();
-                        logInfo("Se elimino correctamente el ultimo backup registrado: " + extraerRutaUltimoBackup("backup").string(), "backups.log");
-                    }
-                }else {
-                    logInfo("No se eliminara el ultimo backup ya que hubieron errores en el backup actual","backups.log");
-                }
-            }
-
-            if (configBackup.crear_carpeta_backup) {
-                if (!hubo_errores) {
-                    guardarRutaUltimoBackup("backup", carpeta_backup.parent_path().string());
-                    logInfo("Se guardo correctamente la ruta del backup: " + carpeta_backup.parent_path().string(), "backups.log");
-                }else {
-                    logInfo("No se guardara el actual backup ya que hubieron errores","backups.log");
-                }
-            }
-
         }catch(const fs::filesystem_error& e){
+            hubo_errores = true;
             enviarNotificación("Backup", "Error Backup: -" + std::string(e.what()), "WARNING");
             logError("Error Backup filesystem: -" + std::string(e.what()), "backups.log");
         }
         catch (const ErrorBackup& e) {
+            hubo_errores = true;
             enviarNotificación("Backup", "Error Backup: -" + std::string(e.what()), "WARNING");
             logError("Error Backup: -" + std::string(e.what()), "backups.log");
         }
     }
-    logInfo("Se a completado el backup local", "sentinel.log");
+
+    return { !hubo_errores, ruta_backup };
+}
+
+bool ejecutarBackup(const ConfigBackup& configBackup){
+    ResultadoCopiaBackup resultado = copiarCarpetasBackup(configBackup);
+
+    if (!resultado.completado) {
+        logWarning("El backup local terminó con errores. Se conserva el backup anterior y la copia parcial no se registrará.", "backups.log");
+        logWarning("El backup local terminó con errores. Revise backups.log.", "sentinel.log");
+        enviarNotificación("Backup", "El backup terminó con errores; se conservó el anterior y la copia parcial no se registró.", "WARNING");
+        return false;
+    }
+
+    fs::path ultimo_backup;
+    if (configBackup.eliminar_ultimo_backup_registrado) {
+        ultimo_backup = extraerRutaUltimoBackup("backup");
+    }
+
+    if (configBackup.crear_carpeta_backup) {
+        guardarRutaUltimoBackup("backup", resultado.ruta_backup.string());
+        logInfo("Se guardó correctamente la ruta del backup: " + resultado.ruta_backup.string(), "backups.log");
+    }
+
+    if (configBackup.eliminar_ultimo_backup_registrado) {
+        if (ultimo_backup.empty()) {
+            logInfo("No había un backup anterior registrado para eliminar.", "backups.log");
+        } else if (ultimo_backup.lexically_normal() == resultado.ruta_backup.lexically_normal()) {
+            logWarning("El backup anterior coincide con el actual; no se eliminará.", "backups.log");
+        } else if (!fs::exists(ultimo_backup)) {
+            logWarning("El backup anterior registrado no existe: " + ultimo_backup.string(), "backups.log");
+        } else {
+            eliminarBackup(ultimo_backup);
+            logInfo("Se eliminó correctamente el backup anterior: " + ultimo_backup.string(), "backups.log");
+        }
+    }
+
+    logInfo("Se completó el backup local", "sentinel.log");
+    return true;
 }
 
 void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_monitor){
     try{
+        validarConfiguracionBackup(config_backup);
         ResultadoVerificacionRecursos resultado = verificarRecursosBackup(config_backup, config_monitor);
 
         if (resultado == ResultadoVerificacionRecursos::FORZADO) {
@@ -181,7 +212,9 @@ void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_
 
         limpiarLog();
         std::string carpetas_msg = verificarCarpetasBackup(config_backup.carpetas, config_backup.destino);
-        ejecutarBackup(config_backup);
+        if (!ejecutarBackup(config_backup)) {
+            return;
+        }
 
         logInfo("Se realizo un bakup revise 'backups.log': " + carpetas_msg + " Destino: " + config_backup.destino, "sentinel.log");
         enviarNotificación("Backup", "Se completo el bakup revise 'backups.log': " + config_backup.destino, "INFO");

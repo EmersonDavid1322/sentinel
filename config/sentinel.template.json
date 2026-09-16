@@ -7,6 +7,7 @@
     "forzar_backup": false,
     "solo_modificados_hoy": false,
     "eliminar_ultimo_backup_registrado": false,
+    "ultimo_backup_registrado": "",
     "hora": "00:00",
     "ignorar": []
   },
@@ -16,6 +17,7 @@
     "solo_subir_modificados_hoy": false,
     "crear_carpeta_backup_nube": false,
     "eliminar_ultimo_backup_registrado": false,
+    "ultimo_backup_registrado": "",
     "carpeta_remota": "/",
     "carpetas": [],
     "cliente_id": "",
