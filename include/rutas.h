@@ -1,8 +1,6 @@
 #pragma once
 #include <filesystem>
 
-std::filesystem::path obtenerRutaBase();
-
 void asegurarCarpetasSentinel();
 
 std::filesystem::path obtenerRutaConfig();
