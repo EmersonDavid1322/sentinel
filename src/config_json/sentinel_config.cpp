@@ -115,7 +115,7 @@ void inicializarConfiguraciones(const std::filesystem::path& rutaConfig) {
     std::ifstream archivoConfig(rutaConfig);
 
     if (!archivoConfig.is_open()) {
-        throw ErrorConfig("No se puedo abrir el archivo de configuraciones en: " + rutaConfig.string());
+        throw ErrorConfig("No se puedo abrir el archivo de configuraciones en modo lectura: " + rutaConfig.string());
     }
 
     try {
@@ -127,10 +127,11 @@ void inicializarConfiguraciones(const std::filesystem::path& rutaConfig) {
     archivoConfig.close();
 
     std::ofstream archivo_escritura(rutaConfig);
-    if (archivo_escritura.is_open()) {
-        archivo_escritura << config_base.dump(4);
-        archivo_escritura.close();
+    if (!archivo_escritura.is_open()) {
+        throw ErrorConfig("No se puedo abrir el archivo de configuraciones en modo escritura: " + rutaConfig.string());
     }
+    archivo_escritura << config_base.dump(4);
+    archivo_escritura.close();
 }
 
 void crearConfigPorDefecto(const std::filesystem::path& rutaJSON){
@@ -145,16 +146,21 @@ void crearConfigPorDefecto(const std::filesystem::path& rutaJSON){
 }
 
 void asegurarConfigExiste(const std::filesystem::path& rutaJSON){
-    std::filesystem::path carpeta_padre = rutaJSON.parent_path();
+    try {
+        std::filesystem::path carpeta_padre = rutaJSON.parent_path();
 
-    if (!fs::exists(carpeta_padre)){
-        fs::create_directories(carpeta_padre);
-        logInfo("No se encontro la carpeta 'config' se creo una nueva: " + carpeta_padre.string(), "sentinel.log");
+        if (!fs::exists(carpeta_padre)){
+            fs::create_directories(carpeta_padre);
+            logInfo("No se encontro la carpeta 'config' se creo una nueva: " + carpeta_padre.string(), "sentinel.log");
+        }
+
+        if (!fs::exists(rutaJSON)){
+            crearConfigPorDefecto(rutaJSON);
+            logInfo("No se encontro el archivo 'sentinel.json' se creo uno nuevo: " + rutaJSON.string() +
+                " se recomienda proporcinarle y verificar los permisos correctos", "sentinel.log");
+        }
+    }catch (const std::filesystem::filesystem_error& e) {
+        throw ErrorConfig("Hubo un error al intentar reconstruir las configuraciones: " + std::string(e.what()));
     }
 
-    if (!fs::exists(rutaJSON)){
-        crearConfigPorDefecto(rutaJSON);
-        logInfo("No se encontro el archivo 'sentinel.json' se creo uno nuevo: " + rutaJSON.string() +
-            " se recomienda proporcinarle y verificar los permisos correctos", "sentinel.log");
-    }
 }

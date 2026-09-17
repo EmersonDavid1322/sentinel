@@ -68,6 +68,9 @@ add_executable(sentinel_test
         src/logger.cpp
         src/notificador.cpp
         src/rutas.cpp
+        tests/sentinel_config_test.cpp
+        src/config_json/sentinel_config.cpp
+        src/config_json/config_loader.cpp
 )
 
 # Vincular librerías al ejecutable de pruebas
