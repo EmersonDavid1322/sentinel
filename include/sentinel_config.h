@@ -7,7 +7,7 @@ void actualizarJSON(ConfigCompartida& configCompartida);
 
 nlohmann::json obtenerConfiguracionPorDefectoCompleta();
 
-void inicializarConfiguraciones();
+void inicializarConfiguraciones(const std::filesystem::path& rutaConfig);
 
 std::ifstream comprobar_json(const std::filesystem::path& ruta);
 

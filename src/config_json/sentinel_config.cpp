@@ -108,22 +108,21 @@ json obtenerConfiguracionPorDefectoCompleta() {
     })"_json;
 }
 
-void inicializarConfiguraciones() {
+void inicializarConfiguraciones(const std::filesystem::path& rutaConfig) {
     json config_base = obtenerConfiguracionPorDefectoCompleta();
-    fs::path rutaConfig = obtenerRutaConfig();
     json config_usuario;
 
     std::ifstream archivoConfig(rutaConfig);
 
     if (!archivoConfig.is_open()) {
-        logError("No se puedo abrir el archivo de configuraciones en: " + rutaConfig.string(), "sentinel.log");
+        throw ErrorConfig("No se puedo abrir el archivo de configuraciones en: " + rutaConfig.string());
     }
 
     try {
         archivoConfig >> config_usuario;
         config_base.merge_patch(config_usuario);
     } catch (const json::parse_error& e) {
-        logError("Error al leer el JSON (archivo corrupto). Se usará el defecto. " + std::string(e.what()), "sentinel.log");
+        throw ErrorConfig("Error al leer el JSON (archivo corrupto). Se usará el defecto. " + std::string(e.what()));
     }
     archivoConfig.close();
 

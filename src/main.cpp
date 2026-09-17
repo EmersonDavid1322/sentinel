@@ -33,7 +33,7 @@ int main() {
 
     try {
         asegurarConfigExiste(rutaConfig);
-        inicializarConfiguraciones();
+        inicializarConfiguraciones(obtenerRutaConfig());
         ConfigCompartida config_compartida;
         config_compartida.actualizar(cargarConfig(rutaConfig));
         logInfo("Sentinel iniciado correctamente 1.88", "sentinel.log");
