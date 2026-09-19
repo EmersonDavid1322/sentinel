@@ -6,6 +6,8 @@
 extern std::atomic<bool> hayEntornoGrafico;
 
 extern std::atomic<bool> corriendo;
+extern std::atomic<bool> corriendo_backup_nube;
+extern std::atomic<bool> corriendo_backup_local;
 extern std::mutex mtx_apagado;
 extern std::condition_variable cv_apagado;
 

@@ -84,6 +84,10 @@ void procesarComandoBackupNube(const std::string& accion, const std::string& val
         aniadirIgnorar("backup_nube", valor);
     }
     else if (accion == "ahora") {
+        if (corriendo_backup_nube) {
+            enviarRespuesta("Actualmente hay un backup a nube ejecutandose mediante la configuraciones del json");
+            return;
+        }
         enviarRespuesta("Se inicio el backup a dropbox por comando revise 'backups.log' para información detallada");
         logInfo("Se inicio el backup a dropbox por comando ", "sentinel.log");
         ejecutarBackupNube(config);

@@ -4,12 +4,15 @@
 #include "auxiliar_compartido.h"
 #include "backup_nube_auxiliar_dropbox.h"
 #include "notificador.h"
+#include "sentinel_estado.h"
 #include <string>
+#include <mutex>
 #include <curl/curl.h>
 #include <filesystem>
 #include <fstream>
 #include "json.hpp"
 using json = nlohmann::json;
+std::mutex mutex_subir_archivos;
 
 std::string iniciarSesion(const std::string& trozo, const std::string& token) {
     CURL* curl = inicializarCurl("Iniciar seción subida");
@@ -176,6 +179,8 @@ void subirArchivoStreaming(const std::string& ruta, const std::string& rutaRemot
 }
 
 void ejecutarBackupNube(const ConfigBackupNube& config) {
+    std::lock_guard<std::mutex> lock(mutex_subir_archivos);
+    corriendo_backup_nube = true;
     logInfo("Se incio el backup a la nube", "sentinel.log");
     logInfo("Se incio el backup a la nube Destino: " + config.carpeta_remota, "backups.log");
     limpiarLog();
@@ -296,6 +301,7 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
         logError("Ocurrio un error inesperado: " + std::string(e.what()), "backups.log");
         hubo_errores = true;
     }
+    corriendo_backup_nube = false;
 
     if (!hubo_errores) {
         logInfo("Se completo el backup a DropBox de forma correcta", "sentinel.log");

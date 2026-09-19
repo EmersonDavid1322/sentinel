@@ -4,6 +4,7 @@
 #include "backup_nube_bajada.h"
 #include "config_compartida.h"
 #include "auxiliar_compartido.h"
+#include "logger.h"
 
 void loopBackupNube(ConfigCompartida& config_compartida) {
     while (corriendo) {
@@ -11,7 +12,11 @@ void loopBackupNube(ConfigCompartida& config_compartida) {
 
         if (config.backup_nube.activo) {
             if (verificarHoraBackup(config.backup_nube.hora)) {
-                ejecutarBackupNube(config.backup_nube);
+                if (corriendo_backup_nube) {
+                    logInfo("No se podra realizar el backup a la hora configurada ya que hay un backup nube activo actualmente mediante comando", "sentinel.log");
+                }else {
+                    ejecutarBackupNube(config.backup_nube);
+                }
             }
         }
         if (config.backup_nube.activo_bajada) {

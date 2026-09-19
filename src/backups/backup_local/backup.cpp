@@ -13,6 +13,7 @@
 #include "monitor.h"
 #include "auxiliar_compartido.h"
 namespace fs = std::filesystem;
+std::mutex mutex_subir_archivos_local;
 
 ResultadoVerificacionRecursos verificarRecursosBackup(const ConfigBackup& configBackup, const ConfigMonitor& configMonitor) {
     bool disco_superado = uso_disco() >= configMonitor.disco;
@@ -189,6 +190,8 @@ bool ejecutarBackup(const ConfigBackup& configBackup){
 }
 
 void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_monitor){
+    std::lock_guard<std::mutex> lock(mutex_subir_archivos_local);
+    corriendo_backup_local = true;
     try{
         validarConfiguracionBackup(config_backup);
         ResultadoVerificacionRecursos resultado = verificarRecursosBackup(config_backup, config_monitor);
@@ -200,10 +203,12 @@ void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_
         else if (resultado == ResultadoVerificacionRecursos::CANCELADO_CPU) {
             logInfo("Se cancelo el backup_local 'Se regitro un uso elevado del cpu'", "sentinel.log");
             enviarNotificación("Backup","Se cancelo el backup_local luego de varios intentos  'Se regitro un uso elevado del cpu'", "WARNING");
+            corriendo_backup_local = false;
             return;
         }else if (resultado == ResultadoVerificacionRecursos::CANCELADO_DISCO) {
             logInfo("Se cancelo el backup_local 'Se regitro espacio elevado en el disco'", "sentinel.log");
             enviarNotificación("Backup","Se cancelo el backup_local 'Se regitro espacio elevado en el disco'", "WARNING");
+            corriendo_backup_local = false;
             return;
         }
         else {
@@ -213,6 +218,7 @@ void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_
         limpiarLog();
         std::string carpetas_msg = verificarCarpetasBackup(config_backup.carpetas, config_backup.destino);
         if (!ejecutarBackup(config_backup)) {
+            corriendo_backup_local = false;
             return;
         }
 
@@ -229,6 +235,7 @@ void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_
         logError("Error en backup_local - " + std::string(e.what()), "sentinel.log");
         enviarNotificación("Error Deamon-backup_local", "Ocurrio un error en el intento de bakup: " + std::string(e.what()), "ERROR");
     }
+    corriendo_backup_local = false;
 }
 
 void loopBackup(ConfigCompartida& config_compartida){
@@ -237,7 +244,11 @@ void loopBackup(ConfigCompartida& config_compartida){
 
         if (config.backup.activo) {
             if (verificarHoraBackup(config.backup.hora)) {
-                hacerBackup(config.backup, config.monitor);
+                if (corriendo_backup_local) {
+                    logInfo("No se podra realizar el backup a la hora configurada ya que hay un backup local activo actualmente mediante comando", "sentinel.log");
+                }else {
+                    hacerBackup(config.backup, config.monitor);
+                }
             }
         }
 
