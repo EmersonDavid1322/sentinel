@@ -53,7 +53,6 @@ int main() {
 
         std::thread hilo_organizador(ejecutarOrganizador,std::ref(config_compartida));
 
-
         hilo_json.join();
         hilo_comandos.join();
         hilo_backup.join();

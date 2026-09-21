@@ -198,109 +198,112 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
 
     for (const auto& carpeta : config.carpetas) {
         fs::path origen(carpeta);
+        try {
+            for (auto it = fs::recursive_directory_iterator(origen); it != fs::recursive_directory_iterator(); ++it) {
+                try{
+                    const auto& entrada = *it;
 
-        for (auto it = fs::recursive_directory_iterator(origen); it != fs::recursive_directory_iterator(); ++it) {
-            try{
-                const auto& entrada = *it;
+                    archivo = origen / entrada;
 
-                archivo = origen / entrada;
+                    if (debeSubirseArchivo(entrada, config.ignorar, config.solo_subir_modificados_hoy) == FiltroArchivos::IGNORAR_CARPETA) {
+                        it.disable_recursion_pending();
+                        logInfo("Se ignoro la carpeta completa: " + entrada.path().string(), "backups.log");
+                        continue;
+                    }
 
-                if (debeSubirseArchivo(entrada, config.ignorar, config.solo_subir_modificados_hoy) == FiltroArchivos::IGNORAR_CARPETA) {
-                    it.disable_recursion_pending();
-                    logInfo("Se ignoro la carpeta completa: " + entrada.path().string(), "backups.log");
-                    continue;
+                    if (debeSubirseArchivo(entrada, config.ignorar, config.solo_subir_modificados_hoy) == FiltroArchivos::IGNORAR) {
+                        logInfo("Se ignoro un archivo que no paso los filtros: " + entrada.path().string(), "backups.log");
+                        continue;
+                    }
+
+                    fs::path ruta_relativa = fs::relative(entrada.path(), origen);
+
+                    if (config.crear_carpeta_backup_nube) {
+                        ruta_remota = config.carpeta_remota + "/" + nombre_carpeta + "/" + ruta_relativa.string();
+                    }else {
+                        ruta_remota = config.carpeta_remota + "/" + ruta_relativa.string();
+                    }
+
+                    conReintento(config, token, [&]() {
+                        subirArchivoStreaming(archivo.string(), ruta_remota, token);
+                    });
                 }
-
-                if (debeSubirseArchivo(entrada, config.ignorar, config.solo_subir_modificados_hoy) == FiltroArchivos::IGNORAR) {
-                    logInfo("Se ignoro un archivo que no paso los filtros: " + entrada.path().string(), "backups.log");
-                    continue;
+                catch (const std::filesystem::filesystem_error& e) {
+                    logError("Ocurrio un error con el manejo de archivos loca: " + std::string(e.what()), "backups.log");
+                    hubo_errores = true;
                 }
+                catch (const ErrorBackupAPI& e) {
+                    logError("Ocurrio un error con la petición del backup: " + std::string(e.what())
+                    + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string()
+                    + " Codigo:" + std::to_string(e.codigoHTTP), "backups.log");
+                    hubo_errores = true;
+                    if (e.codigoHTTP == 409) {
+                        json error = json::parse(e.what());
 
-                fs::path ruta_relativa = fs::relative(entrada.path(), origen);
+                        if (error.contains("error_summary")) {
+                            std::string summary = error["error_summary"];
 
-                if (config.crear_carpeta_backup_nube) {
-                    ruta_remota = config.carpeta_remota + "/" + nombre_carpeta + "/" + ruta_relativa.string();
-                }else {
-                    ruta_remota = config.carpeta_remota + "/" + ruta_relativa.string();
-                }
-
-                conReintento(config, token, [&]() {
-                    subirArchivoStreaming(archivo.string(), ruta_remota, token);
-                });
-            }
-            catch (const std::filesystem::filesystem_error& e) {
-                logError("Ocurrio un error con el manejo de archivos loca: " + std::string(e.what()), "backups.log");
-                hubo_errores = true;
-            }
-            catch (const ErrorBackupAPI& e) {
-                logError("Ocurrio un error con la petición del backup: " + std::string(e.what())
-                + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string()
-                + " Codigo:" + std::to_string(e.codigoHTTP), "backups.log");
-                hubo_errores = true;
-                if (e.codigoHTTP == 409) {
-                    json error = json::parse(e.what());
-
-                    if (error.contains("error_summary")) {
-                        std::string summary = error["error_summary"];
-
-                        if (summary.find("insufficient_space") != std::string::npos) {
-                            logError("Se detecto error de espacio insuficiente finalizando backup: " + archivo.string(), "backups.log");
-                            logError("Se detecto error de espacio insuficiente finalizando backup", "sentinel.log");
-                            break;
+                            if (summary.find("insufficient_space") != std::string::npos) {
+                                logError("Se detecto error de espacio insuficiente finalizando backup: " + archivo.string(), "backups.log");
+                                logError("Se detecto error de espacio insuficiente finalizando backup", "sentinel.log");
+                                break;
+                            }
                         }
                     }
                 }
-            }
-            catch (const ErrorBackupRED& e) {
-                logError("Ocurrio un error con la red al intentar realizar el backup a la nube" + std::string(e.what())
-                + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "backups.log");
-                hubo_errores = true;
-            }
-            catch (const DaemonError& e) {
-                logError("Ocurrio un error inesperado: " + std::string(e.what()), "backups.log");
-                hubo_errores = true;
-            }
-        }
-    }
-
-    try {
-        if (config.eliminar_ultimo_backup_registrado) {
-            if (!hubo_errores) {
-                logInfo("Se acepto la eliminación del ultimo backup", "backups.log");
-                if (verificarSiExisteArchivoDropbox(config.token, extraerRutaUltimoBackup("backup_nube"))) {
-                    elimarAnteriorBackupNube(extraerRutaUltimoBackup("backup_nube"), token);
-                    logInfo("Se elimino corectamente el anterior backup: " + extraerRutaUltimoBackup("backup_nube").string(), "backups.log");
-                }else {
-                    logWarning("No se elimino el anterior backup debido a que no se encontro el backup en la ruta registrada", "backups.log");
+                catch (const ErrorBackupRED& e) {
+                    logError("Ocurrio un error con la red al intentar realizar el backup a la nube" + std::string(e.what())
+                    + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "backups.log");
+                    hubo_errores = true;
                 }
-            }else {
-                logInfo("No se podra eliminara el anterior backup debido a que hubo errores en el actual", "backups.log");
+                catch (const DaemonError& e) {
+                    logError("Ocurrio un error inesperado: " + std::string(e.what()), "backups.log");
+                    hubo_errores = true;
+                }
             }
-        }
+            //Acciones pos backup
+            if (config.eliminar_ultimo_backup_registrado) {
+                if (!hubo_errores) {
+                    logInfo("Se acepto la eliminación del ultimo backup", "backups.log");
+                    if (verificarSiExisteArchivoDropbox(config.token, extraerRutaUltimoBackup("backup_nube"))) {
+                        elimarAnteriorBackupNube(extraerRutaUltimoBackup("backup_nube"), token);
+                        logInfo("Se elimino corectamente el anterior backup: " + extraerRutaUltimoBackup("backup_nube").string(), "backups.log");
+                    }else {
+                        logWarning("No se elimino el anterior backup debido a que no se encontro el backup en la ruta registrada", "backups.log");
+                    }
+                }else {
+                    logInfo("No se podra eliminara el anterior backup debido a que hubo errores en el actual", "backups.log");
+                }
 
-        if (config.crear_carpeta_backup_nube) {
-            if (!hubo_errores) {
-                guardarRutaUltimoBackup("backup_nube", config.carpeta_remota + "/" + nombre_carpeta);
-                logInfo("Se guardo correctamente el registro del backup: " + config.carpeta_remota + "/" + nombre_carpeta, "backups.log");
-            }else {
-                logInfo("No se guardara la ruta del backup debido a que este tuvo errores", "backups.log");
+            if (config.crear_carpeta_backup_nube) {
+                if (!hubo_errores) {
+                    guardarRutaUltimoBackup("backup_nube", config.carpeta_remota + "/" + nombre_carpeta);
+                    logInfo("Se guardo correctamente el registro del backup: " + config.carpeta_remota + "/" + nombre_carpeta, "backups.log");
+                }else {
+                    logInfo("No se guardara la ruta del backup debido a que este tuvo errores", "backups.log");
+                }
             }
         }
+        }catch (const std::filesystem::filesystem_error& e) {
+            logError("Ocurrio un error con el manejo de archivos locales se cancelo el backup, posiblemente el iterador: " + std::string(e.what()), "backups.log");
+            hubo_errores = true;
+        }
+        catch (const ErrorBackupAPI& e) {
+            logError("Ocurrio un error con la petición del backup: " + std::string(e.what())
+            + " Codigo:" + std::to_string(e.codigoHTTP), "backups.log");
+            hubo_errores = true;
+        }
+        catch (const ErrorBackupRED& e) {
+            logError("Ocurrio un error con la red al intentar realizar el backup a la nube" + std::string(e.what())
+            + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "backups.log");
+            hubo_errores = true;
+        }
+        catch (const DaemonError& e) {
+            logError("Ocurrio un error inesperado: " + std::string(e.what()), "backups.log");
+            hubo_errores = true;
+        }
     }
-    catch (const ErrorBackupAPI& e) {
-        logError("Ocurrio un error con la petición del backup: " + std::string(e.what())
-        + " Codigo:" + std::to_string(e.codigoHTTP), "backups.log");
-        hubo_errores = true;
-    }
-    catch (const ErrorBackupRED& e) {
-        logError("Ocurrio un error con la red al intentar realizar el backup a la nube" + std::string(e.what())
-        + " ruta remota: " + ruta_remota + " ruta sistema: " + archivo.string(), "backups.log");
-        hubo_errores = true;
-    }
-    catch (const DaemonError& e) {
-        logError("Ocurrio un error inesperado: " + std::string(e.what()), "backups.log");
-        hubo_errores = true;
-    }
+    //desactivar goblal de backup nube
     corriendo_backup_nube = false;
 
     if (!hubo_errores) {
