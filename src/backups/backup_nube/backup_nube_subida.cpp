@@ -216,7 +216,7 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
                         continue;
                     }
 
-                    fs::path ruta_relativa = fs::relative(entrada.path(), origen);
+                    fs::path ruta_relativa = fs::relative(entrada.path(), origen.parent_path());
 
                     if (config.crear_carpeta_backup_nube) {
                         ruta_remota = config.carpeta_remota + "/" + nombre_carpeta + "/" + ruta_relativa.string();

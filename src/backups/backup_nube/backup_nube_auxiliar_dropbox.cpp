@@ -116,11 +116,22 @@ bool verificarSiExisteArchivoDropbox(const std::string& accessToken, const std::
 void actualizarToken(const std::string& token) {
     std::filesystem::path rutaConfig = obtenerRutaConfig();
 
-    json datos = leerJSONActual(rutaConfig);
+    std::ifstream archivo(rutaConfig);
+    if (!archivo.is_open()){
+        throw ErrorConfig("No se pudo abrir el archivo configuraciones en la ruta: " + rutaConfig.string());
+    }
+
+    json datos = json::parse(archivo);
+    archivo.close();
 
     datos["backup_nube"]["token"] = token;
 
-    guardarJSON(datos, rutaConfig);
+    std::ofstream archivo_escritura(rutaConfig);
+    if (!archivo_escritura.is_open()){
+        throw ErrorConfig("No se pudo abrir el archivo configuraciones para escribir en la ruta: " + rutaConfig.string());
+    }
+
+    archivo_escritura << datos.dump(4);
 }
 
 CURL* inicializarCurl(const std::string& contexto) {

@@ -1,7 +1,8 @@
 #pragma once
 #include "json.hpp"
-#include "config_loader.h"
 using json = nlohmann::json;
+
+void enviarRespuesta(const std::string& mensaje);
 
 //json
 json leerJSONActual(const std::filesystem::path& ruta);

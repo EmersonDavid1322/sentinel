@@ -2,8 +2,6 @@
 #include <string>
 #include <config_compartida.h>
 
-void enviarRespuesta(const std::string& mensaje);
-
 void procesarEstado(std::string modulo, const std::string& accion);
 
 void procesarComandoMonitor(std::string& accion, std::string& valor);

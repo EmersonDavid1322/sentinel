@@ -18,17 +18,6 @@
 #include "backup.h"
 #include "backup_nube_subida.h"
 
-void enviarRespuesta(const std::string& mensaje) {
-    std::filesystem::path ruta_estado = obtenerRutaEstado() / "sentinel_estado.txt";
-    std::ofstream salida(ruta_estado);
-    if (salida.is_open()) {
-        salida << mensaje << std::endl;
-    }else{
-        logError("No se pudo abrir el archivo sentinel_estado.txt en: " + ruta_estado.string(), "sentinel.log");
-    }
-    salida.close();
-}
-
 void procesarEstado(const std::string& modulo, const std::string& accion){
     try {
         if (accion == "activar") {

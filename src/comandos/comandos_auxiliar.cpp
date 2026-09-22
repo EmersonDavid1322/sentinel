@@ -2,12 +2,23 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
-#include "procesar_comandos.h"
 #include "errores.h"
 #include "json.hpp"
 #include "rutas.h"
+#include "logger.h"
 using json = nlohmann::json;
 namespace fs = std::filesystem;
+
+void enviarRespuesta(const std::string& mensaje) {
+    std::filesystem::path ruta_estado = obtenerRutaEstado() / "sentinel_estado.txt";
+    std::ofstream salida(ruta_estado);
+    if (salida.is_open()) {
+        salida << mensaje << std::endl;
+    }else{
+        logError("No se pudo abrir el archivo sentinel_estado.txt en: " + ruta_estado.string(), "sentinel.log");
+    }
+    salida.close();
+}
 
 //json carga y guarda
 json leerJSONActual(const std::filesystem::path& ruta){

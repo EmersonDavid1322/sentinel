@@ -72,6 +72,9 @@ add_executable(sentinel_test
         src/config_json/sentinel_config.cpp
         src/config_json/config_loader.cpp
         tests/rutas_test.cpp
+        tests/backup_nube_subida_test.cpp
+        src/backups/backup_nube/backup_nube_auxiliar_dropbox.cpp
+        src/backups/backup_nube/backup_nube_subida.cpp
 )
 
 # Vincular librerías al ejecutable de pruebas
