@@ -4,10 +4,12 @@
 #include <ctime>
 #include <mutex>
 #include "rutas.h"
+#include "sentinel_estado.h"
 namespace fs = std::filesystem;
 std::mutex mutex_log;
 
 static void escribirLog(const std::string& nivel, const std::string& mensaje, const std::string& tipo) {
+    if (modo_test) return;
     std::lock_guard<std::mutex> lock(mutex_log);
     fs::path ruta_log = obtenerRutaLogs() / tipo;
 

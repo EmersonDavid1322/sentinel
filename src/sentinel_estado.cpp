@@ -6,6 +6,7 @@
 std::atomic<bool> corriendo{true};
 std::atomic<bool> corriendo_backup_nube{false};
 std::atomic<bool> corriendo_backup_local{false};
+std::atomic<bool> modo_test{false};
 std::mutex mtx_apagado;
 std::condition_variable cv_apagado;
 

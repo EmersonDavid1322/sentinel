@@ -4,6 +4,7 @@
 #include <vector>
 #include "backup_nube_subida.h"
 #include "backup_nube_auxiliar_dropbox.h"
+#include "sentinel_estado.h"
 namespace fs = std::filesystem;
 
 class BackupNubeTest : public ::testing::Test {
@@ -23,6 +24,7 @@ protected:
 };
 
 TEST_F(BackupNubeTest, RealizarBackupNube) {
+    modo_test = true;
     const char* clienteID = std::getenv("CLIENTE_ID");
     const char* clienteSecret = std::getenv("CLIENTE_SECRET");
     const char* refresh_token = std::getenv("REFRESH_TOKEN");
@@ -80,4 +82,5 @@ TEST_F(BackupNubeTest, RealizarBackupNube) {
             EXPECT_TRUE(verificarSiExisteArchivoDropbox(token, dropboxpath));
         }
     }
+    modo_test = false;
 }
