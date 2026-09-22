@@ -2,6 +2,7 @@
 #include "errores.h"
 #include "rutas.h"
 #include "json.hpp"
+#include "sentinel_estado.h"
 #include <fstream>
 #include <filesystem>
 #include <string>
@@ -35,6 +36,7 @@ bool debeIgnorarce(const fs::path& ruta, const std::vector<std::string>& lista_i
 }
 
 void limpiarLog() {
+    if (modo_test) return;
     namespace fs = std::filesystem;
     fs::path logPath = obtenerRutaLogs() / "backups.log";
     std::ofstream logFile(logPath, std::ios::trunc);
