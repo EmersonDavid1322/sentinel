@@ -120,6 +120,7 @@ TEST_F(BackupNubeTest, RealizarBackupNube) {
             EXPECT_TRUE(verificarSiExisteArchivoDropbox(token, dropboxpath));
         }
     }
+    elimarAnteriorBackupNube(configuraciones_test.carpeta_remota , token);
     modo_test = false;
 }
 
@@ -163,6 +164,7 @@ TEST_F(BackupNubeTest, RealizarBackupNubeCreandoCarpeta) {
             EXPECT_TRUE(verificarSiExisteArchivoDropbox(token, dropboxpath));
         }
     }
+    elimarAnteriorBackupNube(configuraciones_test.carpeta_remota , token);
     modo_test = false;
 }
 
@@ -211,5 +213,6 @@ TEST_F(BackupNubeTest, RealizarBackupNubeIgnorandoArchivos) {
             }
         }
     }
+    elimarAnteriorBackupNube(configuraciones_test.carpeta_remota , token);
     modo_test = false;
 }
