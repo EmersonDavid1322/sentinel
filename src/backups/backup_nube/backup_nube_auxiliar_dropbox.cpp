@@ -7,6 +7,7 @@
 #include "json.hpp"
 #include "rutas.h"
 #include "comandos_auxiliar.h"
+#include "sentinel_estado.h"
 namespace fs = std::filesystem;
 
 size_t escribirRespuesta(void* datos, size_t tamano, size_t cantidad, std::string* salida) {
@@ -114,6 +115,7 @@ bool verificarSiExisteArchivoDropbox(const std::string& accessToken, const std::
     return (codigo_http == 200);
 }
 void actualizarToken(const std::string& token) {
+    if (modo_test) return;
     std::filesystem::path rutaConfig = obtenerRutaConfig();
 
     std::ifstream archivo(rutaConfig);
