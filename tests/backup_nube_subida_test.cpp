@@ -146,6 +146,7 @@ TEST_F(BackupNubeTest, RealizarBackupNubeCreandoCarpeta) {
             fs::path ruta_relativa = fs::relative(entrada.path(), ruta_carpeta.parent_path());
 
             fs::path dropboxpath = configuraciones_test.carpeta_remota +  "/" + nombre_carpeta + "/" + ruta_relativa.string();
+            std::cout << "Dropbox: " + dropboxpath.string() << std::endl;
 
             EXPECT_TRUE(verificarSiExisteArchivoDropbox(token, dropboxpath));
         }
@@ -189,6 +190,7 @@ TEST_F(BackupNubeTest, RealizarBackupNubeIgnorandoArchivos) {
             fs::path ruta_relativa = fs::relative(entrada.path(), ruta_carpeta.parent_path());
 
             fs::path dropboxpath = configuraciones_test.carpeta_remota +  "/" + nombre_carpeta + "/" + ruta_relativa.string();
+            std::cout << "Dropbox: " + dropboxpath.string() << std::endl;
 
             if (dropboxpath.extension() == ".txt") {
                 EXPECT_FALSE(verificarSiExisteArchivoDropbox(token, dropboxpath));
