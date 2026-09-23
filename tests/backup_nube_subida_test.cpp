@@ -47,11 +47,11 @@ DatosRutas PrepararBackupNube(const std::filesystem::path& ruta_prueba) {
     fs::create_directories(subcarpeta_test);
 
     std::vector<std::string> archivos{
-        carpeta_test_1 / "archivo_test_1.txt", carpeta_test_1 / "archivo_test_3.txt",
+        carpeta_test_1 / "archivo_test_1.txt", carpeta_test_1 / "archivo_test_2.txt", carpeta_test_1 / "archivo_test_3.txt",
         carpeta_test_2 / "archivo_test_1.txt", carpeta_test_2 / "archivo_test_2.txt", carpeta_test_2 / "archivo_test_3.txt",
         subcarpeta_test / "archivo_test_1.txt", subcarpeta_test / "archivo_test_2.txt", subcarpeta_test / "archivo_test_3.txt",
         //archivos secundarios
-        subcarpeta_test / "archivo_log_test.log"
+        subcarpeta_test / "archivo_log_test.log", carpeta_test_1 / "archivo_json_test.json"
     };
 
     for (const auto& archivo : archivos) {
@@ -67,6 +67,17 @@ DatosRutas PrepararBackupNube(const std::filesystem::path& ruta_prueba) {
         carpetas_test_strings,
         archivos
     };
+}
+
+TEST_F(BackupNubeTest, comprobarArchivos) {
+    DatosRutas datos = PrepararBackupNube(ruta_prueba);
+    for (const auto& archivo : datos.archivos) {
+        EXPECT_TRUE(fs::exists(archivo));
+        std::ifstream archivo_test(archivo);
+        std::string contenido;
+        archivo_test >> contenido;
+        EXPECT_TRUE(contenido == "Archivo test");
+    }
 }
 
 TEST_F(BackupNubeTest, RealizarBackupNube) {
