@@ -47,7 +47,7 @@ DatosRutas PrepararBackupNube(const std::filesystem::path& ruta_prueba) {
     fs::create_directories(subcarpeta_test);
 
     std::vector<std::string> archivos{
-        carpeta_test_1 / "archivo_test_1.txt", carpeta_test_1 / "archivo_test_2.txt", carpeta_test_1 / "archivo_test_3.txt",
+        carpeta_test_1 / "archivo_test_1.txt", carpeta_test_1 / "archivo_test_3.txt",
         carpeta_test_2 / "archivo_test_1.txt", carpeta_test_2 / "archivo_test_2.txt", carpeta_test_2 / "archivo_test_3.txt",
         subcarpeta_test / "archivo_test_1.txt", subcarpeta_test / "archivo_test_2.txt", subcarpeta_test / "archivo_test_3.txt",
         //archivos secundarios
