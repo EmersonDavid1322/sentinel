@@ -182,8 +182,8 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
     std::lock_guard<std::mutex> lock(mutex_subir_archivos);
     corriendo_backup_nube = true;
     logInfo("Se incio el backup a la nube", "sentinel.log");
-    logInfo("Se incio el backup a la nube Destino: " + config.carpeta_remota, "backups.log");
     limpiarLog();
+    logInfo("Se incio el backup a la nube Destino: " + config.carpeta_remota, "backups.log");
     std::string token = config.token;
     bool hubo_errores = false;
 

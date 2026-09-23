@@ -75,12 +75,13 @@ std::string obtenerNombreCarpetaBackup() {
 
     char buffer[80];
 
-    std::strftime(buffer, sizeof(buffer), "backup_%Y_%m_%d_%H_%M_%S", &tm_actual);
+    std::strftime(buffer, sizeof(buffer), "backup_%Y_%m_%d_%H_%M", &tm_actual);
 
     return std::string(buffer);
 }
 
 void guardarRutaUltimoBackup(const std::string& parametro, const std::string& nombre) {
+    if (modo_test) return;
     fs::path rutaConfig = obtenerRutaConfig();
     std::ifstream archivoConfig(rutaConfig);
 
