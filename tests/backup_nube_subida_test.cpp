@@ -74,9 +74,9 @@ TEST_F(BackupNubeTest, comprobarArchivos) {
     for (const auto& archivo : datos.archivos) {
         EXPECT_TRUE(fs::exists(archivo));
         std::ifstream archivo_test(archivo);
-        std::string contenido;
-        archivo_test >> contenido;
-        EXPECT_TRUE(contenido == "Archivo test");
+        std::string contenido((std::istreambuf_iterator<char>(archivo_test)),
+                              std::istreambuf_iterator<char>());
+        EXPECT_EQ(contenido, "Archivo test");
     }
 }
 
