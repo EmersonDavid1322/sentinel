@@ -1,5 +1,6 @@
 #include <string>
 #include <filesystem>
+#include <iostream>
 #include <fstream>
 #include <ctime>
 #include <mutex>
@@ -9,7 +10,10 @@ namespace fs = std::filesystem;
 std::mutex mutex_log;
 
 static void escribirLog(const std::string& nivel, const std::string& mensaje, const std::string& tipo) {
-    if (modo_test) return;
+    if (modo_test) {
+        std::cout << mensaje << std::endl;
+        return;
+    }
     std::lock_guard<std::mutex> lock(mutex_log);
     fs::path ruta_log = obtenerRutaLogs() / tipo;
 
