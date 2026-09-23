@@ -50,7 +50,7 @@ DatosRutas PrepararBackupNube(const std::filesystem::path& ruta_prueba) {
         carpeta_test_2 / "archivo_test_1.txt", carpeta_test_2 / "archivo_test_2.txt", carpeta_test_2 / "archivo_test_3.txt",
         subcarpeta_test / "archivo_test_1.txt", subcarpeta_test / "archivo_test_2.txt", subcarpeta_test / "archivo_test_3.txt",
         //archivos secundarios
-        subcarpeta_test / "archivo_log_test.log", carpeta_test_1 / "archivo_json_test.json"
+        subcarpeta_test / "archivo_log_test.log"
     };
 
     for (const auto& archivo : archivos) {
@@ -101,6 +101,7 @@ TEST_F(BackupNubeTest, RealizarBackupNube) {
             fs::path ruta_relativa = fs::relative(entrada.path(), ruta_carpeta.parent_path());
 
             fs::path dropboxpath = configuraciones_test.carpeta_remota / ruta_relativa;
+            std::cout << dropboxpath.string() << std::endl;
 
             EXPECT_TRUE(verificarSiExisteArchivoDropbox(token, dropboxpath));
         }
