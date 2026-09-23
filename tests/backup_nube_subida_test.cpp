@@ -31,7 +31,7 @@ protected:
     }
 };
 
-DatosRutas PrepararBackupNub (const std::filesystem::path& ruta_prueba) {
+DatosRutas PrepararBackupNube(const std::filesystem::path& ruta_prueba) {
     const char* clienteID = std::getenv("CLIENTE_ID");
     const char* clienteSecret = std::getenv("CLIENTE_SECRET");
     const char* refresh_token = std::getenv("REFRESH_TOKEN");
@@ -50,7 +50,7 @@ DatosRutas PrepararBackupNub (const std::filesystem::path& ruta_prueba) {
         carpeta_test_2 / "archivo_test_1.txt", carpeta_test_2 / "archivo_test_2.txt", carpeta_test_2 / "archivo_test_3.txt",
         subcarpeta_test / "archivo_test_1.txt", subcarpeta_test / "archivo_test_2.txt", subcarpeta_test / "archivo_test_3.txt",
         //archivos secundarios
-        subcarpeta_test / "archivo_log_test.log", carpeta_test_1 / "archivo_json_test.json"
+        subcarpeta_test / "archivo_log_test.log", carpeta_test_1 / "archivo_json_test.log"
     };
 
     for (const auto& archivo : archivos) {
@@ -68,7 +68,7 @@ DatosRutas PrepararBackupNub (const std::filesystem::path& ruta_prueba) {
 
 TEST_F(BackupNubeTest, RealizarBackupNube) {
     modo_test = true;
-    DatosRutas datos = PrepararBackupNub(ruta_prueba);
+    DatosRutas datos = PrepararBackupNube(ruta_prueba);
 
     ConfigBackupNube configuraciones_test{
         datos.carpetas_test_strig,
@@ -106,7 +106,7 @@ TEST_F(BackupNubeTest, RealizarBackupNube) {
 
 TEST_F(BackupNubeTest, RealizarBackupNubeCreandoCarpeta) {
     modo_test = true;
-    DatosRutas datos = PrepararBackupNub(ruta_prueba);
+    DatosRutas datos = PrepararBackupNube(ruta_prueba);
 
     ConfigBackupNube configuraciones_test{
         datos.carpetas_test_strig,
@@ -144,7 +144,7 @@ TEST_F(BackupNubeTest, RealizarBackupNubeCreandoCarpeta) {
 
 TEST_F(BackupNubeTest, RealizarBackupNubeIgnorandoArchivos) {
     modo_test = true;
-    DatosRutas datos = PrepararBackupNub(ruta_prueba);
+    DatosRutas datos = PrepararBackupNube(ruta_prueba);
 
     ConfigBackupNube configuraciones_test{
         datos.carpetas_test_strig,
