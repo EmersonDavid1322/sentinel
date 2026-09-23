@@ -57,6 +57,7 @@ DatosRutas PrepararBackupNube(const std::filesystem::path& ruta_prueba) {
     for (const auto& archivo : archivos) {
         std::ofstream archivo_test(archivo);
         archivo_test << "Archivo test";
+        archivo_test.close();
     }
 
     return {
