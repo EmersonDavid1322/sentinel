@@ -3,6 +3,7 @@
 #include <sys/inotify.h>
 #include <unistd.h>
 #include <poll.h>
+#include <cerrno>
 #include "sentinel_config.h"
 #include "config_loader.h"
 #include "errores.h"
@@ -26,7 +27,11 @@ std::ifstream comprobar_json(const std::filesystem::path& ruta){
 void actualizarJSON(ConfigCompartida& configCompartida){
     try{
         fs::path ruta = obtenerRutaConfig();
-        VigilanteInotify vigilante(ruta.c_str(), IN_MODIFY);
+        fs::path carpetaConfig = ruta.parent_path();
+        if (carpetaConfig.empty()) {
+            carpetaConfig = ".";
+        }
+        VigilanteInotify vigilante(carpetaConfig.c_str(), IN_CLOSE_WRITE | IN_MOVED_TO);
 
         struct pollfd pfd;
         pfd.fd = vigilante.fd;
@@ -35,18 +40,33 @@ void actualizarJSON(ConfigCompartida& configCompartida){
         while (corriendo){
             int resultado = poll(&pfd, 1, 1000);
 
-            if (resultado < 0) break;
+            if (resultado < 0) {
+                if (errno == EINTR) {
+                    continue;
+                }
+                throw ErrorInotify("Error al esperar cambios en el archivo de configuración");
+            }
 
             if (pfd.revents & POLLIN) {
-                char buffer[4096];
+                alignas(struct inotify_event) char buffer[4096];
                 int bytes = read(vigilante.fd, buffer, sizeof(buffer));
-                if (bytes < 0) break;
+                if (bytes < 0) {
+                    if (errno == EINTR) {
+                        continue;
+                    }
+                    throw ErrorInotify("Error al leer cambios del archivo de configuración");
+                }
 
                 for (int i = 0; i < bytes; ) {
                     struct inotify_event* evento = (struct inotify_event*)&buffer[i];
-                    if (evento->mask & IN_MODIFY){
-                        configCompartida.actualizar(cargarConfig(ruta));
-                        logInfo("Sentinel actualizado correctamente", "sentinel.log");
+                    if ((evento->mask & (IN_CLOSE_WRITE | IN_MOVED_TO)) &&
+                        evento->len > 0 && ruta.filename() == evento->name) {
+                        try {
+                            configCompartida.actualizar(cargarConfig(ruta));
+                            logInfo("Sentinel actualizado correctamente", "sentinel.log");
+                        } catch (const DaemonError& e) {
+                            logError("No se pudo actualizar la configuración: " + std::string(e.what()), "sentinel.log");
+                        }
                     }
                     i += sizeof(struct inotify_event) + evento->len;
                 }
