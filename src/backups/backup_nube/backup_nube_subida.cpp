@@ -181,8 +181,8 @@ void subirArchivoStreaming(const std::string& ruta, const std::string& rutaRemot
 void ejecutarBackupNube(const ConfigBackupNube& config) {
     std::lock_guard<std::mutex> lock(mutex_subir_archivos);
     corriendo_backup_nube = true;
-    logInfo("Se incio el backup a la nube", "sentinel.log");
     limpiarLog();
+    logInfo("Se incio el backup a la nube", "sentinel.log");
     logInfo("Se incio el backup a la nube Destino: " + config.carpeta_remota, "backups.log");
     std::string token = config.token;
     bool hubo_errores = false;
@@ -273,7 +273,7 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
                 logInfo("Se acepto la eliminación del ultimo backup", "backups.log");
                 if (verificarSiExisteArchivoDropbox(config.token, extraerRutaUltimoBackup("backup_nube"))) {
                     elimarAnteriorBackupNube(extraerRutaUltimoBackup("backup_nube"), token);
-                    logInfo("Se elimino corectamente el anterior backup: " + extraerRutaUltimoBackup("backup_nube").string(), "backups.log");
+                    logInfo("Se elimino correctamente el anterior backup: " + extraerRutaUltimoBackup("backup_nube").string(), "backups.log");
                 }else {
                     logWarning("No se elimino el anterior backup debido a que no se encontro el backup en la ruta registrada", "backups.log");
                 }
@@ -304,7 +304,7 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
         hubo_errores = true;
     }
 
-    //desactivar goblal de backup nube
+    //desactivar global de backup nube
     corriendo_backup_nube = false;
 
     if (!hubo_errores) {

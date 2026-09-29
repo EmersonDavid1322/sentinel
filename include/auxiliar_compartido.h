@@ -10,6 +10,10 @@ enum class FiltroArchivos{
 
 bool verificarHoraBackup(const std::string& horaConfigurada);
 
+std::string verificarCarpetasBackup(const std::vector<std::string>& carpetas, const std::string& destino);
+
+void comprobarCarpetasBackup(const std::vector<std::string>& carpetas);
+
 bool debeIgnorarce(const std::filesystem::path& ruta, const std::vector<std::string>& lista_ignorar);
 
 void limpiarLog();

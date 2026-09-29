@@ -3,6 +3,7 @@
 #include "rutas.h"
 #include "json.hpp"
 #include "sentinel_estado.h"
+#include "logger.h"
 #include <fstream>
 #include <filesystem>
 #include <string>
@@ -11,6 +12,38 @@
 #include <vector>
 namespace fs = std::filesystem;
 using json = nlohmann::json;
+
+void comprobarCarpetasBackup(const std::vector<std::string>& carpetas) {
+    for (const std::string& carpeta : carpetas){
+        if (!fs::exists(carpeta)){
+            throw ErrorBackup("La carpeta no existe: " + carpeta);
+        }
+    }
+}
+
+std::string verificarCarpetasBackup(const std::vector<std::string>& carpetas, const std::string& destino){
+    std::string msg_carpetas;
+
+    for (const std::string& carpeta : carpetas){
+        if (!fs::exists(carpeta)){
+            throw ErrorBackup("La carpeta no existe: " + carpeta);
+        }
+
+        msg_carpetas += " " + carpeta;
+
+    }
+    if (!fs::exists(destino)){
+        try {
+            fs::create_directories(destino);
+            logWarning("La carpeta destinataria no existe, se creo la carpeta destinataria del backup_local: " + destino, "sentinel.log");
+        }
+        catch (const std::filesystem::filesystem_error& e) {
+            throw ErrorBackup("No se pudo crear la carpeta destino '" + destino + "' "
+                                "posible ubicacion erronea: " + std::string(e.what()));
+        }
+    }
+    return msg_carpetas;
+}
 
 bool verificarHoraBackup(const std::string& horaConfigurada) {
     time_t ahora = time(0);

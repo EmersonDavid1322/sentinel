@@ -33,30 +33,6 @@ ResultadoVerificacionRecursos verificarRecursosBackup(const ConfigBackup& config
     return ResultadoVerificacionRecursos::OK;
 }
 
-std::string verificarCarpetasBackup(const std::vector<std::string>& carpetas, const std::string& destino){
-    std::string msg_carpetas;
-
-    for (const std::string& carpeta : carpetas){
-        if (!fs::exists(carpeta)){
-            throw ErrorBackup("La carpeta no existe: " + carpeta);
-        }
-
-        msg_carpetas += " " + carpeta;
-
-    }
-    if (!fs::exists(destino)){
-        try {
-            fs::create_directories(destino);
-            logWarning("La carpeta destinataria no existe, se creo la carpeta destinataria del backup_local: " + destino, "sentinel.log");
-        }
-        catch (const std::filesystem::filesystem_error& e) {
-            throw ErrorBackup("No se pudo crear la carpeta destino '" + destino + "' "
-                                "posible ubicacion erronea: " + std::string(e.what()));
-        }
-    }
-    return msg_carpetas;
-}
-
 void validarConfiguracionBackup(const ConfigBackup& configBackup) {
     if (configBackup.carpetas.empty()) {
         throw ErrorBackup("No se configuraron carpetas para el backup local");

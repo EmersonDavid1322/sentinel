@@ -18,8 +18,6 @@ struct ResultadoCopiaBackup {
 
 ResultadoVerificacionRecursos verificarRecursosBackup(const ConfigBackup& configBackup, const ConfigMonitor& configMonitor);
 
-std::string verificarCarpetasBackup(const std::vector<std::string>& carpetas, const std::string& destino);
-
 void validarConfiguracionBackup(const ConfigBackup& configBackup);
 
 ResultadoCopiaBackup copiarCarpetasBackup(const ConfigBackup& configBackup);
