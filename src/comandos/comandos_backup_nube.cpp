@@ -21,7 +21,7 @@ void mostrarListadoComando(const ConfigBackupNube& config) {
     }
     catch (const ErrorBackupAPI& e) {
         if (e.codigoHTTP == 401) {
-            std::string token_nuvo = renovarAccessToken(config);
+            std::string token_nuvo = renovarAccessToken(config.refresh_token, config.clienteID, config.clienteSecret);
             actualizarToken(token_nuvo);
             logInfo("Se a actualizado el token", "sentinel.log");
             enviarRespuesta("Se a actualizado el token, vuelva a intentarlo");

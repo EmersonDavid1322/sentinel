@@ -21,17 +21,7 @@ void comprobarCarpetasBackup(const std::vector<std::string>& carpetas) {
     }
 }
 
-std::string verificarCarpetasBackup(const std::vector<std::string>& carpetas, const std::string& destino){
-    std::string msg_carpetas;
-
-    for (const std::string& carpeta : carpetas){
-        if (!fs::exists(carpeta)){
-            throw ErrorBackup("La carpeta no existe: " + carpeta);
-        }
-
-        msg_carpetas += " " + carpeta;
-
-    }
+void verificarCarpetasDestino(const std::string& destino){
     if (!fs::exists(destino)){
         try {
             fs::create_directories(destino);
@@ -42,7 +32,6 @@ std::string verificarCarpetasBackup(const std::vector<std::string>& carpetas, co
                                 "posible ubicacion erronea: " + std::string(e.what()));
         }
     }
-    return msg_carpetas;
 }
 
 bool verificarHoraBackup(const std::string& horaConfigurada) {

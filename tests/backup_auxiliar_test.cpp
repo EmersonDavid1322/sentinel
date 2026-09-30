@@ -233,33 +233,45 @@ protected:
     }
 };
 
-TEST_F(VerficarBackupTests, ErrorCarpetaNoExistente) {
-    fs::path ruta_test = ruta_prueba / "directorio_no_existente";
+//finción comprobar destino
+TEST_F(VerficarBackupTests, CarpetaDestinoNoExistente) {
     fs::path destino = ruta_prueba / "destino_test";
+    verificarCarpetasDestino(destino);
 
-    fs::create_directories(destino);
-    std::vector<std::string> carpetas{ruta_test.string()};
-
-    EXPECT_THROW(verificarCarpetasBackup(carpetas, destino), ErrorBackup);
+    EXPECT_TRUE(fs::exists(destino));
 }
 
 TEST_F(VerficarBackupTests, ErrorDestinoImposibleDeCrear) {
-    fs::path ruta_test = ruta_prueba / "directorio_test";
-    fs::create_directories(ruta_test);
-
     fs::path destino = "/abc/destino_test";
-    std::vector<std::string> carpetas{ruta_test.string()};
 
-    EXPECT_THROW(verificarCarpetasBackup(carpetas, destino), ErrorBackup);
+    EXPECT_THROW(verificarCarpetasDestino(destino), ErrorBackup);
 }
 
-TEST_F(VerficarBackupTests, VerificacionAceptada) {
-    fs::path ruta_test = ruta_prueba / "directorio_test";
-    fs::path destino_test = ruta_prueba / "destino_test";
+//finción comprobar carpetas
+TEST_F(VerficarBackupTests, CarpetasBackupExistentes) {
+    std::vector<std::string> carpetas{
+        ruta_prueba.string() + "/" + "carpeta_test1", ruta_prueba.string() + "/" + "carpeta_test2", ruta_prueba.string() + "/" + "carpeta_test3",
+        ruta_prueba.string() + "/" +"carpeta_test4", ruta_prueba.string() + "/" +"carpeta_sub" + "/" + "subcarpeta"
+    };
 
-    fs::create_directories(ruta_test);
+    for (const auto& carpeta : carpetas) {
+        fs::create_directories(carpeta);
+    }
 
-    std::vector<std::string> carpetas{ruta_test.string()};
+    EXPECT_NO_THROW(comprobarCarpetasBackup(carpetas));
+}
 
-    EXPECT_EQ(verificarCarpetasBackup(carpetas, destino_test), " " + ruta_test.string());
+TEST_F(VerficarBackupTests, CarpetasBackupNoExistentes) {
+    std::vector<std::string> carpetas{
+        ruta_prueba.string() + "/" + "carpeta_test1", ruta_prueba.string() + "/" + "carpeta_test2", ruta_prueba.string() + "/" + "carpeta_test3",
+        ruta_prueba.string() + "/" +"carpeta_test4", ruta_prueba.string() + "/" +"carpeta_sub" + "/" + "subcarpeta"
+    };
+
+    for (const auto& carpeta : carpetas) {
+        if (carpeta == ruta_prueba.string() + "/" + "carpeta_test1") {
+            continue;
+        }
+        fs::create_directories(carpeta);
+    }
+    EXPECT_THROW(comprobarCarpetasBackup(carpetas), ErrorBackup);
 }

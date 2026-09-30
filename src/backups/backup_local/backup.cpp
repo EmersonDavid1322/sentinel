@@ -168,6 +168,8 @@ bool ejecutarBackup(const ConfigBackup& configBackup){
 void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_monitor){
     std::lock_guard<std::mutex> lock(mutex_subir_archivos_local);
     corriendo_backup_local = true;
+    comprobarCarpetasBackup(config_backup.carpetas);
+    verificarCarpetasDestino(config_backup.destino);
     try{
         validarConfiguracionBackup(config_backup);
         ResultadoVerificacionRecursos resultado = verificarRecursosBackup(config_backup, config_monitor);
@@ -192,13 +194,12 @@ void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_
         }
 
         limpiarLog();
-        std::string carpetas_msg = verificarCarpetasBackup(config_backup.carpetas, config_backup.destino);
         if (!ejecutarBackup(config_backup)) {
             corriendo_backup_local = false;
             return;
         }
 
-        logInfo("Se realizo un bakup revise 'backups.log': " + carpetas_msg + " Destino: " + config_backup.destino, "sentinel.log");
+        logInfo("Se realizo un bakup revise 'backups.log' Destino: " + config_backup.destino, "sentinel.log");
         enviarNotificación("Backup", "Se completo el bakup revise 'backups.log': " + config_backup.destino, "INFO");
 
     }

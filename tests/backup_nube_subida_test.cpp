@@ -103,7 +103,7 @@ TEST_F(BackupNubeTest, RealizarBackupNube) {
     };
 
     ejecutarBackupNube(configuraciones_test);
-    std::string token = renovarAccessToken(configuraciones_test);
+    std::string token = renovarAccessToken(configuraciones_test.refresh_token, configuraciones_test.clienteID, configuraciones_test.clienteSecret);
 
     for (const auto& carpeta : datos.carpetas_test_strig) {
         for (const auto& entrada : fs::directory_iterator(carpeta)) {
@@ -147,7 +147,7 @@ TEST_F(BackupNubeTest, RealizarBackupNubeCreandoCarpeta) {
     };
     std::string nombre_carpeta = obtenerNombreCarpetaBackup();
     ejecutarBackupNube(configuraciones_test);
-    std::string token = renovarAccessToken(configuraciones_test);
+    std::string token = renovarAccessToken(configuraciones_test.refresh_token, configuraciones_test.clienteID, configuraciones_test.clienteSecret);
 
     for (const auto& carpeta : datos.carpetas_test_strig) {
         for (const auto& entrada : fs::directory_iterator(carpeta)) {
@@ -192,7 +192,7 @@ TEST_F(BackupNubeTest, RealizarBackupNubeIgnorandoArchivos) {
 
     std::string nombre_carpeta = obtenerNombreCarpetaBackup();
     ejecutarBackupNube(configuraciones_test);
-    std::string token = renovarAccessToken(configuraciones_test);
+    std::string token = renovarAccessToken(configuraciones_test.refresh_token, configuraciones_test.clienteID, configuraciones_test.clienteSecret);
 
     for (const auto& carpeta : datos.carpetas_test_strig) {
         for (const auto& entrada : fs::directory_iterator(carpeta)) {

@@ -8,7 +8,7 @@
 
 size_t escribirRespuesta(void* datos, size_t tamano, size_t cantidad, std::string* salida);
 
-std::string renovarAccessToken(const ConfigBackupNube& config);
+std::string renovarAccessToken(const std::string& refresh_token, const std::string& clienteID, const std::string& clienteSecret);
 
 void actualizarToken(const std::string& token);
 
@@ -18,8 +18,11 @@ bool verificarSiExisteArchivoDropbox(const std::string& accessToken, const std::
 
 CURL* inicializarCurl(const std::string& contexto);
 
+void accionesPosBackupNube(const ConfigBackupNube &config, const bool &hubo_errores, std::string &token, const std::string &nombre_carpeta);
+
 template <typename Func>
-void conReintento(const ConfigBackupNube& config, std::string& token, Func operacion) {
+void conReintento(const std::string &refresh_token, const std::string &clienteID, const std::string &clienteSecret,
+                  std::string &token, Func operacion) {
     int max_intentos = 3;
     for (int intentos = 1; intentos <= max_intentos; intentos++) {
         try {
@@ -28,7 +31,7 @@ void conReintento(const ConfigBackupNube& config, std::string& token, Func opera
         }
         catch (const ErrorBackupAPI& e) {
             if (e.codigoHTTP == 401 && intentos < max_intentos) {
-                token = renovarAccessToken(config);
+                token = renovarAccessToken(refresh_token, clienteID, clienteSecret);
                 actualizarToken(token);
                 continue;
             }

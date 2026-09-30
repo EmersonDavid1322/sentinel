@@ -8,6 +8,8 @@
 #include "rutas.h"
 #include "comandos_auxiliar.h"
 #include "sentinel_estado.h"
+#include "logger.h"
+#include "auxiliar_compartido.h"
 namespace fs = std::filesystem;
 
 size_t escribirRespuesta(void* datos, size_t tamano, size_t cantidad, std::string* salida) {
@@ -16,14 +18,14 @@ size_t escribirRespuesta(void* datos, size_t tamano, size_t cantidad, std::strin
     return bytesTotales;
 }
 
-std::string renovarAccessToken(const ConfigBackupNube& config) {
+std::string renovarAccessToken(const std::string& refresh_token, const std::string& clienteID, const std::string& clienteSecret) {
     CURL* curl = curl_easy_init();
     if (!curl) {
         throw DaemonError("Error al intentar inicializar curl para renovar token");
     }
 
-    std::string cuerpo = "grant_type=refresh_token&refresh_token=" + config.refresh_token +
-                          "&client_id=" + config.clienteID + "&client_secret=" + config.clienteSecret;
+    std::string cuerpo = "grant_type=refresh_token&refresh_token=" + refresh_token +
+                          "&client_id=" + clienteID + "&client_secret=" + clienteSecret;
 
     curl_easy_setopt(curl, CURLOPT_URL, "https://api.dropboxapi.com/oauth2/token");
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, cuerpo.c_str());
@@ -143,4 +145,30 @@ CURL* inicializarCurl(const std::string& contexto) {
     }
     curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
     return curl;
+}
+
+void accionesPosBackupNube(const ConfigBackupNube &config, const bool &hubo_errores, std::string &token, const std::string &nombre_carpeta) {
+    if (config.eliminar_ultimo_backup_registrado) {
+        if (!hubo_errores) {
+            logInfo("Se acepto la eliminación del ultimo backup", "backups.log");
+            if (verificarSiExisteArchivoDropbox(token, extraerRutaUltimoBackup("backup_nube"))) {
+                conReintento(config.refresh_token, config.clienteID, config.clienteSecret, token, [&]() {
+                    elimarAnteriorBackupNube(extraerRutaUltimoBackup("backup_nube"), token);
+                    });
+                logInfo("Se elimino correctamente el anterior backup: " + extraerRutaUltimoBackup("backup_nube").string(), "backups.log");
+            }else {
+                logWarning("No se elimino el anterior backup debido a que no se encontro el backup en la ruta registrada", "backups.log");
+            }
+        }else {
+            logInfo("No se podra eliminara el anterior backup debido a que hubo errores en el actual", "backups.log");
+        }
+    }
+    if (config.crear_carpeta_backup_nube) {
+        if (!hubo_errores) {
+            guardarRutaUltimoBackup("backup_nube", config.carpeta_remota + "/" + nombre_carpeta);
+            logInfo("Se guardo correctamente el registro del backup: " + config.carpeta_remota + "/" + nombre_carpeta, "backups.log");
+        }else {
+            logInfo("No se guardara la ruta del backup debido a que este tuvo errores", "backups.log");
+        }
+    }
 }

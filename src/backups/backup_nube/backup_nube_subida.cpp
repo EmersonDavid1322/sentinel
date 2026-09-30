@@ -182,6 +182,7 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
     std::lock_guard<std::mutex> lock(mutex_subir_archivos);
     corriendo_backup_nube = true;
     limpiarLog();
+    comprobarCarpetasBackup(config.carpetas);
     logInfo("Se incio el backup a la nube", "sentinel.log");
     logInfo("Se incio el backup a la nube Destino: " + config.carpeta_remota, "backups.log");
     std::string token = config.token;
@@ -224,7 +225,7 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
                         ruta_remota = config.carpeta_remota + "/" + ruta_relativa.string();
                     }
 
-                    conReintento(config, token, [&]() {
+                    conReintento(config.refresh_token, config.clienteID, config.clienteSecret, token, [&]() {
                         subirArchivoStreaming(archivo.string(), ruta_remota, token);
                     });
                 }catch (const std::filesystem::filesystem_error& e) {
@@ -243,7 +244,9 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
                             std::string summary = error["error_summary"];
 
                             if (summary.find("insufficient_space") != std::string::npos) {
-                                logError("Se detecto error de espacio insuficiente finalizando backup: " + archivo.string(), "backups.log");
+                                logError(
+                                    "Se detecto error de espacio insuficiente finalizando backup: " + archivo.string(),
+                                    "backups.log");
                                 logError("Se detecto error de espacio insuficiente finalizando backup", "sentinel.log");
                                 break;
                             }
@@ -261,34 +264,16 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
                 }
             }
         }catch (const std::filesystem::filesystem_error& e) {
-            logError("Ocurrio un error con el manejo de archivos locales se cancelo el backup, posiblemente el iterador: " + std::string(e.what()), "backups.log");
+            logError(
+                "Ocurrio un error con el manejo de archivos locales se cancelo el backup, posiblemente el iterador: " +
+                std::string(e.what()), "backups.log");
             hubo_errores = true;
         }
     }
 
     try {
         //Acciones pos backup
-        if (config.eliminar_ultimo_backup_registrado) {
-            if (!hubo_errores) {
-                logInfo("Se acepto la eliminación del ultimo backup", "backups.log");
-                if (verificarSiExisteArchivoDropbox(config.token, extraerRutaUltimoBackup("backup_nube"))) {
-                    elimarAnteriorBackupNube(extraerRutaUltimoBackup("backup_nube"), token);
-                    logInfo("Se elimino correctamente el anterior backup: " + extraerRutaUltimoBackup("backup_nube").string(), "backups.log");
-                }else {
-                    logWarning("No se elimino el anterior backup debido a que no se encontro el backup en la ruta registrada", "backups.log");
-                }
-            }else {
-                logInfo("No se podra eliminara el anterior backup debido a que hubo errores en el actual", "backups.log");
-            }
-        }
-        if (config.crear_carpeta_backup_nube) {
-            if (!hubo_errores) {
-                guardarRutaUltimoBackup("backup_nube", config.carpeta_remota + "/" + nombre_carpeta);
-                logInfo("Se guardo correctamente el registro del backup: " + config.carpeta_remota + "/" + nombre_carpeta, "backups.log");
-            }else {
-                logInfo("No se guardara la ruta del backup debido a que este tuvo errores", "backups.log");
-            }
-        }
+        accionesPosBackupNube(config, hubo_errores,token,nombre_carpeta);
     }catch (const ErrorBackupAPI& e) {
         logError("Ocurrio un error con la petición del backup: " + std::string(e.what())
         + " Codigo:" + std::to_string(e.codigoHTTP), "backups.log");
@@ -312,7 +297,9 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
         logInfo("Se completo el backup a DropBox de forma correcta", "backups.log");
         enviarNotificación("Backup Nube", "Se completo el backup a DropBox de forma correcta", "INFO");
     }else {
-        logInfo("Se completo el backup a DropBox, hubo problemas con algunos archivos, por favor revise 'backups.log' para mas información", "sentinel.log");
+        logInfo(
+            "Se completo el backup a DropBox, hubo problemas con algunos archivos, por favor revise 'backups.log' para mas información",
+            "sentinel.log");
         logInfo("Se completo el backup a DropBox, hubo algunos error con archivos", "backups.log");
         enviarNotificación("Backup Nube",
                     "Se completo el backup a DropBox, hubo problemas con algunos archivos, por favor revise 'backups.log' para mas información", "WARNING");

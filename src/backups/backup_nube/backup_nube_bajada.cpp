@@ -74,7 +74,7 @@ void ejecutarBajadaArchivosNube(const ConfigBackupNube& config) {
     namespace fs = std::filesystem;
 
     try {
-        conReintento(config, token, [&]() {
+        conReintento(config.refresh_token, config.clienteID, config.clienteSecret, token, [&]() {
           listaNube = listaArchivosRemotos(config);
      });
     }catch (const ErrorBackupAPI& e) {
@@ -101,7 +101,7 @@ void ejecutarBajadaArchivosNube(const ConfigBackupNube& config) {
             if (archivo.esCarpeta) {
                 fs::create_directories(rutaLocal);
             }else {
-                conReintento(config, token, [&]() {
+                conReintento(config.refresh_token, config.clienteID, config.clienteSecret, token, [&]() {
                     backupNubeBajada(token, archivo.ruta, rutaLocal);
                 });
             }
