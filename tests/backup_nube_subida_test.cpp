@@ -6,6 +6,7 @@
 #include "backup_nube_auxiliar_dropbox.h"
 #include "sentinel_estado.h"
 #include "auxiliar_compartido.h"
+#include "errores.h"
 namespace fs = std::filesystem;
 
 struct DatosRutas {
@@ -214,5 +215,30 @@ TEST_F(BackupNubeTest, RealizarBackupNubeIgnorandoArchivos) {
         }
     }
     elimarAnteriorBackupNube(configuraciones_test.carpeta_remota , token);
+    modo_test = false;
+}
+
+TEST_F(BackupNubeTest, BackupNubeCarpetaNoExistente) {
+    modo_test = true;
+    DatosRutas datos = PrepararBackupNube(ruta_prueba);
+
+    ConfigBackupNube configuraciones_test{
+        {ruta_prueba.string()+ "/" + "carpeta_no_existente",},
+        "/backupTEST/TEST4",
+        {},
+        "ff1122",
+        datos.clienteID,
+        datos.clienteSecret,
+        datos.refreshToken,
+        "00:00",
+        "00:00",
+        "",
+        true,
+        false,
+        false,
+        true,
+        false
+    };
+    EXPECT_THROW(ejecutarBackupNube(configuraciones_test), ErrorBackup);
     modo_test = false;
 }
