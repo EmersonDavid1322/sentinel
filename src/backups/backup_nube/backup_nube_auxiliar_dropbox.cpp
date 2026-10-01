@@ -147,26 +147,38 @@ CURL* inicializarCurl(const std::string& contexto) {
     return curl;
 }
 
-void accionesPosBackupNube(const ConfigBackupNube &config, const bool &hubo_errores, std::string &token, const std::string &nombre_carpeta) {
+void accionesPosBackupNube(const ConfigBackupNube &config, const bool &hubo_errores, std::string &token,
+                           const std::string &nombre_carpeta) {
+    //eliminar anterior backup
     if (config.eliminar_ultimo_backup_registrado) {
         if (!hubo_errores) {
             logInfo("Se acepto la eliminación del ultimo backup", "backups.log");
             if (verificarSiExisteArchivoDropbox(token, extraerRutaUltimoBackup("backup_nube"))) {
+                if (extraerRutaUltimoBackup("backup_nube") == config.carpeta_remota + "/" + nombre_carpeta) {
+                    logWarning("No se eliminara el anterior backup ya que coincide con el actual", "backups.log");
+                    return;
+                }
                 conReintento(config.refresh_token, config.clienteID, config.clienteSecret, token, [&]() {
                     elimarAnteriorBackupNube(extraerRutaUltimoBackup("backup_nube"), token);
                     });
-                logInfo("Se elimino correctamente el anterior backup: " + extraerRutaUltimoBackup("backup_nube").string(), "backups.log");
+                logInfo(
+                    "Se elimino correctamente el anterior backup: " + extraerRutaUltimoBackup("backup_nube").string(),
+                    "backups.log");
             }else {
-                logWarning("No se elimino el anterior backup debido a que no se encontro el backup en la ruta registrada", "backups.log");
+                logWarning(
+                    "No se elimino el anterior backup debido a que no se encontro el backup en la ruta registrada",
+                    "backups.log");
             }
         }else {
-            logInfo("No se podra eliminara el anterior backup debido a que hubo errores en el actual", "backups.log");
+            logInfo("No se podra eliminara el anterior backup debido a que hubo errores en el actual backup", "backups.log");
         }
     }
+    //guardar dirreción carpeta
     if (config.crear_carpeta_backup_nube) {
         if (!hubo_errores) {
             guardarRutaUltimoBackup("backup_nube", config.carpeta_remota + "/" + nombre_carpeta);
-            logInfo("Se guardo correctamente el registro del backup: " + config.carpeta_remota + "/" + nombre_carpeta, "backups.log");
+            logInfo("Se guardo correctamente el registro del backup: " + config.carpeta_remota + "/" + nombre_carpeta,
+                    "backups.log");
         }else {
             logInfo("No se guardara la ruta del backup debido a que este tuvo errores", "backups.log");
         }
