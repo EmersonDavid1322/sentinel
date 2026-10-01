@@ -10,9 +10,8 @@
 std::mutex mutex_notificador;
 
 void enviarNotificación(const std::string& titulo, const std::string& mensaje, const std::string& nivel){
-    if (!hayEntornoGrafico) {
-        return;
-    }
+    if (!hayEntornoGrafico) return;
+    if (modo_test) return;
 
     std::lock_guard<std::mutex> lock(mutex_notificador);
     NotifyUrgency urgencia;

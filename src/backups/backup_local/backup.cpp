@@ -168,6 +168,7 @@ bool ejecutarBackup(const ConfigBackup& configBackup){
 void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_monitor){
     std::lock_guard<std::mutex> lock(mutex_subir_archivos_local);
     corriendo_backup_local = true;
+    limpiarLog();
     comprobarCarpetasBackup(config_backup.carpetas);
     verificarCarpetasDestino(config_backup.destino);
     try{
@@ -193,7 +194,6 @@ void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_
             logInfo("Se inicio correctamente el backup_local", "sentinel.log");
         }
 
-        limpiarLog();
         if (!ejecutarBackup(config_backup)) {
             corriendo_backup_local = false;
             return;
