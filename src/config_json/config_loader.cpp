@@ -114,6 +114,8 @@ ConfigOrganizador cargarOrganizador(const json& datos){
     json plantilla_organizador = R"({
         "organizador": {
             "carpeta_vigilar": "",
+            "destino_descompresion": "",
+            "descomprimir_automaticamente": false,
             "activo": false,
             "reglas": {}
         }
@@ -123,6 +125,8 @@ ConfigOrganizador cargarOrganizador(const json& datos){
 
     ConfigOrganizador organizador;
     organizador.carpeta_vigilar = plantilla_organizador["organizador"]["carpeta_vigilar"];
+    organizador.destino_descompresion = plantilla_organizador["organizador"]["destino_descompresion"];
+    organizador.descomprimir_automaticamente = plantilla_organizador["organizador"]["descomprimir_automaticamente"];
     organizador.activo          = plantilla_organizador["organizador"]["activo"];
     organizador.reglas          = plantilla_organizador["organizador"]["reglas"];
 

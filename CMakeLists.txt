@@ -8,6 +8,7 @@ add_compile_options(-Wall -Wextra -Wpedantic)
 find_package(CURL REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(Threads REQUIRED)
+find_package(LibArchive REQUIRED)
 
 pkg_check_modules(LIBNOTIFY REQUIRED IMPORTED_TARGET libnotify)
 
@@ -46,6 +47,7 @@ target_link_libraries(sentinel
         CURL::libcurl
         Threads::Threads
         PkgConfig::LIBNOTIFY
+        LibArchive::LibArchive
 )
 
 # =============================================================================

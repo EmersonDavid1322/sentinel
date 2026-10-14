@@ -122,6 +122,8 @@ json obtenerConfiguracionPorDefectoCompleta() {
         },
         "organizador": {
             "carpeta_vigilar": "",
+            "destino_descompresion": "",
+            "descomprimir_automaticamente": false,
             "activo": false,
             "reglas": {}
         }

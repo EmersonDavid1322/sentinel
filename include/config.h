@@ -43,6 +43,8 @@ struct ConfigMonitor {
 
 struct ConfigOrganizador {
     std::string carpeta_vigilar;
+    std::string destino_descompresion;
+    bool descomprimir_automaticamente;
     bool activo;
     std::map<std::string, std::string> reglas;
 };
