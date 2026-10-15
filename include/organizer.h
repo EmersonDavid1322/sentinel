@@ -12,4 +12,4 @@ void moverArchivo(const std::string& archivo, const std::map<std::string, std::s
 
 void ejecutarOrganizador(ConfigCompartida& config_compartida);
 
-void extraer_archivo(const char* ruta_archivo);
+void extraer_archivo(const char* ruta_archivo, const std::string& destino);

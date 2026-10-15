@@ -35,7 +35,11 @@ std::vector<std::string> verificarCarpetasOrganizado(const std::map<std::string,
 }
 
 bool comprobar_archivo_comprimido(const std::string& archivo) {
-    struct archive *a = nullptr;
+    struct archive *a = archive_read_new();
+    if (!a) {
+        throw ErrorOrganizador("No se pudo crear el objeto de lectura de libarchive.");
+    }
+
     struct archive_entry *entry;
 
     archive_read_support_filter_all(a);
@@ -43,20 +47,24 @@ bool comprobar_archivo_comprimido(const std::string& archivo) {
     archive_read_support_format_raw(a);
 
     if (archive_read_open_filename(a, archivo.c_str(), 10240) != ARCHIVE_OK) {
+        archive_read_free(a);
         throw ErrorOrganizador("No se pudo abrir el archivo: " + archivo);
     }
 
+    // Leer la cabecera
     int r = archive_read_next_header(a, &entry);
+    bool es_comprimido = false;
+
     if (r == ARCHIVE_OK || r == ARCHIVE_WARN) {
-        const std::string nombre =  archive_filter_name(a, 0);
+        const std::string nombre = archive_filter_name(a, 0);
         logInfo("Archivo comprimido. Filtro detectado: " + nombre, "organizador.log");
-        archive_read_close(a);
-        archive_read_free(a);
-        return true;
+        es_comprimido = true;
     }
+
     archive_read_close(a);
     archive_read_free(a);
-    return false;
+
+    return es_comprimido;
 }
 
 void moverArchivo(const std::string &archivo, const std::map<std::string, std::string> &reglas,
@@ -87,10 +95,11 @@ void moverArchivo(const std::string &archivo, const std::map<std::string, std::s
 
 }
 
-void extraer_archivo(const char* ruta_archivo) {
+void extraer_archivo(const char* ruta_archivo, const std::string& destino) {
     // a=lector ext=extractor o escritor entry=contiene la información del archivo r=Da los resultado de operaciones
-    struct archive* a;
-    struct archive* ext;
+    //Inicializara variables
+    struct archive* a = archive_read_new();
+    struct archive* ext = archive_write_disk_new();
     struct archive_entry* entry;
     int r;
 
@@ -100,14 +109,10 @@ void extraer_archivo(const char* ruta_archivo) {
     // Configurar banderas predeterminadas para la extracción en disco
     int flags = ARCHIVE_EXTRACT_TIME | ARCHIVE_EXTRACT_PERM | ARCHIVE_EXTRACT_ACL | ARCHIVE_EXTRACT_FFLAGS;
 
-    // Inicializar el objeto lector
-    a = archive_read_new();
     // Habilitar formatos y filtros
     archive_read_support_filter_all(a);
     archive_read_support_format_all(a);
 
-    // Inicializar el escritor de disco
-    ext = archive_write_disk_new();
     // Pasar flags
     archive_write_disk_set_options(ext, flags);
     archive_write_disk_set_standard_lookup(ext);
@@ -115,13 +120,19 @@ void extraer_archivo(const char* ruta_archivo) {
     // Abrir el archivo comprimido en bloques de 10kb
     if ((r = archive_read_open_filename(a, ruta_archivo, 10240))) {
         error = archive_error_string(a);
+        archive_read_free(a);
+        archive_write_free(ext);
         throw ErrorOrganizador("Error al abrir el archivo: " + error);
     }
 
     // Iterar sobre cada elemento/fichero dentro del contenedor comprimido
     while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
-        std::string archivo = archive_entry_pathname(entry);
-        logInfo("Extrayendo: " + archivo + "\n", "organizador.log");
+        //Construir ruta destino
+        std::string archivo_original = archive_entry_pathname(entry);
+        std::string ruta_destino = destino + "/" + archivo_original;
+        archive_entry_set_pathname(entry, ruta_destino.c_str());
+
+        logInfo("Extrayendo: " + ruta_destino, "organizador.log");
 
         // Escribir la cabecera en el disco
         r = archive_write_header(ext, entry);
@@ -146,7 +157,7 @@ void extraer_archivo(const char* ruta_archivo) {
                 r = archive_write_data_block(ext, buff, size, offset);
                 if (r < ARCHIVE_OK) {
                     error = archive_error_string(ext);
-                    logError("Error al leer datos: " + error, "organizador.log");
+                    logError("Error al escribir datos: " + error, "organizador.log");
                     break;
                 }
             }
@@ -203,7 +214,20 @@ void ejecutarOrganizador(ConfigCompartida& config_compartida){
                     struct inotify_event* evento = (struct inotify_event*)&buffer[i];
                     if (evento->len > 0) {
                         std::string rutaCompleta = config.organizador.carpeta_vigilar + "/" + evento->name;
-                        moverArchivo(rutaCompleta, config.organizador.reglas, carpetas_fallidas);
+                        if (config.organizador.descomprimir_automaticamente) {
+                            if (comprobar_archivo_comprimido(rutaCompleta)) {
+                                if (!fs::exists(config.organizador.destino_descompresion)) {
+                                    logWarning("La carpeta destinataria de la descompresión no existe", "sentinel.log");
+                                }else {
+                                    extraer_archivo(rutaCompleta.c_str(), config.organizador.destino_descompresion);
+                                    moverArchivo(rutaCompleta, config.organizador.reglas, carpetas_fallidas);
+                                }
+                            }else {
+                                moverArchivo(rutaCompleta, config.organizador.reglas, carpetas_fallidas);
+                            }
+                        }else {
+                            moverArchivo(rutaCompleta, config.organizador.reglas, carpetas_fallidas);
+                        }
                     }
                     i += sizeof(struct inotify_event) + evento->len;
                 }
