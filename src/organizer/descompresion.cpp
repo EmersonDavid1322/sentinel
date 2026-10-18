@@ -114,4 +114,6 @@ void extraer_archivo(const char* ruta_archivo, const std::string& destino) {
     archive_write_close(ext);
     archive_write_free(ext);
     logInfo("Archivo Extraido correctamente", "organizador.log");
+    const std::string ruta_archivo_string = ruta_archivo;
+    logInfo("Se a extraido correctamente el archivo: " + ruta_archivo_string + " a " + destino, "sentinel.log");
 }

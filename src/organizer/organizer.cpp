@@ -7,12 +7,12 @@
 #include <poll.h>
 #include <unistd.h>
 #include "organizer.h"
+#include "descompresion.h"
 #include "logger.h"
 #include "errores.h"
 #include "notificador.h"
 #include "sentinel_estado.h"
 #include "descriptor_inotify.h"
-#include "descompresion.h"
 namespace fs = std::filesystem;
 
 std::vector<std::string> verificarCarpetasOrganizado(const std::map<std::string, std::string>& carpetasRegla, const std::string& carpetaVigilar){
@@ -31,6 +31,27 @@ std::vector<std::string> verificarCarpetasOrganizado(const std::map<std::string,
         }
     }
     return carpetas_fallidas;
+}
+
+void validarAccion(const bool &descompresion, const std::string &ruta, const std::string &destino,
+                   const std::map<std::string, std::string> &reglas, const std::vector<std::string> &carpetas_fallidas,
+                   const std::string &carpeta_vigilar) {
+    if (descompresion) {
+        if (comprobar_archivo_comprimido(ruta)) {
+            if (!fs::exists(destino)) {
+                logWarning("La carpeta destinataria de la descompresión no existe", "sentinel.log");
+            }else if (destino == carpeta_vigilar) {
+                logWarning("La carpeta destinataria de la descompresión es igual a la carpeta a vigilar", "sentinel.log");
+            }else {
+                extraer_archivo(ruta.c_str(), destino);
+                moverArchivo(ruta, reglas, carpetas_fallidas);
+            }
+        }else {
+            moverArchivo(ruta, reglas, carpetas_fallidas);
+        }
+    }else {
+        moverArchivo(ruta, reglas, carpetas_fallidas);
+    }
 }
 
 void moverArchivo(const std::string &archivo, const std::map<std::string, std::string> &reglas,
@@ -102,20 +123,9 @@ void ejecutarOrganizador(ConfigCompartida& config_compartida){
                     struct inotify_event* evento = (struct inotify_event*)&buffer[i];
                     if (evento->len > 0) {
                         std::string rutaCompleta = config.organizador.carpeta_vigilar + "/" + evento->name;
-                        if (config.organizador.descomprimir_automaticamente) {
-                            if (comprobar_archivo_comprimido(rutaCompleta)) {
-                                if (!fs::exists(config.organizador.destino_descompresion)) {
-                                    logWarning("La carpeta destinataria de la descompresión no existe", "sentinel.log");
-                                }else {
-                                    extraer_archivo(rutaCompleta.c_str(), config.organizador.destino_descompresion);
-                                    moverArchivo(rutaCompleta, config.organizador.reglas, carpetas_fallidas);
-                                }
-                            }else {
-                                moverArchivo(rutaCompleta, config.organizador.reglas, carpetas_fallidas);
-                            }
-                        }else {
-                            moverArchivo(rutaCompleta, config.organizador.reglas, carpetas_fallidas);
-                        }
+                        validarAccion(config.organizador.descomprimir_automaticamente, rutaCompleta,
+                                      config.organizador.destino_descompresion, reglas, carpetas_fallidas,
+                                      carpetaVigiladaActual);
                     }
                     i += sizeof(struct inotify_event) + evento->len;
                 }
