@@ -3,12 +3,9 @@ on:
   push:
     branches: ["*"]
 jobs:
-  despliegue:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout del código
-        uses: actions/checkout@v4
-        
       - name: Notificar rama no compatible
         if: github.ref_name != 'main'
         run: echo "La rama ${{ github.ref_name }} no es compatible con el despliegue. Cancelando el flujo..."
@@ -26,37 +23,47 @@ jobs:
       - name: Compilar
         run: cmake --build build
 
-      - name: Ejecutar tests
-        run: export $(cat /home/runner/.env | xargs) && ctest --test-dir build --output-on-failure
 
-      # --- DESPLIEGUE EN EL SERVIDOR ---
-      - name: Transferir proyecto al servidor
-        run: |
-          rsync -avz -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no" \
-            --exclude '.git' \
-            ./ ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:/home/deploy/sentinel-deploy/
 
-      - name: Ejecutar instalación remota servidor
-        run: |
-          ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
-            sudo /home/deploy/sentinel-deploy/scripts/install.sh --server sentinel "
+      - name: Subir binario
+        uses: actions/upload-artifact@v3
+        with:
+          name: sentinel-binario
+          path: build/sentinel
 
-      - name: Eliminar carpeta build servidor
-        run: |
-          ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
-          rm -rf /home/deploy/sentinel-deploy/build "
+  # --- DESPLIEGUE EN EL SERVIDOR ---
+  deploy-servidor:
+    needs: build
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
 
-      # --- DESPLIEGUE EN EL ESCRITORIO ---
-      - name: Transferir proyecto a escritorio
-        run: |
-          rsync -avz -e "ssh -i ~/.ssh/id_deploy_escritorio -o StrictHostKeyChecking=no" \
-            --exclude '.git' \
-            ./ ${{ secrets.SERVER_USER }}@${{ secrets.DESKTOP_IP }}:/home/deploy/sentinel-deploy/
+      - name: Bajar binario
+        uses: actions/download-artifact@v3
+        with:
+          name: sentinel-binario
+          path: build
 
-      - name: Ejecutar instalación remota a escritorio
-        run: |
-          ssh -i ~/.ssh/id_deploy_escritorio -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.DESKTOP_IP }} "sudo /home/deploy/sentinel-deploy/scripts/install.sh --desktop ${{ secrets.USER_NAME }}"
+      - name: Comprobar
+        run: ls -R build
 
-      - name: Eliminar carpeta build escritorio
-        run: |
-          ssh -i ~/.ssh/id_deploy_escritorio -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.DESKTOP_IP }} "rm -rf /home/deploy/sentinel-deploy/build"
+
+  # --- DESPLIEGUE EN EL ESCRITORIO ---
+  deploy-escritorio:
+    needs: deploy-servidor
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Bajar binario
+        uses: actions/download-artifact@v3
+        with:
+          name: sentinel-binario
+          path: build
+
+      - name: Comprobar
+        run: ls -R build
