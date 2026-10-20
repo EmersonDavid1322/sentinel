@@ -1,12 +1,22 @@
 name: Compilar Sentinel
 on:
   push:
-    branches:
-      - main
+    branches: ["*"]
 jobs:
-  build:
+  despliegue:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+        
+      - name: Notificar rama no compatible
+        if: github.ref_name != 'main'
+        run: echo "La rama ${{ github.ref_name }} no es compatible con el despliegue. Cancelando el flujo..."
+
+      - name: Cancelar ejecución CI
+        if: github.ref_name != 'main'
+        uses: andymckay/cancel-action@0.3
+
       - name: Descargar el código
         uses: actions/checkout@v4
 
