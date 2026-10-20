@@ -1,7 +1,5 @@
-name: Compilar Sentinel
-on:
-  push:
-    branches: ["*"]
+name: Despliegue Sentinel
+on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
