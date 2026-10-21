@@ -4,6 +4,7 @@
 #include <vector>
 #include "backup.h"
 #include "errores.h"
+#include "sentinel_estado.h"
 namespace fs = std::filesystem;
 
 //validar configuraciones al hacer backup
@@ -198,3 +199,30 @@ TEST_F(BackupTest, RealizarBackupExitosoConCrearCarpeta) {
         EXPECT_TRUE(fs::exists(respuesta.ruta_backup.string() + "/" + nombre_carpeta.string() + "/" + nombre_archivo.string()));
     }
 };
+
+TEST_F(BackupTest, RealizarBackupCarpetaNoExistente) {
+    fs::create_directories(ruta_prueba.string() + "/" + "destino_test");
+
+    ConfigBackup config_test{
+        {ruta_prueba.string() + "/" + "carpeta_no_existente"},
+        ruta_prueba.string() + "/" + "destino_test",
+        {},
+        "00:00",
+        false,
+        false,
+        false,
+        true,
+        false
+    };
+
+    ConfigMonitor config_test_monitor{
+        20,
+        90.00,
+        90.00,
+        90.00,
+        true
+    };
+
+    EXPECT_NO_THROW(hacerBackup(config_test, config_test_monitor));
+    EXPECT_FALSE(corriendo_backup_local);
+}

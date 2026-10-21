@@ -1,4 +1,4 @@
-name: Despliegue Sentinel
+name: CI/CD Sentinel
 on: [push]
 jobs:
   build:

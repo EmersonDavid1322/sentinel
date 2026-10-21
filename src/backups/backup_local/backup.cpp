@@ -168,10 +168,10 @@ bool ejecutarBackup(const ConfigBackup& configBackup){
 void hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_monitor){
     std::lock_guard<std::mutex> lock(mutex_subir_archivos_local);
     corriendo_backup_local = true;
-    limpiarLog();
-    comprobarCarpetasBackup(config_backup.carpetas);
-    verificarCarpetasDestino(config_backup.destino);
     try{
+        limpiarLog();
+        comprobarCarpetasBackup(config_backup.carpetas);
+        verificarCarpetasDestino(config_backup.destino);
         validarConfiguracionBackup(config_backup);
         ResultadoVerificacionRecursos resultado = verificarRecursosBackup(config_backup, config_monitor);
 
