@@ -239,6 +239,7 @@ TEST_F(BackupNubeTest, BackupNubeCarpetaNoExistente) {
         true,
         false
     };
-    EXPECT_THROW(ejecutarBackupNube(configuraciones_test), ErrorBackup);
+    EXPECT_NO_THROW(ejecutarBackupNube(configuraciones_test));
+    EXPECT_FALSE(corriendo_backup_nube);
     modo_test = false;
 }

@@ -181,12 +181,24 @@ void subirArchivoStreaming(const std::string& ruta, const std::string& rutaRemot
 void ejecutarBackupNube(const ConfigBackupNube& config) {
     std::lock_guard<std::mutex> lock(mutex_subir_archivos);
     corriendo_backup_nube = true;
-    limpiarLog();
-    comprobarCarpetasBackup(config.carpetas);
+    bool hubo_errores = false;
+
+    try {
+        limpiarLog();
+        comprobarCarpetasBackup(config.carpetas);
+    }catch (const ErrorBackup& e) {
+        logError("Ocurrio un error al iniciar el backup: " + std::string(e.what()), "sentinel.log");
+        corriendo_backup_nube = false;
+        return;
+    }catch (const DaemonError& e) {
+        logError("Ocurrio un error inesperado al iniciar el backup: " + std::string(e.what()), "sentinel.log");
+        corriendo_backup_nube = false;
+        return;
+    }
+
     logInfo("Se incio el backup a la nube", "sentinel.log");
     logInfo("Se incio el backup a la nube Destino: " + config.carpeta_remota, "backups.log");
     std::string token = config.token;
-    bool hubo_errores = false;
 
     if (config.crear_carpeta_backup_nube) {
         logInfo("Se a creara carpeta de backup", "backups.log");
