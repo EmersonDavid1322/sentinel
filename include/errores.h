@@ -2,6 +2,13 @@
 #include <stdexcept>
 #include <string>
 
+enum class CausaBackup {
+    CONFIG_INVALIDA,
+    CARPETA_NO_EXISTE,
+    DESTINO_INACCESIBLE,
+    DESCONOCIDA
+};
+
 class DaemonError : public std::runtime_error {
 public:
     DaemonError(const std::string& mensaje)
@@ -10,8 +17,9 @@ public:
 
 class ErrorBackup : public DaemonError {
 public:
-    ErrorBackup(const std::string& mensaje)
-        : DaemonError(mensaje) {}
+    CausaBackup causa;
+    ErrorBackup(const std::string& mensaje,  CausaBackup causa_dada = CausaBackup::DESCONOCIDA)
+        : DaemonError(mensaje), causa (causa_dada) {}
 };
 
 class ErrorBackupRED : public DaemonError {
