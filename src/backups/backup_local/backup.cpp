@@ -35,16 +35,16 @@ ResultadoVerificacionRecursos verificarRecursosBackup(const ConfigBackup& config
 
 void validarConfiguracionBackup(const ConfigBackup& configBackup) {
     if (configBackup.carpetas.empty()) {
-        throw ErrorBackup("No se configuraron carpetas para el backup local");
+        throw ErrorBackup("No se configuraron carpetas para el backup local", CausaBackup::CONFIG_INVALIDA);
     }
 
     if (configBackup.destino.empty()) {
-        throw ErrorBackup("No se configuró una carpeta destino para el backup local");
+        throw ErrorBackup("No se configuró una carpeta destino para el backup local", CausaBackup::CONFIG_INVALIDA);
     }
 
     if (configBackup.eliminar_ultimo_backup_registrado && !configBackup.crear_carpeta_backup) {
         throw ErrorBackup(
-            "La opción eliminar_ultimo_backup_registrado requiere crear_carpeta_backup activada");
+            "La opción eliminar_ultimo_backup_registrado requiere crear_carpeta_backup activada", CausaBackup::CONFIG_INVALIDA);
     }
 }
 

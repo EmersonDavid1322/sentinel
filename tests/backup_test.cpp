@@ -24,10 +24,12 @@ TEST(ValidarConfiguraciones, ErrorCarpetasVacia) {
         true
     };
 
-    EXPECT_THROW(
-      validarConfiguracionBackup(config_test),
-      ErrorBackup
-    );
+    try {
+        validarConfiguracionBackup(config_test);
+        FAIL() << "No lanzó ErrorBackup";
+    }catch (ErrorBackup& e) {
+        EXPECT_EQ(e.causa, CausaBackup::CONFIG_INVALIDA);
+    }
 }
 
 TEST(ValidarConfiguraciones, ErrorDestinoVacio) {
@@ -46,10 +48,12 @@ TEST(ValidarConfiguraciones, ErrorDestinoVacio) {
         true
     };
 
-    EXPECT_THROW(
-      validarConfiguracionBackup(config_test),
-      ErrorBackup
-    );
+    try {
+        validarConfiguracionBackup(config_test);
+        FAIL() << "No lanzó ErrorBackup";
+    }catch (ErrorBackup& e) {
+        EXPECT_EQ(e.causa, CausaBackup::CONFIG_INVALIDA);
+    }
 }
 
 TEST(ValidarConfiguraciones, ErrorEliminarSinGuardarRegistro) {
@@ -68,10 +72,12 @@ TEST(ValidarConfiguraciones, ErrorEliminarSinGuardarRegistro) {
         true
     };
 
-    EXPECT_THROW(
-      validarConfiguracionBackup(config_test),
-      ErrorBackup
-    );
+    try {
+        validarConfiguracionBackup(config_test);
+        FAIL() << "No lanzó ErrorBackup";
+    }catch (const ErrorBackup& e) {
+        EXPECT_EQ(e.causa, CausaBackup::CONFIG_INVALIDA);
+    }
 }
 
 class BackupTest : public ::testing::Test {

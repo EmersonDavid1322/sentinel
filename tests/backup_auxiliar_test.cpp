@@ -244,7 +244,12 @@ TEST_F(VerficarBackupTests, CarpetaDestinoNoExistente) {
 TEST_F(VerficarBackupTests, ErrorDestinoImposibleDeCrear) {
     fs::path destino = "/abc/destino_test";
 
-    EXPECT_THROW(verificarCarpetasDestino(destino), ErrorBackup);
+    try {
+        verificarCarpetasDestino(destino);
+        FAIL() << "No lanzó ErrorBackup";
+    }catch (const ErrorBackup& e) {
+        EXPECT_EQ(e.causa, CausaBackup::DESTINO_INACCESIBLE);
+    }
 }
 
 //finción comprobar carpetas
@@ -273,5 +278,10 @@ TEST_F(VerficarBackupTests, CarpetasBackupNoExistentes) {
         }
         fs::create_directories(carpeta);
     }
-    EXPECT_THROW(comprobarCarpetasBackup(carpetas), ErrorBackup);
+    try {
+        comprobarCarpetasBackup(carpetas);
+        FAIL() << "No lanzó ErrorBackup";
+    }catch (const ErrorBackup& e) {
+        EXPECT_EQ(e.causa, CausaBackup::CARPETA_NO_EXISTE);
+    }
 }

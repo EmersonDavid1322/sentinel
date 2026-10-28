@@ -16,7 +16,7 @@ using json = nlohmann::json;
 void comprobarCarpetasBackup(const std::vector<std::string>& carpetas) {
     for (const std::string& carpeta : carpetas){
         if (!fs::exists(carpeta)){
-            throw ErrorBackup("La carpeta no existe: " + carpeta);
+            throw ErrorBackup("La carpeta no existe: " + carpeta, CausaBackup::CARPETA_NO_EXISTE);
         }
     }
 }
@@ -29,7 +29,7 @@ void verificarCarpetasDestino(const std::string& destino){
         }
         catch (const std::filesystem::filesystem_error& e) {
             throw ErrorBackup("No se pudo crear la carpeta destino '" + destino + "' "
-                                "posible ubicacion erronea: " + std::string(e.what()));
+                                "posible ubicacion erronea: " + std::string(e.what()), CausaBackup::DESTINO_INACCESIBLE);
         }
     }
 }
