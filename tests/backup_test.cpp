@@ -229,6 +229,86 @@ TEST_F(BackupTest, RealizarBackupCarpetaNoExistente) {
         true
     };
 
-    EXPECT_NO_THROW(hacerBackup(config_test, config_test_monitor));
+    ResultadoHacerBackup resultado_esperado {
+        ResultadoBackupEnum::FALLIDO,
+        CausaBackup::CARPETA_NO_EXISTE
+    };
+
+    ResultadoHacerBackup resultado_dado;
+
+    EXPECT_NO_THROW(resultado_dado = hacerBackup(config_test, config_test_monitor));
+    EXPECT_EQ(resultado_dado.resultado_backup, resultado_esperado.resultado_backup);
+    EXPECT_EQ(resultado_dado.causa, resultado_esperado.causa);
+    EXPECT_FALSE(corriendo_backup_local);
+}
+
+TEST_F(BackupTest, RealizarBackupFallidoDestino) {
+    fs::create_directories(ruta_prueba.string() + "/" + "carpeta");
+
+    ConfigBackup config_test{
+        {ruta_prueba.string() + "/" + "carpeta"},
+         "/destino_test",
+        {},
+        "00:00",
+        false,
+        false,
+        false,
+        true,
+        false
+    };
+
+    ConfigMonitor config_test_monitor{
+        20,
+        90.00,
+        90.00,
+        90.00,
+        true
+    };
+
+    ResultadoHacerBackup resultado_esperado {
+        ResultadoBackupEnum::FALLIDO,
+        CausaBackup::DESTINO_INACCESIBLE
+    };
+
+    ResultadoHacerBackup resultado_dado;
+
+    EXPECT_NO_THROW(resultado_dado = hacerBackup(config_test, config_test_monitor));
+    EXPECT_EQ(resultado_dado.resultado_backup, resultado_esperado.resultado_backup);
+    EXPECT_EQ(resultado_dado.causa, resultado_esperado.causa);
+    EXPECT_FALSE(corriendo_backup_local);
+}
+
+TEST_F(BackupTest, RealizarBackupCanceladoDisco) {
+    fs::create_directories(ruta_prueba.string() + "/" + "destino_test");
+    fs::create_directories(ruta_prueba.string() + "/" + "carpeta");
+
+    ConfigBackup config_test{
+        {ruta_prueba.string() + "/" + "carpeta"},
+        ruta_prueba.string() + "/" + "destino_test",
+        {},
+        "00:00",
+        false,
+        false,
+        false,
+        true,
+        false
+    };
+
+    ConfigMonitor config_test_monitor{
+        20,
+        90.00,
+        90.00,
+        1.00,
+        true
+    };
+
+    ResultadoHacerBackup resultado_esperado {
+        ResultadoBackupEnum::CANCELADO_DISCO
+    };
+
+    ResultadoHacerBackup resultado_dado;
+
+    EXPECT_NO_THROW(resultado_dado = hacerBackup(config_test, config_test_monitor));
+    EXPECT_EQ(resultado_dado.resultado_backup, resultado_esperado.resultado_backup);
     EXPECT_FALSE(corriendo_backup_local);
 }
