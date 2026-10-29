@@ -207,6 +207,7 @@ TEST_F(BackupTest, RealizarBackupExitosoConCrearCarpeta) {
 };
 
 TEST_F(BackupTest, RealizarBackupCarpetaNoExistente) {
+    modo_test = true;
     fs::create_directories(ruta_prueba.string() + "/" + "destino_test");
 
     ConfigBackup config_test{
@@ -223,9 +224,9 @@ TEST_F(BackupTest, RealizarBackupCarpetaNoExistente) {
 
     ConfigMonitor config_test_monitor{
         20,
-        90.00,
-        90.00,
-        90.00,
+        101.00,
+        101.00,
+        101.00,
         true
     };
 
@@ -240,14 +241,16 @@ TEST_F(BackupTest, RealizarBackupCarpetaNoExistente) {
     EXPECT_EQ(resultado_dado.resultado_backup, resultado_esperado.resultado_backup);
     EXPECT_EQ(resultado_dado.causa, resultado_esperado.causa);
     EXPECT_FALSE(corriendo_backup_local);
+    modo_test = false;
 }
 
 TEST_F(BackupTest, RealizarBackupFallidoDestino) {
+    modo_test = true;
     fs::create_directories(ruta_prueba.string() + "/" + "carpeta");
 
     ConfigBackup config_test{
         {ruta_prueba.string() + "/" + "carpeta"},
-         "/abc/destino_test",
+         "/destino_test",
         {},
         "00:00",
         false,
@@ -259,9 +262,9 @@ TEST_F(BackupTest, RealizarBackupFallidoDestino) {
 
     ConfigMonitor config_test_monitor{
         20,
-        90.00,
-        90.00,
-        90.00,
+        101.00,
+        101.00,
+        101.00,
         true
     };
 
@@ -276,9 +279,11 @@ TEST_F(BackupTest, RealizarBackupFallidoDestino) {
     EXPECT_EQ(resultado_dado.resultado_backup, resultado_esperado.resultado_backup);
     EXPECT_EQ(resultado_dado.causa, resultado_esperado.causa);
     EXPECT_FALSE(corriendo_backup_local);
+    modo_test = false;
 }
 
 TEST_F(BackupTest, RealizarBackupCanceladoDisco) {
+    modo_test = true;
     fs::create_directories(ruta_prueba.string() + "/" + "destino_test");
     fs::create_directories(ruta_prueba.string() + "/" + "carpeta");
 
@@ -296,8 +301,8 @@ TEST_F(BackupTest, RealizarBackupCanceladoDisco) {
 
     ConfigMonitor config_test_monitor{
         20,
-        90.00,
-        90.00,
+        101.00,
+        101.00,
         1.00,
         true
     };
@@ -311,4 +316,5 @@ TEST_F(BackupTest, RealizarBackupCanceladoDisco) {
     EXPECT_NO_THROW(resultado_dado = hacerBackup(config_test, config_test_monitor));
     EXPECT_EQ(resultado_dado.resultado_backup, resultado_esperado.resultado_backup);
     EXPECT_FALSE(corriendo_backup_local);
+    modo_test = false;
 }
