@@ -247,7 +247,7 @@ TEST_F(BackupTest, RealizarBackupFallidoDestino) {
 
     ConfigBackup config_test{
         {ruta_prueba.string() + "/" + "carpeta"},
-         "/destino_test",
+         "/abc/destino_test",
         {},
         "00:00",
         false,
