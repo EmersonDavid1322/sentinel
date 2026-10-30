@@ -167,7 +167,7 @@ bool ejecutarBackup(const ConfigBackup& configBackup){
 
 ResultadoHacerBackup hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_monitor){
     std::lock_guard<std::mutex> lock(mutex_subir_archivos_local);
-    corriendo_backup_local = true;
+    CorriendoBackupLocal estado_backup;
     try{
         limpiarLog();
         comprobarCarpetasBackup(config_backup.carpetas);
@@ -182,12 +182,10 @@ ResultadoHacerBackup hacerBackup(const ConfigBackup& config_backup, const Config
         else if (resultado == ResultadoVerificacionRecursos::CANCELADO_CPU) {
             logInfo("Se cancelo el backup_local 'Se regitro un uso elevado del cpu'", "sentinel.log");
             enviarNotificación("Backup","Se cancelo el backup_local luego de varios intentos  'Se regitro un uso elevado del cpu'", "WARNING");
-            corriendo_backup_local = false;
             return {ResultadoBackupEnum::CANCELADO_CPU, std::nullopt};
         }else if (resultado == ResultadoVerificacionRecursos::CANCELADO_DISCO) {
             logInfo("Se cancelo el backup_local 'Se regitro espacio elevado en el disco'", "sentinel.log");
             enviarNotificación("Backup","Se cancelo el backup_local 'Se regitro espacio elevado en el disco'", "WARNING");
-            corriendo_backup_local = false;
             return {ResultadoBackupEnum::CANCELADO_DISCO, std::nullopt};
         }
         else {
@@ -196,7 +194,6 @@ ResultadoHacerBackup hacerBackup(const ConfigBackup& config_backup, const Config
 
         //Pendiente hacer que la funcion ademas del bool, devuelva el error la cusa dada por la función interior
         if (!ejecutarBackup(config_backup)) {
-            corriendo_backup_local = false;
             return {ResultadoBackupEnum::COMPLETADO_CON_ERRORES, std::nullopt};
         }
 
@@ -207,17 +204,14 @@ ResultadoHacerBackup hacerBackup(const ConfigBackup& config_backup, const Config
     catch(const ErrorBackup& e){
         logError("Error en backup_local - " + std::string(e.what()), "sentinel.log");
         enviarNotificación("Error backup_local", "Ocurrio un error en el intento de backup: " + std::string(e.what()), "ERROR");
-        corriendo_backup_local = false;
         return {ResultadoBackupEnum::FALLIDO, e.causa};
     }
 
     catch(const DaemonError& e){
         logError("Error en backup_local - " + std::string(e.what()), "sentinel.log");
         enviarNotificación("Error Deamon-backup_local", "Ocurrio un error en el intento de backup: " + std::string(e.what()), "ERROR");
-        corriendo_backup_local = false;
         return {ResultadoBackupEnum::FALLIDO, std::nullopt};
     }
-    corriendo_backup_local = false;
     return {ResultadoBackupEnum::EXITO, std::nullopt};
 }
 

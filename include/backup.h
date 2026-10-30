@@ -13,7 +13,7 @@ enum class ResultadoVerificacionRecursos {
     FORZADO
 };
 
-//Resultado de la copias de los archivos junto con la ruta del backup, confirmando con un bool si hubi errores o no
+//Resultado de la copias de los archivos junto con la ruta del backup, confirmando con un bool si hubo errores o no
 struct ResultadoCopiaBackup {
     bool completado;
     std::filesystem::path ruta_backup;

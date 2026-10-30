@@ -12,6 +12,21 @@ extern std::atomic<bool> modo_test;
 extern std::mutex mtx_apagado;
 extern std::condition_variable cv_apagado;
 
+class CorriendoBackupLocal {
+public:
+
+    CorriendoBackupLocal(const CorriendoBackupLocal&) = delete;
+    CorriendoBackupLocal& operator=(const CorriendoBackupLocal&) = delete;
+
+    CorriendoBackupLocal() {
+        corriendo_backup_local = true;
+    }
+
+    ~CorriendoBackupLocal() {
+        corriendo_backup_local = false;
+    }
+};
+
 void manejoSenal(int senal);
 void capturarSenal();
 
