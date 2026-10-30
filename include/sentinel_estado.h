@@ -31,4 +31,4 @@ public:
 void manejoSenal(int senal);
 void capturarSenal();
 
-void verficarEntornoGrafico();
+void verificarEntornoGrafico();

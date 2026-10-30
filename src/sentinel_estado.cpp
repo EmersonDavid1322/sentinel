@@ -23,6 +23,6 @@ void capturarSenal(){
 
 std::atomic<bool> hayEntornoGrafico{false};
 
-void verficarEntornoGrafico() {
+void verificarEntornoGrafico() {
     hayEntornoGrafico = std::getenv("DISPLAY") != nullptr || std::getenv("WAYLAND_DISPLAY") != nullptr;
 }

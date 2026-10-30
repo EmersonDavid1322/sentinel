@@ -19,7 +19,7 @@ namespace fs = std::filesystem;
 
 int main() {
     curl_global_init(CURL_GLOBAL_ALL);
-    verficarEntornoGrafico();
+    verificarEntornoGrafico();
 
     if (hayEntornoGrafico) {
         notify_init("Sentinel");
