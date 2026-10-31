@@ -122,6 +122,7 @@ TEST_F(BackupNubeTest, RealizarBackupNube) {
         }
     }
     elimarAnteriorBackupNube(configuraciones_test.carpeta_remota , token);
+    EXPECT_FALSE(corriendo_backup_nube);
     modo_test = false;
 }
 
@@ -166,6 +167,7 @@ TEST_F(BackupNubeTest, RealizarBackupNubeCreandoCarpeta) {
         }
     }
     elimarAnteriorBackupNube(configuraciones_test.carpeta_remota , token);
+    EXPECT_FALSE(corriendo_backup_nube);
     modo_test = false;
 }
 
@@ -215,6 +217,7 @@ TEST_F(BackupNubeTest, RealizarBackupNubeIgnorandoArchivos) {
         }
     }
     elimarAnteriorBackupNube(configuraciones_test.carpeta_remota , token);
+    EXPECT_FALSE(corriendo_backup_nube);
     modo_test = false;
 }
 

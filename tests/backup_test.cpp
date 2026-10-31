@@ -5,6 +5,7 @@
 #include "backup.h"
 #include "errores.h"
 #include "sentinel_estado.h"
+#include "comandos_backup.h"
 namespace fs = std::filesystem;
 
 //validar configuraciones al hacer backup
@@ -240,6 +241,7 @@ TEST_F(BackupTest, RealizarBackupCarpetaNoExistente) {
     EXPECT_NO_THROW(resultado_dado = hacerBackup(config_test, config_test_monitor));
     EXPECT_EQ(resultado_dado.resultado_backup, resultado_esperado.resultado_backup);
     EXPECT_EQ(resultado_dado.causa, resultado_esperado.causa);
+    EXPECT_EQ(mensajeResultadoBackup(resultado_dado), "El backup a fallado debido a que hay una carpeta inexistente en la lista de carpetas a copiar");
     EXPECT_FALSE(corriendo_backup_local);
     modo_test = false;
 }
@@ -278,6 +280,7 @@ TEST_F(BackupTest, RealizarBackupFallidoDestino) {
     EXPECT_NO_THROW(resultado_dado = hacerBackup(config_test, config_test_monitor));
     EXPECT_EQ(resultado_dado.resultado_backup, resultado_esperado.resultado_backup);
     EXPECT_EQ(resultado_dado.causa, resultado_esperado.causa);
+    EXPECT_EQ(mensajeResultadoBackup(resultado_dado), "El backup a fallado debido a que no se puedo acceder al destino actual");
     EXPECT_FALSE(corriendo_backup_local);
     modo_test = false;
 }
@@ -315,6 +318,7 @@ TEST_F(BackupTest, RealizarBackupCanceladoDisco) {
 
     EXPECT_NO_THROW(resultado_dado = hacerBackup(config_test, config_test_monitor));
     EXPECT_EQ(resultado_dado.resultado_backup, resultado_esperado.resultado_backup);
+    EXPECT_EQ(mensajeResultadoBackup(resultado_dado), "El backup a sido cancelado debido a que se detecto que se sobrepasa el limite de espacio en el dispositivo (Active ´forzar_backup' si desea que no se cancele el backup)");
     EXPECT_FALSE(corriendo_backup_local);
     modo_test = false;
 }

@@ -46,9 +46,9 @@ void procesarComandoBackup(const std::string& accion, const std::string& valor, 
         cambiarDireccion("backup",accion ,valor);
     }
     else if (accion == "ahora") {
-        enviarRespuesta("Se inicio el backup local por comando revise 'backups.log' para información detallada");
         logInfo("Se inicio el backup local por comando ", "sentinel.log");
-        hacerBackup(configBackup, configMonitor);
+        ResultadoHacerBackup respuesta = hacerBackup(configBackup, configMonitor);
+        enviarRespuesta(mensajeResultadoBackup(respuesta));
     }
     else if (accion == "modo") {
         cambiarForzarBackup(valor);

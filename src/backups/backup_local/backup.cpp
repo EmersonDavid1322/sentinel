@@ -167,7 +167,7 @@ bool ejecutarBackup(const ConfigBackup& configBackup){
 
 ResultadoHacerBackup hacerBackup(const ConfigBackup& config_backup, const ConfigMonitor& config_monitor){
     std::lock_guard<std::mutex> lock(mutex_subir_archivos_local);
-    CorriendoBackupLocal estado_backup;
+    CambiarEstadoBandera estado_backup(corriendo_backup_local);
     try{
         limpiarLog();
         comprobarCarpetasBackup(config_backup.carpetas);

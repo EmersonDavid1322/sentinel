@@ -180,7 +180,7 @@ void subirArchivoStreaming(const std::string& ruta, const std::string& rutaRemot
 
 void ejecutarBackupNube(const ConfigBackupNube& config) {
     std::lock_guard<std::mutex> lock(mutex_subir_archivos);
-    corriendo_backup_nube = true;
+    CambiarEstadoBandera estado_backup_nube(corriendo_backup_nube);
     bool hubo_errores = false;
 
     try {
@@ -188,11 +188,9 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
         comprobarCarpetasBackup(config.carpetas);
     }catch (const ErrorBackup& e) {
         logError("Ocurrio un error al iniciar el backup: " + std::string(e.what()), "sentinel.log");
-        corriendo_backup_nube = false;
         return;
     }catch (const DaemonError& e) {
         logError("Ocurrio un error inesperado al iniciar el backup: " + std::string(e.what()), "sentinel.log");
-        corriendo_backup_nube = false;
         return;
     }
 
@@ -300,9 +298,6 @@ void ejecutarBackupNube(const ConfigBackupNube& config) {
         logError("Ocurrio un error inesperado: " + std::string(e.what()), "backups.log");
         hubo_errores = true;
     }
-
-    //desactivar global de backup nube
-    corriendo_backup_nube = false;
 
     if (!hubo_errores) {
         logInfo("Se completo el backup a DropBox de forma correcta", "sentinel.log");

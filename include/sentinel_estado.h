@@ -12,22 +12,23 @@ extern std::atomic<bool> modo_test;
 extern std::mutex mtx_apagado;
 extern std::condition_variable cv_apagado;
 
-class CorriendoBackupLocal {
+class CambiarEstadoBandera {
 public:
+    bool bandera;
+    CambiarEstadoBandera(const CambiarEstadoBandera&) = delete;
+    CambiarEstadoBandera& operator=(const CambiarEstadoBandera&) = delete;
 
-    CorriendoBackupLocal(const CorriendoBackupLocal&) = delete;
-    CorriendoBackupLocal& operator=(const CorriendoBackupLocal&) = delete;
-
-    CorriendoBackupLocal() {
-        corriendo_backup_local = true;
+    CambiarEstadoBandera(const bool laBandera) {
+        bandera = laBandera;
+        bandera = true;
     }
 
-    ~CorriendoBackupLocal() {
-        corriendo_backup_local = false;
+    ~CambiarEstadoBandera() {
+        bandera = false;
     }
 };
 
 void manejoSenal(int senal);
 void capturarSenal();
 
-void verficarEntornoGrafico();
+void verificarEntornoGrafico();
