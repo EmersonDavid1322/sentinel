@@ -4,6 +4,9 @@
 #include <poll.h>
 #include <sys/stat.h>
 #include <fstream>
+#include <sys/socket.h>
+#include <poll.h>
+#include <sys/un.h>
 #include "errores.h"
 #include "logger.h"
 #include "sentinel_estado.h"
@@ -162,19 +165,33 @@ void procesarComando(const std::string& comando, const ConfigSentinel& config) {
 }
 
 void loopComandos(ConfigCompartida& config_compartida) {
-    std::string ruta_fifo = (obtenerRutaEstado()/ "sentinel.fifo").string();
-    std::string ruta_estado = obtenerRutaEstado()/ "sentinel_estado.txt";
+    std::string ruta_socket = (obtenerRutaEstado() / "sentinel.sock").string();
+    std::string ruta_estado = (obtenerRutaEstado() / "sentinel_estado.txt").string();
 
-    mkfifo(ruta_fifo.c_str(), 0666);
-    std::ofstream salida(ruta_estado);
-
-    int fd = open(ruta_fifo.c_str(), O_RDWR);
-    if (fd == -1) {
-        throw ErrorConfig("No se pudo abrir el FIFO de comandos en: " + ruta_fifo);
+    //Crear el socket Unix
+    int server_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (server_fd == -1) {
+        throw ErrorConfig("No se pudo crear el socket en: " + ruta_socket);
     }
 
+    unlink(ruta_socket.c_str());
+
+    sockaddr_un addr{};
+    addr.sun_family = AF_UNIX;
+    std::strncpy(addr.sun_path, ruta_socket.c_str(), sizeof(addr.sun_path) - 1);
+
+    // Vincular y activar
+    if (bind(server_fd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
+        close(server_fd);
+        throw ErrorConfig("No se pudo hacer bind en: " + ruta_socket);
+    }
+    listen(server_fd, 5);
+
+    std::ofstream salida(ruta_estado);
+
+    // Poll
     struct pollfd pfd;
-    pfd.fd = fd;
+    pfd.fd = server_fd;
     pfd.events = POLLIN;
 
     while (corriendo) {
@@ -182,18 +199,26 @@ void loopComandos(ConfigCompartida& config_compartida) {
         int resultado = poll(&pfd, 1, 1000);
 
         if (resultado > 0 && (pfd.revents & POLLIN)) {
-            char buffer[256]; 
-            int bytes = read(fd, buffer, sizeof(buffer) - 1);
-            if (bytes > 0) {
-                buffer[bytes] = '\0';
-                std::string comando(buffer);
+            //Aceptar la conexión entrante del cliente
+            int client_fd = accept(server_fd, nullptr, nullptr);
+            if (client_fd != -1) {
+                char buffer[256];
+                int bytes = read(client_fd, buffer, sizeof(buffer) - 1);
 
-                if (!comando.empty() && comando.back() == '\n'){
-                    comando.pop_back();
+                if (bytes > 0) {
+                    buffer[bytes] = '\0';
+                    std::string comando(buffer);
+
+                    if (!comando.empty() && comando.back() == '\n') {
+                        comando.pop_back();
+                    }
+                    procesarComando(comando, config);
                 }
-                procesarComando(comando, config);
+                // Cerrar el socket
+                close(client_fd);
             }
         }
     }
-    close(fd);
+    close(server_fd);
+    unlink(ruta_socket.c_str());
 }

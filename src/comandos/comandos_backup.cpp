@@ -45,7 +45,7 @@ void cambiarForzarBackup(const std::string& accion) {
 std::string mensajeResultadoBackup(const ResultadoHacerBackup& resultado) {
     std::string mensaje;
     if (resultado.resultado_backup == ResultadoBackupEnum::EXITO) {
-        mensaje = "El backup se a realizado con existo con la configuración establecida";
+        mensaje = "El backup se a realizado con exito con la configuración establecida";
     }else if (resultado.resultado_backup == ResultadoBackupEnum::FALLIDO) {
         if (resultado.causa.has_value()) {
             if (resultado.causa == CausaBackup::CONFIG_INVALIDA) {

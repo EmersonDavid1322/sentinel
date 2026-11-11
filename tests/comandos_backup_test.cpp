@@ -25,7 +25,7 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         RespuestaEspetada{
             "RespuestaExitosa",
-            "El backup se a realizado con existo con la configuración establecida",
+            "El backup se a realizado con exito con la configuración establecida",
             {ResultadoBackupEnum::EXITO}
         },
         RespuestaEspetada{
