@@ -1,6 +1,5 @@
 #include "comandos_organizador.h"
 #include "comandos_auxiliar.h"
-#include "procesar_comandos.h"
 #include "rutas.h"
 #include <string>
 #include <filesystem>
@@ -8,12 +7,11 @@
 #include "logger.h"
 namespace fs = std::filesystem;
 
-void agregarReglaOrganizador(const std::string& extension, const std::string& carpetaDestino) {
+std::string agregarReglaOrganizador(const std::string& extension, const std::string& carpetaDestino) {
 
     std::filesystem::path ruta_destino(carpetaDestino);
     if (!fs::exists(ruta_destino)) {
-        enviarRespuesta("La carpeta destino " + carpetaDestino + " no existe");
-        return;
+        return "La carpeta destino " + carpetaDestino + " no existe";
     }
 
     std::filesystem::path ruta = obtenerRutaConfig();
@@ -24,10 +22,10 @@ void agregarReglaOrganizador(const std::string& extension, const std::string& ca
     datos["organizador"]["reglas"] = reglas;
 
     guardarJSON(datos, ruta);
-    enviarRespuesta("Regla agregada: " + extension + " -> " + carpetaDestino);
+    return "Regla agregada: " + extension + " -> " + carpetaDestino;
 }
 
-void procesarComandoOrganizadorAgregarRegla(const std::string& valor) {
+std::string procesarComandoOrganizadorAgregarRegla(const std::string& valor) {
     try {
         std::istringstream stream(valor);
         std::string extension, direccion;
@@ -39,19 +37,17 @@ void procesarComandoOrganizadorAgregarRegla(const std::string& valor) {
         direccion = limpiarEspacios(direccion);
 
         if (extension.empty() || direccion.empty()) {
-            enviarRespuesta("Formato incorrecto. Usa: extension|direccion (ej: .pdf|/home/usuario/PDFs)");
-            return;
+            return "Formato incorrecto. Usa: extension|direccion (ej: .pdf|/home/usuario/PDFs)";
         }
 
         if (extension.front() != '.') {
-            enviarRespuesta("La extension debe comenzar con un punto, ej: .pdf");
-            return;
+            return "La extension debe comenzar con un punto, ej: .pdf";
         }
 
-        agregarReglaOrganizador(extension, direccion);
+        return agregarReglaOrganizador(extension, direccion);
     }
     catch (const ErrorConfig& e) {
         logError("Ocurrio un error de configuración durante el proceso del comando 'agregar_regla': " + std::string(e.what()), "sentinel.log");
-        enviarRespuesta("Ocurrio un error de configuración durante el proceso del comando 'agregar_regla': " + std::string(e.what()));
+        return "Ocurrio un error de configuración durante el proceso del comando 'agregar_regla': " + std::string(e.what());
     }
 }

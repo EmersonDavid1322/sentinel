@@ -5,21 +5,8 @@
 #include "errores.h"
 #include "json.hpp"
 #include "rutas.h"
-#include "logger.h"
 using json = nlohmann::json;
 namespace fs = std::filesystem;
-
-void enviarRespuesta(const std::string& mensaje) {
-    std::filesystem::path ruta_estado = obtenerRutaEstado() / "sentinel_estado.txt";
-    std::ofstream salida(ruta_estado);
-    if (salida.is_open()) {
-        salida << mensaje << std::endl;
-    }else{
-        logError("No se pudo abrir el archivo sentinel_estado.txt en: " + ruta_estado.string(), "sentinel.log");
-    }
-    salida.close();
-}
-
 //json carga y guarda
 json leerJSONActual(const std::filesystem::path& ruta){
     std::ifstream archivo(ruta);
@@ -32,7 +19,6 @@ json leerJSONActual(const std::filesystem::path& ruta){
 void guardarJSON(const json& datos, const std::filesystem::path& ruta){
     std::ofstream archivo(ruta);
     if (!archivo.is_open()){
-        enviarRespuesta("No se pudo abir el archivo configuraciones en la ruta: " + ruta.string());
         throw ErrorConfig("No se pudo abir el archivo configuraciones en la ruta: " + ruta.string());
     }
     archivo << datos.dump(4);
@@ -48,18 +34,16 @@ std::string limpiarEspacios(const std::string& texto) {
     return texto.substr(inicio, final - inicio + 1);
 }
 
-void cambiarDireccion(const std::string& parametro,const std::string& llave ,const std::string& dirrecion) {
+std::string cambiarDireccion(const std::string& parametro,const std::string& llave ,const std::string& dirrecion) {
     std::string destino_limpio = limpiarEspacios(dirrecion);
     if (destino_limpio.empty()) {
-        enviarRespuesta("No se permiten valores vacios en destino");
-        return;
+        return "No se permiten valores vacios en destino";
     }
 
 
     std::filesystem::path direccion_path(destino_limpio);
     if (!fs::exists(direccion_path)) {
-        enviarRespuesta("La dirrección " + destino_limpio + " no a sido encontrada o no existe");
-        return;
+        return "La dirrección " + destino_limpio + " no a sido encontrada o no existe";
     }
 
     std::filesystem::path ruta = obtenerRutaConfig();
@@ -67,13 +51,12 @@ void cambiarDireccion(const std::string& parametro,const std::string& llave ,con
     json datos = leerJSONActual(ruta);
 
     if (datos[parametro][llave] == destino_limpio) {
-        enviarRespuesta("Esta dirección " + destino_limpio + " ya esta asignada a " + parametro + "-" + llave);
-        return;
+        return "Esta dirección " + destino_limpio + " ya esta asignada a " + parametro + "-" + llave;
     }
 
     datos [parametro][llave] = destino_limpio;
     guardarJSON(datos, ruta);
-    enviarRespuesta("Se a cambiado la dirrecion de: "+ parametro + " a " + destino_limpio);
+    return "Se a cambiado la dirrecion de: "+ parametro + " a " + destino_limpio;
 }
 
 //cambiar estado acitvo modulo
@@ -86,11 +69,10 @@ void cambiarEstadoSeccion(const std::string& seccion, bool activo){
 }
 
 //ignorar para backup local y nube
-void aniadirIgnorar(const std::string& parametro, const std::string& valor) {
+std::string aniadirIgnorar(const std::string& parametro, const std::string& valor) {
     std::string valor_limpio = limpiarEspacios(valor);
     if (valor_limpio.empty()) {
-        enviarRespuesta("No se permiten valores vacios en destino");
-        return;
+        return "No se permiten valores vacios en destino";
     }
 
     std::filesystem::path ruta = obtenerRutaConfig();
@@ -101,5 +83,5 @@ void aniadirIgnorar(const std::string& parametro, const std::string& valor) {
 
     datos[parametro]["ignorar"] = lista_ignorados;
     guardarJSON(datos, ruta);
-    enviarRespuesta("Se añadido " + valor_limpio + " a la lista de ignorar");
+    return "Se añadido " + valor_limpio + " a la lista de ignorar";
 }

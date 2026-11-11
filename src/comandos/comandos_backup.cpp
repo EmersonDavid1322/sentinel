@@ -6,12 +6,11 @@
 #include <filesystem>
 
 //comandos backup_local
-void agregarCarpetaBackup(const std::string& carpeta) {
+std::string agregarCarpetaBackup(const std::string& carpeta) {
 
     std::string carpeta_limpia = limpiarEspacios(carpeta);
     if (carpeta_limpia.empty()) {
-        enviarRespuesta("No se permiten valores vacios en agregar carpeta");
-        return;
+        return "No se permiten valores vacios en agregar carpeta";
     }
 
     std::filesystem::path ruta = obtenerRutaConfig();
@@ -23,10 +22,10 @@ void agregarCarpetaBackup(const std::string& carpeta) {
     datos["backup"]["carpetas"] = carpetas;
 
     guardarJSON(datos, ruta);
-    enviarRespuesta("Se a añadido la carpeta: " + carpeta_limpia);
+    return  "Se a añadido la carpeta: " + carpeta_limpia;
 }
 
-void cambiarForzarBackup(const std::string& accion) {
+std::string cambiarForzarBackup(const std::string& accion) {
     std::filesystem::path ruta = obtenerRutaConfig();
     json datos = leerJSONActual(ruta);
 
@@ -35,11 +34,11 @@ void cambiarForzarBackup(const std::string& accion) {
     }else if (accion == "no_forzar") {
         datos["backup"]["forzar_backup"] = false;
     }else {
-        enviarRespuesta("No existe la opción: " + accion + "\nDisponibles: 'forzar' y 'no_forzar'");
+       return "No existe la opción: " + accion + "\nDisponibles: 'forzar' y 'no_forzar'";
     }
 
     guardarJSON(datos, ruta);
-    enviarRespuesta("Se a cambiado el parametro de forzar_backup");
+    return "Se a cambiado el parametro de forzar_backup";
 }
 
 std::string mensajeResultadoBackup(const ResultadoHacerBackup& resultado) {

@@ -21,7 +21,7 @@
 #include "backup.h"
 #include "backup_nube_subida.h"
 
-void procesarEstado(const std::string& modulo, const std::string& accion){
+std::string procesarEstado(const std::string& modulo, const std::string& accion){
     try {
         if (accion == "activar") {
             cambiarEstadoSeccion(modulo, true);
@@ -29,144 +29,142 @@ void procesarEstado(const std::string& modulo, const std::string& accion){
         else if (accion == "desactivar"){
             cambiarEstadoSeccion(modulo, false);
         }
-        enviarRespuesta("Se cambio el estado del modulo "+ modulo + " a: " + accion);
+        return "Se cambio el estado del modulo "+ modulo + " a: " + accion;
     }
    catch (const ErrorConfig& e) {
-       enviarRespuesta("Ocurrio un error al intentar cambiar de estado el modulo: " + modulo + " Error: " + std::string(e.what()));
        logError("Ocurrio un error al intentar cambiar de estado el modulo: " + modulo + " Error: " + std::string(e.what()), "sentinel.log");
+        return "Ocurrio un error al intentar cambiar de estado el modulo: " + modulo + " Error: " + std::string(e.what());
    }
 }
 
 //backup_local
-void procesarComandoBackup(const std::string& accion, const std::string& valor, const ConfigBackup& configBackup, const ConfigMonitor& configMonitor){
+std::string procesarComandoBackup(const std::string& accion, const std::string& valor, const ConfigBackup& configBackup, const ConfigMonitor& configMonitor){
     if (accion == "activar" || accion == "desactivar"){
-        procesarEstado("backup", accion);
+        return procesarEstado("backup", accion);
     }
     else if (accion == "añadir_carpeta") {
-        agregarCarpetaBackup(valor);
+        return agregarCarpetaBackup(valor);
     }
     else if (accion == "destino") {
-        cambiarDireccion("backup",accion ,valor);
+        return cambiarDireccion("backup",accion ,valor);
     }
     else if (accion == "ahora") {
         logInfo("Se inicio el backup local por comando ", "sentinel.log");
         ResultadoHacerBackup respuesta = hacerBackup(configBackup, configMonitor);
-        enviarRespuesta(mensajeResultadoBackup(respuesta));
+        return mensajeResultadoBackup(respuesta);
     }
     else if (accion == "modo") {
-        cambiarForzarBackup(valor);
+        return cambiarForzarBackup(valor);
     }
     else if (accion == "ignorar") {
-        aniadirIgnorar("backup", valor);
+        return aniadirIgnorar("backup", valor);
     }
     else {
-        enviarRespuesta("Accion '" + accion + "' no disponible en el modulo de backup local");
+       return "Accion '" + accion + "' no disponible en el modulo de backup local";
     }
 }
 
 //backup_nube
-void procesarComandoBackupNube(const std::string& accion, const std::string& valor, const ConfigBackupNube& config) {
+std::string procesarComandoBackupNube(const std::string& accion, const std::string& valor, const ConfigBackupNube& config) {
     if (accion == "activar" || accion == "desactivar") {
-        procesarEstado("backup_nube", accion);
+        return procesarEstado("backup_nube", accion);
     }
     else if (accion == "lista_nube") {
-        mostrarListadoComando(config);
+        return mostrarListadoComando(config);
     }
     else if (accion == "ignorar") {
-        aniadirIgnorar("backup_nube", valor);
+        return aniadirIgnorar("backup_nube", valor);
     }
     else if (accion == "ahora") {
         if (corriendo_backup_nube) {
-            enviarRespuesta("Actualmente hay un backup a nube ejecutandose mediante la configuraciones del json");
-            return;
+            return "Actualmente hay un backup a nube ejecutandose mediante la configuraciones del json";
         }
-        enviarRespuesta("Se inicio el backup a dropbox por comando revise 'backups.log' para información detallada");
         logInfo("Se inicio el backup a dropbox por comando ", "sentinel.log");
         ejecutarBackupNube(config);
+        return "Backup nube completo";
     }
     else{
-        enviarRespuesta("Accion '" + accion + "' no disponible en el modulo de backup nube");
+        return "Accion '" + accion + "' no disponible en el modulo de backup nube";
     }
 }
 
 //monitor
-void procesarComandoMonitor(std::string& accion, std::string& valor){
+std::string procesarComandoMonitor(std::string& accion, std::string& valor){
     if (accion == "activar" || accion == "desactivar"){
-        procesarEstado("monitor", accion);
+        return procesarEstado("monitor", accion);
     }
     else if (accion == "limite_cpu" || accion == "limite_ram" || accion == "limite_disco" ){
-        ejecutarCambioValorMonitor(accion, valor);
+        return ejecutarCambioValorMonitor(accion, valor);
     }
     else if (accion == "consumo") {
-        ejecutarMonitoreoComando();
+        return ejecutarMonitoreoComando();
     }
     else{
-        enviarRespuesta("Accion '" + accion + "' no disponible en el modulo de monitor");
+        return "Accion '" + accion + "' no disponible en el modulo de monitor";
     }
 }
 
 //organizador
-void procesarComandoOrganizador(const std::string& accion, const std::string& valor){
+std::string procesarComandoOrganizador(const std::string& accion, const std::string& valor){
     if (accion == "activar" || accion == "desactivar"){
-        procesarEstado("organizador", accion);
+        return procesarEstado("organizador", accion);
     }
     else if (accion == "carpeta_vigilar") {
-        cambiarDireccion("organizador",accion, valor);
+        return cambiarDireccion("organizador",accion, valor);
     }
     else if (accion == "agregar_regla") {
-        procesarComandoOrganizadorAgregarRegla(valor);
+        return  procesarComandoOrganizadorAgregarRegla(valor);
     }
     else {
-        enviarRespuesta("Accion '" + accion + "' no disponible en el modulo de organizador");
+        return "Accion '" + accion + "' no disponible en el modulo de organizador";
     }
 }
 
 //estado
-void procesarComandoEstado(const std::string& accion, const ConfigSentinel& config) {
+std::string procesarComandoEstado(const std::string& accion, const ConfigSentinel& config) {
     if (accion.empty()) {
-        enviarRespuesta(generarDiagnostico(config));
+        return generarDiagnostico(config);
     }
     else if (accion == "backup") {
-        enviarRespuesta(estadoBackup(config.backup));
+        return estadoBackup(config.backup);
     }
     else if (accion == "backup_nube") {
-        enviarRespuesta(estadoBackupNube(config.backup_nube));
+        return estadoBackupNube(config.backup_nube);
     }
     else if (accion == "monitor") {
-        enviarRespuesta(estadoMonitor(config.monitor));
+        return estadoMonitor(config.monitor);
     }
     else if (accion == "organizador") {
-        enviarRespuesta(estadoOrganizador(config.organizador));
+        return estadoOrganizador(config.organizador);
     }
     else {
-        enviarRespuesta("No se a encontrado: " + accion);
+        return "No se a encontrado: " + accion;
     }
 }
 
-void procesarComando(const std::string& comando, const ConfigSentinel& config) {
+std::string procesarComando(const std::string& comando, const ConfigSentinel& config) {
     std::istringstream stream(comando);
     std::string modulo, accion, valor;
     stream >> modulo >> accion;
     std::getline(stream, valor);
 
     if (modulo == "backup") {
-        procesarComandoBackup(accion, valor, config.backup, config.monitor);
+        return procesarComandoBackup(accion, valor, config.backup, config.monitor);
     }else if (modulo == "backup_nube") {
-        procesarComandoBackupNube(accion, valor, config.backup_nube);
+        return procesarComandoBackupNube(accion, valor, config.backup_nube);
     } else if (modulo == "monitor") {
-        procesarComandoMonitor(accion, valor);
+        return procesarComandoMonitor(accion, valor);
     } else if (modulo == "organizador") {
-        procesarComandoOrganizador(accion, valor);
+        return procesarComandoOrganizador(accion, valor);
     } else if (modulo == "estado") {
-        procesarComandoEstado(accion, config);
+        return procesarComandoEstado(accion, config);
     } else {
-        enviarRespuesta("Módulo no reconocido: " + modulo);
+        return "Módulo no reconocido: " + modulo;
     }
 }
 
 void loopComandos(ConfigCompartida& config_compartida) {
     std::string ruta_socket = (obtenerRutaEstado() / "sentinel.sock").string();
-    std::string ruta_estado = (obtenerRutaEstado() / "sentinel_estado.txt").string();
 
     //Crear el socket Unix
     int server_fd = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -186,8 +184,6 @@ void loopComandos(ConfigCompartida& config_compartida) {
         throw ErrorConfig("No se pudo hacer bind en: " + ruta_socket);
     }
     listen(server_fd, 5);
-
-    std::ofstream salida(ruta_estado);
 
     // Poll
     struct pollfd pfd;
@@ -212,7 +208,8 @@ void loopComandos(ConfigCompartida& config_compartida) {
                     if (!comando.empty() && comando.back() == '\n') {
                         comando.pop_back();
                     }
-                    procesarComando(comando, config);
+                    std::string respuesta_comando = procesarComando(comando, config);
+                    write(client_fd, respuesta_comando.c_str(), respuesta_comando.size());
                 }
                 // Cerrar el socket
                 close(client_fd);

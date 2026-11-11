@@ -3,6 +3,6 @@
 
 void cambiarValorMonitor(const std::string& parametro, double valor);
 
-void ejecutarCambioValorMonitor(const std::string& parametro, std::string& valor);
+std::string ejecutarCambioValorMonitor(const std::string& parametro, std::string& valor);
 
-void ejecutarMonitoreoComando();
+std::string ejecutarMonitoreoComando();

@@ -17,41 +17,40 @@ void cambiarValorMonitor(const std::string& parametro, double valor){
     guardarJSON(datos, ruta);
 }
 
-void ejecutarCambioValorMonitor(const std::string& parametro, std::string& valor) {
+std::string ejecutarCambioValorMonitor(const std::string& parametro, std::string& valor) {
     try{
         double valor_double = std::stod(valor);
         if (valor_double < 0 || valor_double > 100){
-            enviarRespuesta("El límite debe estar entre 0 y 100.");
-            return;
+            return "El límite debe estar entre 0 y 100.";
         }
         cambiarValorMonitor(parametro, valor_double);
-        enviarRespuesta("Se cambio el valor del parametro " + parametro + ":" + valor);
+        return "Se cambio el valor del parametro " + parametro + ":" + valor;
     }catch (const std::invalid_argument&){
-        enviarRespuesta("El valor '" + valor + "' no es un numero valido");
+        return "El valor '" + valor + "' no es un numero valido";
     }catch (const std::out_of_range&){
-        enviarRespuesta("El valor '" + valor + "' es demasiado grande.");
+        return "El valor '" + valor + "' es demasiado grande.";
     }
 }
 
-void ejecutarMonitoreoComando() {
+std::string ejecutarMonitoreoComando() {
     try{
         int cpu = static_cast<int>(uso_cpu());
         int ram = static_cast<int>(uso_ram());
         int disco = static_cast<int>(uso_disco());
 
-        enviarRespuesta("Resultado del consumo actual\nCPU: " + std::to_string(cpu) + "%"
-                        + "\nRAM: " + std::to_string(ram)+ "%" + "\nDisco: " + std::to_string(disco) + "%");
+        return "Resultado del consumo actual\nCPU: " + std::to_string(cpu) + "%"
+                        + "\nRAM: " + std::to_string(ram)+ "%" + "\nDisco: " + std::to_string(disco) + "%";
     }
     catch(const ErrorMonitor& e){
         logError("Error Monitor Ocurrio un error en el intento de telemetrica: " + std::string(e.what()), "sentinel.log");
-        enviarRespuesta("Error Monitor Ocurrio un error en el intento de telemetrica: " + std::string(e.what()));
+        return "Error Monitor Ocurrio un error en el intento de telemetrica: " + std::string(e.what());
     }
     catch (const ErrorConfig& e) {
         logError("Error Configuraciones Ocurrio un error en el intento de telemetrica: " + std::string(e.what()), "sentinel.log");
-        enviarRespuesta("Error Configuraciones Ocurrio un error en el intento de telemetrica: " + std::string(e.what()));
+        return "Error Configuraciones Ocurrio un error en el intento de telemetrica: " + std::string(e.what());
     }
     catch(const DaemonError& e){
         logError("Error Deamon-Monitor Ocurrio un error en el intento de telemetrica: " + std::string(e.what()), "sentinel.log");
-        enviarRespuesta("Error Deamon-Monitor Ocurrio un error en el intento de telemetrica: " + std::string(e.what()));
+        return "Error Deamon-Monitor Ocurrio un error en el intento de telemetrica: " + std::string(e.what());
     }
 }
